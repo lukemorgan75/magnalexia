@@ -8,52 +8,68 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="top">
-    <p class="company">MagnaLexia</p>
+    <a class="brand" href="./">
+      <img src="assets/logo.png" alt="" />
+      <span>MAGNALEXIA</span>
+    </a>
   </header>
   <main>
     <ul class="cards">
       <li>
         <a class="card" href="https://virtuositypiano.com" target="_blank" rel="noopener noreferrer">
+          <span class="mark">
+            <img class="app-icon" src="assets/virtuosity-icon.png" alt="" />
+          </span>
           <h2>Virtuosity Piano</h2>
           <p>Visual analytics for piano expression.</p>
         </a>
       </li>
       <li>
         <a class="card" href="https://lukemorgan75.github.io/moon-view/" target="_blank" rel="noopener noreferrer">
-          <svg class="moon" viewBox="0 0 80 80" aria-hidden="true">
-            <defs>
-              <radialGradient id="moon-light" cx="36%" cy="32%" r="68%">
-                <stop offset="0%" stop-color="#f7f4ee" />
-                <stop offset="58%" stop-color="#d5d0c6" />
-                <stop offset="100%" stop-color="#9a958c" />
-              </radialGradient>
-            </defs>
-            <circle cx="40" cy="40" r="28" fill="url(#moon-light)" />
-            <circle cx="30" cy="32" r="4.2" fill="#b7b2a8" opacity="0.55" />
-            <circle cx="48" cy="46" r="6" fill="#b7b2a8" opacity="0.4" />
-            <circle cx="52" cy="28" r="2.4" fill="#c4bfb4" opacity="0.5" />
-          </svg>
+          <span class="mark">
+            <svg class="sunburst" viewBox="0 0 72 72" aria-hidden="true">
+              <path fill="#3B82F6" d="M36.42 14.00 A22 22 0 0 1 40.99 57.43 L38.72 47.69 A12 12 0 0 0 36.23 24.00 Z" />
+              <path fill="#E6B422" d="M40.16 57.60 A22 22 0 0 1 14.03 37.19 L24.02 36.65 A12 12 0 0 0 38.27 47.78 Z" />
+              <path fill="#22C55E" d="M14.00 36.35 A22 22 0 0 1 35.58 14.00 L35.77 24.00 A12 12 0 0 0 24.00 36.19 Z" />
+              <path fill="#71A5F8" d="M36.65 2.01 A34 34 0 0 1 65.11 18.44 L56.55 23.60 A24 24 0 0 0 36.46 12.00 Z" />
+              <path fill="#71A5F8" d="M65.77 19.57 A34 34 0 0 1 68.53 45.88 L58.96 42.98 A24 24 0 0 0 57.01 24.40 Z" />
+              <path fill="#71A5F8" d="M68.13 47.13 A34 34 0 0 1 56.51 63.12 L50.48 55.14 A24 24 0 0 0 58.68 43.85 Z" />
+              <path fill="#71A5F8" d="M55.45 63.89 A34 34 0 0 1 43.71 69.12 L41.44 59.38 A24 24 0 0 0 49.73 55.68 Z" />
+              <path fill="#EDC95F" d="M42.43 69.39 A34 34 0 0 1 19.12 65.52 L24.09 56.84 A24 24 0 0 0 40.54 59.57 Z" />
+              <path fill="#EDC95F" d="M18.00 64.85 A34 34 0 0 1 7.06 53.85 L15.57 48.60 A24 24 0 0 0 23.30 56.36 Z" />
+              <path fill="#EDC95F" d="M6.40 52.73 A34 34 0 0 1 2.05 37.84 L12.04 37.30 A24 24 0 0 0 15.11 47.81 Z" />
+              <path fill="#5FD58B" d="M2.00 36.53 A34 34 0 0 1 9.13 15.17 L17.03 21.29 A24 24 0 0 0 12.00 36.38 Z" />
+              <path fill="#5FD58B" d="M9.95 14.15 A34 34 0 0 1 23.51 4.38 L27.19 13.68 A24 24 0 0 0 17.61 20.58 Z" />
+              <path fill="#5FD58B" d="M24.74 3.92 A34 34 0 0 1 35.35 2.01 L35.54 12.00 A24 24 0 0 0 28.05 13.35 Z" />
+            </svg>
+          </span>
           <h2 class="moon-name" aria-label="Moon View">
             <span>MOON</span><span class="moon-v">V</span><span>IEW</span>
           </h2>
-          <p>Organized the biblical canon by its full categorical structure as a dynamic sunburst viz. Drill down to a book, read basic context, and open it in prose. Drill through to parallel reader, or forensic mode with a concordance.</p>
+          <p>Organizes the biblical canon by its full categorical structure as a dynamic sunburst viz. Drill down to a book, read basic context, and open it in prose. Drill through to parallel reader, or forensic mode with a concordance.</p>
         </a>
       </li>
       <li>
         <a class="card" href="AnglicanResourcePrototype/">
-          <svg class="wrench" viewBox="0 0 64 64" aria-hidden="true">
-            <path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M38.5 14.5a12 12 0 0 0-15.2 15.2L10 43.1 20.9 54l13.4-13.3A12 12 0 0 0 49.5 25.5L40 35l-6-2-2-6 8.5-9.5z" />
-          </svg>
+          <span class="mark">
+            <svg class="wrench" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
+          </span>
           <h2>Anglican Resource <span class="pipe">|</span> Prototype</h2>
           <p>Under development</p>
         </a>
       </li>
     </ul>
   </main>
+  <footer class="foot">
+    <p>© Luke Morgan</p>
+    <p>© MagnaLexia LLC</p>
+  </footer>
 </body>
 </html>
