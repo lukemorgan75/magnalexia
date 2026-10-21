@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Anglican Resource</title>
+  <link rel="icon" href="../assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="ar.css" />
+</head>
+<body data-need-app="1">
+  <header class="bar">
+    <a class="brand" href="index.html" aria-label="Anglican Resource">
+      <img class="mark" src="mark.png" alt="">
+    </a>
+    <nav class="bar-right" aria-label="Primary">
+      <a class="about" href="about.html">About</a>
+      <button class="text-link" type="button" data-signup>Log in</button>
+      <button class="signup" type="button" data-signup>Sign Up</button>
+    </nav>
+  </header>
+  <main class="desk">
+    <h1>Anglican Resource</h1>
+  </main>
+  <section id="login" class="login" hidden>
+    <form id="login-form" class="panel">
+      <h1>Sign in</h1>
+      <label for="login-user">User</label>
+      <input id="login-user" name="user" autocomplete="username" required />
+      <label for="login-pass">Password</label>
+      <input id="login-pass" name="pass" type="password" autocomplete="current-password" required />
+      <button class="signup" type="submit">Sign in</button>
+      <p id="login-notice" class="notice" role="status"></p>
+    </form>
+  </section>
+  <script src="ar.js"></script>
+</body>
+</html>

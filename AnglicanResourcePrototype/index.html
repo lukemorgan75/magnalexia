@@ -4,27 +4,70 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Anglican Resource | Prototype</title>
-  <meta name="description" content="Anglican Resource is under development." />
+  <meta name="description" content="The right resource for every ministry moment." />
   <link rel="icon" href="../assets/logo.png" type="image/png" />
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="preload" as="image" href="hero.png" />
+  <link rel="stylesheet" href="ar.css" />
+  <script>if (sessionStorage.getItem("ar-main") === "1") document.documentElement.classList.add("open");</script>
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="../">
-      <img src="../assets/logo.png" alt="" />
-      <span>MAGNALEXIA</span>
-    </a>
-  </header>
-  <main class="prototype">
-    <svg class="wrench wrench-large" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-    </svg>
-    <h1>Anglican Resource <span class="pipe">|</span> Prototype</h1>
-    <p>Under development</p>
-  </main>
-  <footer class="foot">
-    <p>© Luke Morgan</p>
-    <p>© MagnaLexia LLC</p>
-  </footer>
+  <section id="gate" class="gate">
+    <form id="gate-form" class="panel">
+      <img class="mark" src="mark.png" alt="">
+      <h1>Sign in</h1>
+      <label for="gate-user">User</label>
+      <input id="gate-user" name="user" autocomplete="username" required />
+      <label for="gate-pass">Password</label>
+      <input id="gate-pass" name="pass" type="password" autocomplete="current-password" required />
+      <button class="signup" type="submit">Sign in</button>
+      <p id="gate-notice" class="notice" role="status"></p>
+    </form>
+  </section>
+
+  <div id="site" inert>
+    <header class="bar">
+      <a class="brand" href="./" aria-label="Anglican Resource">
+        <img class="mark" src="mark.png" alt="">
+      </a>
+      <nav class="bar-right" aria-label="Primary">
+        <a class="about" href="about.html">About</a>
+        <button class="text-link" type="button" data-signup>Log in</button>
+        <button class="signup" type="button" data-signup>Sign Up</button>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-bg" role="img" aria-label="An open book on a lectern in a stone church, with light through stained glass."></div>
+      <div class="hero-shade"></div>
+      <div class="hero-copy">
+        <h1>The right resource for every ministry moment</h1>
+      </div>
+      <button id="image-info" class="info" type="button" aria-expanded="false" aria-controls="image-note">
+        i
+        <span class="sr">About this image</span>
+      </button>
+      <p id="image-note" class="image-note" hidden>This image is AI generated as a conceptual design for this prototype.</p>
+    </section>
+
+    <footer class="foot">
+      <p class="blessing">“May the Lord who has given you the will to do these things give you the grace and power to perform them. Amen.”</p>
+      <p class="foot-note">This is a simplified prototype for the CP Anglican Resource web application.</p>
+      <p class="foot-credit">Luke Morgan, MagnaLexia LLC on behalf of Rev. Charlie Holt</p>
+      <img class="foot-logo" src="../assets/logo.png" alt="MagnaLexia">
+    </footer>
+  </div>
+
+  <section id="login" class="login" hidden>
+    <form id="login-form" class="panel">
+      <h1>Sign in</h1>
+      <label for="login-user">User</label>
+      <input id="login-user" name="user" autocomplete="username" required />
+      <label for="login-pass">Password</label>
+      <input id="login-pass" name="pass" type="password" autocomplete="current-password" required />
+      <button class="signup" type="submit">Sign in</button>
+      <p id="login-notice" class="notice" role="status"></p>
+    </form>
+  </section>
+  <script src="ar.js"></script>
 </body>
 </html>
