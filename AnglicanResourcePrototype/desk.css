@@ -1,0 +1,1097 @@
+body[data-need-app="1"] {
+  --ink: #1c1612;
+  --muted: rgba(28, 22, 18, 0.64);
+  --line: rgba(28, 22, 18, 0.12);
+  --field: #fff;
+  --paper: #f4f1eb;
+  --sheet: #fffcf8;
+  --menu: #fff;
+  --wash: rgba(163, 130, 108, 0.22);
+  --hit: rgba(163, 130, 108, 0.28);
+  --shadow: rgba(28, 22, 18, 0.14);
+  --pressed-ink: #1a120e;
+  --lens: rgba(28, 22, 18, 0.06);
+  --lens-line: rgba(28, 22, 18, 0.1);
+  --lens-ink: rgba(28, 22, 18, 0.62);
+  --lens-on: #fff;
+  --lens-on-ink: #1c1612;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  color-scheme: light;
+}
+
+body[data-need-app="1"][data-wheel="fog"] {
+  --ink: #f5f5f7;
+  --muted: #98989d;
+  --line: rgba(255, 255, 255, 0.14);
+  --field: #2a2a2c;
+  --paper: #000;
+  --sheet: #1c1c1e;
+  --menu: #1c1c1e;
+  --wash: rgba(143, 163, 199, 0.24);
+  --brown: #8fa3c7;
+  --hit: rgba(143, 163, 199, 0.32);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --pressed-ink: #0b0b0d;
+  --lens: rgba(255, 255, 255, 0.07);
+  --lens-line: rgba(255, 255, 255, 0.1);
+  --lens-ink: rgba(245, 245, 247, 0.62);
+  --lens-on: #fff;
+  --lens-on-ink: #111;
+  background: #000;
+  color: #f5f5f7;
+  color-scheme: dark;
+}
+
+body[data-need-app="1"] .bar {
+  flex-shrink: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body[data-need-app="1"] .signup {
+  color: var(--pressed-ink);
+}
+
+body[data-need-app="1"][data-wheel="fog"] .mark-ink { display: none; }
+body[data-need-app="1"][data-wheel="fog"] .mark-fog { display: block; }
+.mark-fog { display: none; }
+
+body[data-need-app="1"][data-wheel="fog"] .prose {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+body[data-need-app="1"][data-wheel="fog"] .card h3,
+body[data-need-app="1"][data-wheel="fog"] .sunday h3,
+body[data-need-app="1"][data-wheel="fog"] .season-copy h2,
+body[data-need-app="1"][data-wheel="fog"] .composer h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.app {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn[aria-pressed="true"],
+.icon-btn:hover { color: var(--brown); }
+
+.role {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.role button,
+.exp-option,
+.modules button,
+.chips button,
+.age button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.role button {
+  padding: 8px 12px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.role button[aria-pressed="true"] {
+  background: var(--brown);
+  color: var(--pressed-ink);
+}
+
+.bar .experience {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.person-btn {
+  padding: 0;
+  color: var(--ink);
+}
+
+.person-btn[aria-expanded="true"] {
+  color: var(--brown);
+  background: var(--wash);
+}
+
+.experience-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(420px, 92vw);
+  max-height: min(720px, calc(100vh - 120px));
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--menu);
+  color: var(--ink);
+  box-shadow: 0 16px 40px var(--shadow);
+}
+
+.experience-menu[hidden] { display: none; }
+
+.exp-kicker {
+  margin: 10px 8px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.exp-kicker span {
+  margin-left: 6px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.exp-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  margin: 2px 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.exp-option[aria-pressed="true"] {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.exp-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.exp-desc {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.exp-ico {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.lens {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-self: center;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 2px auto 6px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--lens);
+  border: 1px solid var(--lens-line);
+}
+
+.lens button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--lens-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lens button:hover { color: var(--ink); }
+
+.lens button[aria-checked="true"] {
+  background: var(--lens-on);
+  color: var(--lens-on-ink);
+}
+
+.chips button,
+.age button,
+.modules button {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.chips button[aria-pressed="true"],
+.age button[aria-pressed="true"],
+.modules button[aria-pressed="true"] {
+  color: var(--ink);
+  background: var(--wash);
+}
+
+.bar .search { margin-left: 0; }
+
+.search input {
+  width: min(280px, 70vw);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.modules {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modules button { white-space: nowrap; font-size: 15px; }
+
+.workspace {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+  flex: 1;
+}
+
+#stage {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 28px 28px 64px;
+}
+
+#stage.is-year {
+  padding: 4px 24px 32px;
+}
+
+.lede {
+  max-width: 40rem;
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--field);
+}
+
+.card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--brown);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card h3 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+
+.card .meta {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card a, .card .text-toggle {
+  align-self: flex-start;
+  color: var(--ink);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.card .text-toggle {
+  appearance: none;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.card .body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.empty {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.year {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.wheel-stage {
+  position: relative;
+  width: min(100%, 680px, calc(100vh - 210px));
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.wheel { width: 100%; height: 100%; display: block; overflow: visible; }
+
+.wheel .band { cursor: pointer; }
+.wheel-stage {
+  transition: transform 0.42s ease, opacity 0.42s ease;
+}
+.wheel-stage.is-drilling {
+  transform: scale(2.15);
+  opacity: 0;
+}
+.year.is-arriving .wheel-stage {
+  animation: wheel-in 0.45s ease;
+}
+@keyframes wheel-in {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: none; }
+}
+.wheel .season-label,
+.wheel .feast-label,
+.wheel .month-label {
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.wheel .season-label {
+  fill: #6e5430;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+.wheel .feast-label {
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+.wheel .month-label {
+  fill: #8d7048;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.drill { animation: unfold 0.48s ease; }
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.drill-top {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.drill-back {
+  justify-self: start;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.drill-back::before { content: "← "; }
+.lection-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.sundays {
+  display: flex;
+  justify-content: safe center;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 2px 2px 14px;
+}
+.sunday {
+  flex: 0 0 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--season, #6e5430);
+  border-radius: 14px;
+  background: var(--field);
+}
+.sunday h3 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.sunday time {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.sunday-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.lesson {
+  display: grid;
+  grid-template-columns: 6.6rem 1fr;
+  gap: 2px 8px;
+  margin: 0 0 7px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.lesson > span:first-child {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.lesson button, .lesson .plain {
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+.lesson button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lesson .or {
+  margin: 0 0.4em;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sundays.is-long {
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: visible;
+  width: min(860px, 100%);
+  margin: 0 auto;
+}
+.sundays.is-long .sunday {
+  flex: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) 1fr;
+  column-gap: 18px;
+  align-items: start;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheel-stage, .drill, .year.is-arriving .wheel-stage {
+    transition: none;
+    animation: none;
+  }
+}
+
+.season-copy {
+  text-align: center;
+  max-width: 34rem;
+}
+
+.season-copy h2 {
+  margin: 0 0 4px;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.season-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.year .cards {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  width: min(980px, 100%);
+  overflow-x: auto;
+}
+
+.year .card { flex: 0 1 300px; background: var(--field); }
+.year .empty { text-align: center; }
+
+.topic-grid, .age-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.topic-grid button, .age-grid button {
+  appearance: none;
+  text-align: left;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.topic-grid button[aria-pressed="true"],
+.age-grid button[aria-pressed="true"] { border-color: var(--brown); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+
+.composer-launch { margin: 0 0 18px; }
+
+.composer {
+  margin: 0 0 22px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.composer h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 12px;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.composer h2 button {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.composer form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+}
+
+.composer label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.composer label.wide { grid-column: 1 / -1; }
+
+.composer input, .composer select, .composer textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+
+.composer textarea { min-height: 72px; resize: vertical; }
+
+.composer .signup { justify-self: start; margin-top: 16px; }
+
+.events { display: grid; gap: 12px; }
+
+.event {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.event time {
+  color: var(--brown);
+  font-size: 14px;
+}
+
+.event h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.event p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.bible {
+  display: flex;
+  flex-direction: column;
+  width: min(440px, 42vw);
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  background: var(--sheet);
+  color: var(--ink);
+}
+
+.bible[hidden] { display: none; }
+
+.bible.is-full {
+  position: fixed;
+  z-index: 12;
+  inset: 78px 0 0 0;
+  width: auto;
+  border-left: 0;
+}
+
+.bible-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bible-bar h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bible-bar .grow { flex: 1; }
+
+.bible-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.bible-tools button {
+  appearance: none;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.bible-bar .back { margin: 0; }
+
+.bible-tools button[aria-pressed="true"] { color: var(--pressed-ink); background: var(--brown); }
+
+.bible-body { overflow: auto; padding: 18px 18px 48px; flex: 1; min-height: 0; }
+
+.nav-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
+.nav-list button {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  padding: 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.nav-list button:hover { border-color: var(--brown); }
+
+.prose {
+  max-width: 38rem;
+  margin: 0 auto;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.bible.is-large .prose { font-size: 23px; max-width: 44rem; }
+
+.prose h3 {
+  margin: 28px 0 8px;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+
+.prose p { margin: 0 0 0.8em; }
+
+.verse-hit { background: var(--hit); }
+
+.vnum {
+  margin-right: 0.15em;
+  color: var(--brown);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 0.65em;
+  font-style: normal;
+}
+
+.back {
+  appearance: none;
+  margin-bottom: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.back:hover { color: var(--ink); }
+
+#stage.is-year {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 12px;
+}
+
+.wheel-aside {
+  margin: 4px 0 0;
+  font-size: 13px;
+  text-align: center;
+}
+.wheel-aside a {
+  color: var(--muted);
+  text-underline-offset: 3px;
+}
+
+.dial {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.dial-bar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.crumbs button,
+.dial-text,
+.dial-legacy {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.crumbs [aria-current="page"] {
+  text-decoration: none;
+  cursor: default;
+}
+.crumb-sep { color: var(--muted); }
+.dial-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.dial-styles {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.dial-styles button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.dial-styles button[aria-pressed="true"] {
+  background: var(--brown);
+  color: var(--pressed-ink);
+}
+.dial-stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(380px, 36%);
+  column-gap: 22px;
+  align-items: stretch;
+}
+.dial-frame {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 1;
+  justify-self: start;
+  align-self: center;
+}
+.dial-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.dial-svg text {
+  text-anchor: middle;
+  dominant-baseline: central;
+  user-select: none;
+}
+.dial-svg .day-num {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-weight: 560;
+}
+.dial-svg .day-num.is-sun,
+.dial-svg .day-num.is-proper { font-weight: 750; }
+.dial[data-look="incense"] .ring-label {
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  letter-spacing: 0.04em;
+}
+.dial[data-look="fog"] .dial-svg text {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+.dial-svg .slice { cursor: pointer; }
+.dial-svg .slice.is-hot { filter: brightness(1.16); }
+.dial-svg [data-cut]:focus { outline: none; }
+.dial-svg [data-cut]:focus .slice { stroke: #8fa3c7; stroke-width: 2.5px; }
+.dial-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 17%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+.dial-hub h2 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: clamp(14px, 1.6vw, 28px);
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.dial[data-look="fog"] .dial-hub h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.dial-kicker,
+.dial-sub {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.dial-kicker {
+  margin-bottom: 3px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dial-sub {
+  margin-top: 4px;
+  font-size: 11px;
+}
+.dial-read {
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+}
+.dial-read .sundays {
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+  width: 100%;
+  padding: 0;
+}
+.dial-read .sunday {
+  flex: none;
+  width: auto;
+}
+.dial-library {
+  flex: 0 0 auto;
+  width: 100%;
+  max-height: min(260px, 30vh);
+  overflow: auto;
+}
+.dial-library .cards { margin: 0; }
+.dial.is-arriving .dial-frame { animation: wheel-in 0.45s ease; }
+
+body[data-wheel="fog"] #stage.is-year {
+  background: #000;
+  color: var(--ink);
+}
+
+body.is-wheel-full[data-wheel="incense"] { background: #f4f1eb; }
+body.is-wheel-full[data-wheel="fog"] {
+  background: #000;
+  color: #f5f5f7;
+}
+body.is-wheel-full .bar,
+body.is-wheel-full .modules { display: none; }
+body.is-wheel-full .app,
+body.is-wheel-full .workspace,
+body.is-wheel-full #stage.is-year {
+  flex: 1;
+  min-height: 0;
+}
+body.is-wheel-full #stage.is-year { padding: 10px 14px 12px; }
+body.is-wheel-full .bible,
+body.is-wheel-full .bible.is-full {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: min(440px, 42vw);
+  background: var(--sheet);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial.is-arriving .dial-frame { animation: none; }
+}
+
+@media (max-width: 800px) {
+  .dial-stage { grid-template-columns: 1fr; row-gap: 16px; justify-items: center; }
+  .dial-read { width: 100%; max-height: 42vh; }
+  .wheel-stage { width: min(100%, calc(100vh - 200px)); }
+  .sundays.is-long .sunday { grid-template-columns: 1fr; }
+  .drill-top { grid-template-columns: 1fr; }
+  .drill-top .season-copy { text-align: left; }
+  .year .cards { justify-content: flex-start; }
+  .search { margin-left: 0; }
+  .bible, .bible.is-full {
+    position: fixed;
+    z-index: 12;
+    inset: 78px 0 0 0;
+    width: auto;
+  }
+  .composer form { grid-template-columns: 1fr; }
+}
