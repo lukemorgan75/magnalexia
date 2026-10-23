@@ -66,6 +66,7 @@ body[data-need-app="1"][data-wheel="fog"] .prose {
 }
 body[data-need-app="1"][data-wheel="fog"] .card h3,
 body[data-need-app="1"][data-wheel="fog"] .sunday h3,
+body[data-need-app="1"][data-wheel="fog"] .season-essay h3,
 body[data-need-app="1"][data-wheel="fog"] .season-copy h2,
 body[data-need-app="1"][data-wheel="fog"] .composer h2 {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
@@ -826,6 +827,78 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
 
 .verse-hit { background: var(--hit); }
 
+.xrefs {
+  margin: 0 0 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.xrefs h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.xrefs .xref-note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.xrefs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.xrefs li {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: 4px 8px;
+  align-items: start;
+}
+
+.xrefs .xref-verse {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--brown);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  cursor: pointer;
+}
+
+.xrefs .xref-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.xrefs .xref-refs button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .vnum {
   margin-right: 0.15em;
   color: var(--brown);
@@ -936,18 +1009,17 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
 .dial-stage {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) min(380px, 36%);
-  column-gap: 22px;
-  align-items: stretch;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 }
 .dial-frame {
   position: relative;
   height: 100%;
   width: auto;
-  max-width: 100%;
+  max-width: calc(100% - 320px);
   aspect-ratio: 1;
-  justify-self: start;
+  flex: 0 0 auto;
   align-self: center;
 }
 .dial-svg {
@@ -974,7 +1046,17 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
 .dial[data-look="fog"] .dial-svg text {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 }
-.dial-svg .slice { cursor: pointer; }
+.dial-svg [data-cut="day"] .slice,
+.dial-svg [data-cut="season"] .slice { cursor: pointer; }
+.dial-svg [data-cut="season"] .slice.is-season { filter: brightness(1.18); }
+.dial-svg .slice.is-today { filter: brightness(1.16); }
+.dial-svg .today-beat { animation: day-beat 1.5s ease-in-out infinite; }
+@keyframes day-beat {
+  0%, 62%, 100% { opacity: 0.28; }
+  12% { opacity: 1; }
+  26% { opacity: 0.22; }
+  40% { opacity: 0.92; }
+}
 .dial-svg .slice.is-hot { filter: brightness(1.16); }
 .dial-svg [data-cut]:focus { outline: none; }
 .dial-svg [data-cut]:focus .slice { stroke: #8fa3c7; stroke-width: 2.5px; }
@@ -1017,6 +1099,9 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
   font-size: 11px;
 }
 .dial-read {
+  flex: 0 1 380px;
+  width: min(380px, 34%);
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   max-height: 100%;
@@ -1032,6 +1117,45 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
 .dial-read .sunday {
   flex: none;
   width: auto;
+}
+.season-essay {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--season, #6e5430);
+  border-radius: 14px;
+  background: var(--field);
+  color: var(--ink);
+}
+.season-essay header { margin: 0; }
+.season-essay .season-kicker {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.season-essay h3 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.season-essay time {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.season-essay p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
 }
 .dial-library {
   flex: 0 0 auto;
@@ -1076,11 +1200,284 @@ body.is-wheel-full .bible.is-full {
 
 @media (prefers-reduced-motion: reduce) {
   .dial.is-arriving .dial-frame { animation: none; }
+  .dial-svg .today-beat { animation: none; opacity: 0.85; }
 }
 
+.bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.app-nav,
+.magnifier { position: relative; }
+
+.app-menu,
+.zoom-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 280px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--menu);
+  color: var(--ink);
+  box-shadow: 0 16px 40px var(--shadow);
+}
+
+.app-menu[hidden],
+.zoom-menu[hidden] { display: none; }
+
+.app-menu a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.app-menu a:hover,
+.app-menu a[aria-current="page"] { background: var(--wash); }
+
+.zoom-menu {
+  left: auto;
+  right: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+
+.zoom-menu button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.zoom-menu button:hover,
+.zoom-menu button:focus-visible { background: var(--wash); }
+
+#zoom-label {
+  min-width: 52px;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+body[data-desk="analysis"] .analysis-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+body[data-desk="analysis"] #stage.is-year {
+  height: calc(100vh - 78px);
+  max-height: calc(100vh - 78px);
+  flex: none;
+  overflow: auto;
+}
+
+body[data-desk="analysis"].is-wheel-full .viz-panel { display: none; }
+body[data-desk="analysis"].is-wheel-full .analysis-scroll { overflow: hidden; }
+body[data-desk="analysis"].is-wheel-full #stage.is-year {
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.viz-panel {
+  min-height: calc(100vh - 78px);
+  box-sizing: border-box;
+  padding: 22px 22px 32px;
+  border-top: 1px solid var(--line);
+}
+
+.viz-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 8px;
+}
+
+.viz-head h2 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+body[data-wheel="fog"] .viz-head h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-weight: 600;
+}
+
+.viz-note,
+.viz-read {
+  margin: 6px 0 0;
+  max-width: 68rem;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.viz-read {
+  min-height: 1.45em;
+  color: var(--ink);
+}
+
+.grain {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--lens);
+  border: 1px solid var(--lens-line);
+}
+
+.grain button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--lens-ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.grain button[aria-pressed="true"] {
+  background: var(--lens-on);
+  color: var(--lens-on-ink);
+}
+
+.grain button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.viz-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.crumbs button {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.crumbs .crumb-here {
+  color: var(--ink);
+}
+
+.viz-panel svg {
+  width: 100%;
+  height: calc(100vh - 168px);
+  min-height: 460px;
+  display: block;
+}
+
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 8px 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.viz-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viz-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.ch-arc,
+.ch-ribbon,
+.ch-label,
+.sk-node,
+.sk-hit,
+.sk-label { cursor: pointer; }
+
+.ch-ribbon { fill: var(--chord, rgba(28, 22, 18, 0.45)); opacity: var(--rest, 0.18); }
+.ch-ribbon.is-off { opacity: 0.03; }
+.ch-ribbon.is-on { opacity: 0.82; }
+.ch-arc.is-off { opacity: 0.22; }
+.ch-arc.is-on { opacity: 1; }
+.ch-arc.is-touch { opacity: 0.72; }
+.ch-ribbon.is-touch { opacity: 0.62; }
+.ch-label.is-off { opacity: 0.35; }
+.ch-label.is-on { opacity: 1; font-weight: 700; }
+.ch-label.is-touch { opacity: 0.85; }
+
+.sk-ribbon { opacity: 0.55; }
+.sk-ribbon.is-off { opacity: 0.04; }
+.sk-ribbon.is-on { opacity: 0.9; }
+.sk-node.is-off { opacity: 0.16; }
+.sk-node[data-parent="1"] { stroke: var(--ink); stroke-width: 1px; }
+.sk-node.is-on { opacity: 1; stroke: var(--ink); stroke-width: 1.6px; }
+.sk-node.is-touch { opacity: 0.62; }
+.sk-label.is-off { opacity: 0.28; }
+.sk-label.is-touch { opacity: 0.75; }
+.sk-hit { fill: none; stroke: transparent; pointer-events: stroke; }
+
+path[data-kind="lect"].is-off { opacity: 0.18; }
+path[data-kind="lect"].is-touch { opacity: 0.6; }
+path[data-kind="lect"].is-on { opacity: 1; }
+
+body[data-wheel="fog"] { --chord: rgba(236, 236, 240, 0.55); }
+
 @media (max-width: 800px) {
-  .dial-stage { grid-template-columns: 1fr; row-gap: 16px; justify-items: center; }
-  .dial-read { width: 100%; max-height: 42vh; }
+  .dial-stage { flex-direction: column; justify-content: flex-start; align-items: center; row-gap: 16px; }
+  .dial-frame { max-width: 100%; height: auto; width: min(100%, calc(100vh - 280px)); }
+  .dial-read { width: 100%; max-width: none; max-height: 42vh; flex: none; }
   .wheel-stage { width: min(100%, calc(100vh - 200px)); }
   .sundays.is-long .sunday { grid-template-columns: 1fr; }
   .drill-top { grid-template-columns: 1fr; }

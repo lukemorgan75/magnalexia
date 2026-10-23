@@ -40,7 +40,8 @@
     { testament: "Old Testament", name: "Law", books: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy"] },
     { testament: "Old Testament", name: "History", books: ["Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther"] },
     { testament: "Old Testament", name: "Wisdom", books: ["Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon"] },
-    { testament: "Old Testament", name: "Prophets", books: ["Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"] },
+    { testament: "Old Testament", name: "Major Prophets", books: ["Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel"] },
+    { testament: "Old Testament", name: "Minor Prophets", books: ["Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"] },
     { testament: "New Testament", name: "Gospels", books: ["Matthew", "Mark", "Luke", "John"] },
     { testament: "New Testament", name: "Acts", books: ["Acts"] },
     { testament: "New Testament", name: "Pauline letters", books: ["Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon"] },
@@ -89,8 +90,9 @@
     style: sessionStorage.getItem("ar-wheel-style") === "fog" ? "fog" : "incense",
     slice: { kind: "year" },
     day: null,
+    card: null,
     board: false,
-    bible: { open: false, full: false, level: "testament", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false },
+    bible: { open: false, full: false, level: "testament", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false, xrefs: false, xrefHome: null },
     books: {}
   };
   var legacy = document.body.getAttribute("data-legacy-wheel") === "1";
@@ -287,191 +289,6 @@
     return '<div class="year drill"><div class="drill-top"><button type="button" class="drill-back" data-year>' + back + '</button><div class="season-copy"><h2>' + esc(title) + "</h2><p>" + esc(line) + '</p></div><span></span></div><p class="lection-note">' + esc(note) + '</p><div class="sundays' + (long ? " is-long" : "") + '" style="--season:' + stripe + '">' + body + "</div>" + (list.length ? cards(list) : "") + "</div>";
   }
 
-  function wheel() {
-    var cx = 380, cy = 380;
-    var gold = "#b08d57";
-    var year0 = Date.UTC(2026, 10, 29);
-    var span = (Date.UTC(2027, 10, 28) - year0) / 86400000;
-    function frac(y, month, day) {
-      return (Date.UTC(y, month - 1, day) - year0) / 86400000 / span;
-    }
-    function ang(f) { return -Math.PI / 2 + f * Math.PI * 2; }
-    function n(v) { return Math.round(v * 10) / 10; }
-    function polar(rad, a) {
-      return [n(cx + Math.cos(a) * rad), n(cy + Math.sin(a) * rad)];
-    }
-    function donut(r0, r1, f0, f1) {
-      var a0 = ang(f0), a1 = ang(f1);
-      var large = a1 - a0 > Math.PI ? 1 : 0;
-      var o0 = polar(r1, a0), o1 = polar(r1, a1), i1 = polar(r0, a1), i0 = polar(r0, a0);
-      return "M " + o0[0] + " " + o0[1] + " A " + r1 + " " + r1 + " 0 " + large + " 1 " + o1[0] + " " + o1[1] +
-        " L " + i1[0] + " " + i1[1] + " A " + r0 + " " + r0 + " 0 " + large + " 0 " + i0[0] + " " + i0[1] + " Z";
-    }
-    function arc(rad, f0, f1) {
-      var a0 = ang(f0), a1 = ang(f1);
-      var large = a1 - a0 > Math.PI ? 1 : 0;
-      var p0 = polar(rad, a0), p1 = polar(rad, a1);
-      return "M " + p0[0] + " " + p0[1] + " A " + rad + " " + rad + " 0 " + large + " 1 " + p1[0] + " " + p1[1];
-    }
-    function turned(a) {
-      var deg = a * 180 / Math.PI + 90;
-      var norm = ((deg % 360) + 360) % 360;
-      if (norm > 90 && norm < 270) deg += 180;
-      return n(deg);
-    }
-    function diamond(rad, a, size, fill) {
-      var p = polar(rad, a);
-      return '<rect x="' + n(p[0] - size / 2) + '" y="' + n(p[1] - size / 2) + '" width="' + size + '" height="' + size + '" transform="rotate(45 ' + p[0] + " " + p[1] + ')" fill="' + fill + '" stroke="' + gold + '" stroke-width="0.7" pointer-events="none"/>';
-    }
-
-    var rIn = 222, rOut = 302, rMonthIn = 148, rMonthOut = 214;
-    var bands = [
-      { id: "advent", name: "Advent", color: "#734878", ink: "#f7f3ea", from: frac(2026, 11, 29), to: frac(2026, 12, 25) },
-      { id: "christmas", name: "Christmas", color: "#e3d2a4", ink: "#5c4930", from: frac(2026, 12, 25), to: frac(2027, 1, 6) },
-      { id: "epiphany", name: "Epiphany", color: "#3e6d64", ink: "#f7f3ea", from: frac(2027, 1, 6), to: frac(2027, 2, 10) },
-      { id: "lent", name: "Lent", color: "#6b446f", ink: "#f7f3ea", from: frac(2027, 2, 10), to: frac(2027, 3, 21) },
-      { id: "holyweek", name: "Holy Week", color: "#a83d49", ink: "#f7f3ea", from: frac(2027, 3, 21), to: frac(2027, 3, 28) },
-      { id: "easter", name: "Easter", color: "#d8c398", ink: "#5c4930", from: frac(2027, 3, 28), to: frac(2027, 5, 16) },
-      { id: "pentecost", name: "Pentecost", color: "#a83d49", ink: "#f7f3ea", from: frac(2027, 5, 16), to: frac(2027, 5, 23) },
-      { id: "ordinary", name: "Ordinary Time", color: "#3e6d64", ink: "#f7f3ea", from: frac(2027, 5, 23), to: 1 }
-    ];
-    var feasts = [
-      ["St. Andrew", 2026, 11, 30],
-      ["Christmas", 2026, 12, 25],
-      ["Holy Name", 2027, 1, 1],
-      ["Epiphany", 2027, 1, 6],
-      ["Presentation", 2027, 2, 2],
-      ["Ash Wednesday", 2027, 2, 10],
-      ["Annunciation", 2027, 3, 25],
-      ["Palm Sunday", 2027, 3, 21],
-      ["Good Friday", 2027, 3, 26],
-      ["Easter", 2027, 3, 28],
-      ["Ascension", 2027, 5, 6],
-      ["Pentecost", 2027, 5, 16],
-      ["Trinity", 2027, 5, 23],
-      ["Transfiguration", 2027, 8, 6],
-      ["Holy Cross", 2027, 9, 14],
-      ["All Saints", 2027, 11, 1],
-      ["Christ the King", 2027, 11, 21]
-    ];
-    var months = [
-      ["Dec", 2026, 12], ["Jan", 2027, 1], ["Feb", 2027, 2], ["Mar", 2027, 3],
-      ["Apr", 2027, 4], ["May", 2027, 5], ["Jun", 2027, 6], ["Jul", 2027, 7],
-      ["Aug", 2027, 8], ["Sep", 2027, 9], ["Oct", 2027, 10], ["Nov", 2027, 11]
-    ];
-
-    var bandAt = function (f) {
-      var found = bands.filter(function (b) { return f >= b.from && f < b.to; })[0];
-      return found || bands[bands.length - 1];
-    };
-    var parts = [];
-    var arcSerial = 0;
-    function originOf(band) {
-      var mid = (band.from + band.to) / 2;
-      var focus = polar((rIn + rOut) / 2, ang(mid));
-      return { mid: mid, ox: n(focus[0] / 760 * 100), oy: n(focus[1] / 760 * 100) };
-    }
-    function onArc(text, radius, angle, className, fill, seasonId, ox, oy) {
-      var turned = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      var lower = turned > Math.PI / 4 && turned < 2.95;
-      var spread = 1.05;
-      var a0 = angle - spread;
-      var a1 = angle + spread;
-      var from = lower ? a1 : a0;
-      var to = lower ? a0 : a1;
-      var p0 = polar(radius, from);
-      var p1 = polar(radius, to);
-      var id = "arc" + (++arcSerial);
-      var size = className === "season-label" ? 16 : 11;
-      parts.push('<path id="' + id + '" d="M ' + p0[0] + " " + p0[1] + " A " + radius + " " + radius + " 0 0 " + (lower ? 0 : 1) + " " + p1[0] + " " + p1[1] + '" fill="none" pointer-events="none"/>');
-      var attrs = ' class="' + className + '" font-size="' + size + '"';
-      if (fill) attrs += ' fill="' + fill + '"';
-      if (seasonId) attrs += ' data-season="' + seasonId + '" data-ox="' + ox + '" data-oy="' + oy + '"';
-      parts.push("<text" + attrs + '><textPath href="#' + id + '" startOffset="50%">' + esc(text) + "</textPath></text>");
-    }
-    parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + rMonthOut + '" fill="#f7f3ea"/>');
-    parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + rMonthIn + '" fill="#f4f1eb"/>');
-    bands.forEach(function (band) {
-      var spot = originOf(band);
-      parts.push('<path class="band" d="' + donut(rIn, rOut, band.from, band.to) + '" fill="' + band.color + '" data-season="' + band.id + '" data-ox="' + spot.ox + '" data-oy="' + spot.oy + '" aria-pressed="' + (state.season === band.id) + '"><title>' + esc(band.name) + "</title></path>");
-    });
-    for (var day = 0; day < span; day += 7) {
-      var a = ang(day / span);
-      var p0 = polar(rIn, a), p1 = polar(rOut, a);
-      parts.push('<line x1="' + p0[0] + '" y1="' + p0[1] + '" x2="' + p1[0] + '" y2="' + p1[1] + '" stroke="' + gold + '" stroke-opacity="0.45" stroke-width="0.6" pointer-events="none"/>');
-    }
-    [rIn + (rOut - rIn) * 0.34, rIn + (rOut - rIn) * 0.67].forEach(function (rad) {
-      parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + n(rad) + '" fill="none" stroke="' + gold + '" stroke-opacity="0.4" stroke-width="0.6" pointer-events="none"/>');
-    });
-    var labeled = [];
-    var rank = { Easter: 0, Christmas: 1, Epiphany: 2, Pentecost: 3, "All Saints": 4, "Ash Wednesday": 5, "Good Friday": 6, "Palm Sunday": 7, Ascension: 8, Trinity: 9, "Christ the King": 10 };
-    function labelHalf(name) {
-      return (name.length * 5.4) / (2 * Math.PI * 274) / 2;
-    }
-    feasts.slice().sort(function (a, b) {
-      var ra = rank[a[0]] == null ? 20 : rank[a[0]];
-      var rb = rank[b[0]] == null ? 20 : rank[b[0]];
-      return ra - rb;
-    }).forEach(function (feast) {
-      var f = frac(feast[1], feast[2], feast[3]);
-      var band = bandAt(f);
-      var mark = band.color === "#e3d2a4" || band.color === "#d8c398" ? "#8a6434" : "#f7f3ea";
-      parts.push(diamond(260, ang(f), 6, mark));
-      if (band.name.toLowerCase() === feast[0].toLowerCase()) return;
-      var half = labelHalf(feast[0]);
-      var crowded = labeled.some(function (prev) {
-        var diff = Math.abs(prev.f - f);
-        if (diff > 0.5) diff = 1 - diff;
-        return diff < prev.half + half + 0.006;
-      });
-      if (crowded) return;
-      labeled.push({ f: f, half: half });
-      onArc(feast[0], 276, ang(f), "feast-label", band.ink);
-    });
-    months.forEach(function (month) {
-      var start = Date.UTC(month[1], month[2] - 1, 1);
-      var end = Date.UTC(month[1], month[2], 1);
-      var f0 = (start - year0) / 86400000 / span;
-      var f1 = (end - year0) / 86400000 / span;
-      if (f0 < 0) f0 = 0;
-      if (f1 > 1) f1 = 1;
-      if (f0 > 0.002 && f0 < 0.998) {
-        var boundary = ang(f0);
-        var edge = polar(rMonthOut, boundary), inner = polar(rMonthIn, boundary);
-        parts.push('<line x1="' + edge[0] + '" y1="' + edge[1] + '" x2="' + inner[0] + '" y2="' + inner[1] + '" stroke="' + gold + '" stroke-width="0.7" pointer-events="none"/>');
-      }
-      var a = ang((f0 + f1) / 2);
-      var p = polar(rMonthIn + 26, a);
-      parts.push('<text class="month-label" x="' + p[0] + '" y="' + p[1] + '" transform="rotate(' + turned(a) + " " + p[0] + " " + p[1] + ')" pointer-events="none">' + month[0] + "</text>");
-    });
-    [16, 58, 108, 140].forEach(function (rad) {
-      parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="' + rad + '" fill="none" stroke="' + gold + '" stroke-width="0.8" pointer-events="none"/>');
-    });
-    for (var spoke = 0; spoke < 8; spoke++) {
-      var sa = -Math.PI / 2 + spoke * Math.PI / 4;
-      var s0 = polar(16, sa), s1 = polar(140, sa);
-      parts.push('<line x1="' + s0[0] + '" y1="' + s0[1] + '" x2="' + s1[0] + '" y2="' + s1[1] + '" stroke="' + gold + '" stroke-width="0.7" pointer-events="none"/>');
-      parts.push(diamond(108, sa, 7, "#f4f1eb"));
-      var a1 = sa + Math.PI / 4;
-      var q0 = polar(78, sa), q1 = polar(78, a1), qc = polar(108, sa + Math.PI / 8);
-      parts.push('<path d="M ' + q0[0] + " " + q0[1] + " Q " + qc[0] + " " + qc[1] + " " + q1[0] + " " + q1[1] + '" fill="none" stroke="' + gold + '" stroke-width="0.8" pointer-events="none"/>');
-    }
-    parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="318" fill="none" stroke="' + gold + '" stroke-width="1.3" pointer-events="none"/>');
-    parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="326" fill="none" stroke="' + gold + '" stroke-width="0.6" pointer-events="none"/>');
-    parts.push(diamond(326, ang(0), 8, "#f4f1eb"));
-    bands.forEach(function (band) {
-      var spot = originOf(band);
-      onArc(band.name, 348, ang(spot.mid), "season-label", null, band.id, spot.ox, spot.oy);
-      if (state.season === band.id) {
-        parts.push('<path d="' + arc(306, band.from, band.to) + '" fill="none" stroke="#6e5430" stroke-width="2.2" pointer-events="none"/>');
-      }
-    });
-
-    var season = SEASONS.filter(function (s) { return s.id === state.season; })[0] || SEASONS[0];
-    var list = allResources().filter(function (item) { return item.season === season.id && matches(item); });
-    return '<div class="year' + (state.settle ? " is-arriving" : "") + '"><div class="wheel-stage"><svg class="wheel" viewBox="0 0 760 760" role="group" aria-label="The liturgical year">' + parts.join("") + '</svg></div><div class="season-copy"><h2>' + esc(season.name) + "</h2><p>" + esc(season.line) + "</p></div>" + cards(list) + "</div>";
-  }
-
   var YEAR0 = Date.UTC(2026, 10, 29);
   var YEAR_COUNT = 364;
   var MONTH_NAME = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -487,6 +304,49 @@
     ["pentecost", "2027-05-16", "2027-05-23"],
     ["ordinary", "2027-05-23", "2027-11-28"]
   ];
+  var SEASON_STORY = {
+    advent: [
+      "The church year opens here, in the dark. Advent takes its name from the Latin adventus, a coming or arrival, and the four Sundays hold two arrivals in one season: the birth at Bethlehem, and the day when Christ comes to judge and to make all things new. The weeks do not begin with the manger. They begin with the end.",
+      "Rome settled on four Sundays. Some other Western churches once kept a longer preparation from St. Martin’s day on November 11, a fast sometimes called St. Martin’s Lent. The English prayer books from 1549 open the Christian year on Advent Sunday, so the first of these Sundays is the church’s New Year. Violet became the usual color. A deep blue is used in some Anglican churches, a sign of hope rather than of Lent’s sorrow.",
+      "The waiting has an order. The first Sundays look toward the day of the Lord and the prophets who asked for the heavens to be torn open. John the Baptist stands in the middle of the season, a voice in the wilderness. Only at the end does the story turn to Mary and the promise of a child. Where a fast is kept, it is lighter than Lent. The note is expectation.",
+      "This year the ring runs from November 29 through December 24. Christmas Day begins the next season. The four weeks are short on purpose. The church practices wanting what it does not yet hold."
+    ],
+    christmas: [
+      "Christmas Day is the feast of the Nativity, and the season is the twelve days that follow, through the evening of January 5, Twelfth Night. December 25 is an old Roman date. A civil calendar compiled in 354 records that the church in Rome was already keeping the birth of Christ on that day in 336. In the East the older feast was January 6, and it gathered the birth together with the baptism. The December date spread from west to east. January 6 remained as the Epiphany.",
+      "The twelve days are a feast, not a fast. White and gold are the colors. Inside them the church kept other days and refused to postpone them: Stephen, the first martyr, on the 26th; John the evangelist on the 27th; the Holy Innocents, the children of Bethlehem, on the 28th; and on January 1 the naming of Jesus, which older books called the Circumcision. The joy is not thin. Stephen’s day is still inside the feast, and the church tells the truth that the child is born into a world that resists him.",
+      "On this wheel the ring runs from December 25, 2026, through January 5, 2027. January 6 is the Epiphany and starts the next ring. For these twelve days the year stays with one birth: the Word made flesh, in a particular place, visited by shepherds who were told not to be afraid."
+    ],
+    epiphany: [
+      "Epiphany, on January 6, is the feast of the manifestation. The Greek word means a showing. In the West the day came to belong especially to the magi, the nations arriving with gold, frankincense, and myrrh. Medieval worship also gathered two other signs onto this day: Jesus baptized in the Jordan, and the water turned to wine at Cana. One feast, three ways the hidden Christ is made known.",
+      "After the day itself the season continues in green. These are the counted weeks before Lent, when the church stays with the light that has been shown and reads the early ministry: the call of the disciples, the first healings, the authority of the teaching. Older English prayer books inserted three pre-Lent Sundays, Septuagesima, Sexagesima, and Quinquagesima, and the American book of 1928 still had them. The calendar this wheel follows lets Epiphany run up to Ash Wednesday, so those three Sundays are not a separate season.",
+      "This year the ring runs from January 6 through February 9. February 2, the Presentation of Christ in the Temple, falls inside it. That day was long kept as the close of the Christmas cycle, when candles were blessed and Christ was hailed as a light to the nations and the glory of Israel. Then the green weeks finish, and Lent begins."
+    ],
+    lent: [
+      "Lent is the forty-day fast before Easter. The Latin name is Quadragesima, the fortieth. The number is the Lord’s own: forty days in the wilderness, and behind that the forty of Moses on the mountain and of Elijah on the way to Horeb. The church walks into that wilderness before it tries to keep the Passion.",
+      "Sundays are in Lent, but they are not fast days, and so they are not counted in the forty. The fast starts on Ash Wednesday and runs through Holy Saturday. Count every day between those two, including both, and then set the six Sundays aside, and forty remain. Ashes on every worshipper, rather than on public penitents only, spread through the Western church in the tenth and eleventh centuries. The English books of the Reformation kept the fast and did not keep the imposition of ashes. Many Anglican churches have since received that sign back. A forty-day Lent is already visible in the fourth century. Before that, the pre-Easter fast was often shorter and differed from city to city.",
+      "On this wheel the violet ring runs from Ash Wednesday, February 10, through March 20, the day before Palm Sunday. The forty days are not cut short. Holy Week is drawn as its own ring, and the fast continues through it to the tomb. The fourth Sunday has long been a slight easing, called Refreshment Sunday, or Laetare, and in England Mothering Sunday. The work of the season is repentance, almsgiving, and prayer, so that the week of the Passion is not a surprise."
+    ],
+    holyweek: [
+      "Holy Week is the last week of Jesus’ life, from the entry into Jerusalem to the Sabbath spent in the tomb. Pilgrims in Jerusalem in the 380s already called it the Great Week and walked the places of the story on the days themselves. The West came to call it Holy Week. It is the heart of the year. Everything else leans toward it or away from it.",
+      "Palm Sunday opens with branches and the shout of the crowds, and the same liturgy turns to the Passion. The reading is long because the church refuses to summarize these hours. Monday, Tuesday, and Wednesday stay with the last teaching and the closing of the plot. Wednesday is sometimes called Spy Wednesday, for the betrayal. Maundy Thursday takes its English name from the Latin mandatum, the new commandment. The church remembers the supper, the bread and the cup, and the washing of feet. Good Friday is the day of the cross. The English name is medieval. Holy Saturday is the day of the tomb, and of the night watch that became the Easter Vigil, the hour when the early church preferred to baptize.",
+      "This year Palm Sunday is March 21, Good Friday is March 26, and Holy Saturday is March 27. Easter Day is March 28. March 25, the Annunciation, falls on Thursday of this week. The date remains the feast’s day. Many modern calendars keep the observance on a day after Easter, so the week is not asked to celebrate two mysteries at once. The ring is short, and it is meant to be walked slowly."
+    ],
+    easter: [
+      "Easter is the feast of the resurrection. Most of the Christian world calls it Pascha, from the Hebrew pesach, because the Lord’s passover from death was kept at the time of Passover. The English name comes from the old name of the month in which the feast fell. Bede, in the eighth century, says that month was called Eosturmonath. The date is the Sunday after the full moon on or after March 21, the rule that grew out of the fourth-century effort to keep one feast. This year that Sunday is March 28.",
+      "From Easter Day the church keeps fifty days, a week of weeks, and calls the stretch the Great Fifty Days. Fasting was set aside. Alleluia, put away for Lent, comes back. White and gold replace violet. The Sundays belong to the feast itself. Older books counted them as Sundays after Easter. The fiftieth day is Pentecost, drawn on this wheel as its own ring, so the Easter ring runs from March 28 through May 15, the eve of Pentecost.",
+      "Inside those days, the fortieth is the Ascension, always a Thursday. This year it is May 6. The church has kept that day since the fourth century as the moment the risen Christ entrusts his going to the church and promises the Spirit. The stories of the season are the appearances, the breakfast on the shore, the opening of the scriptures, and the charge to go. Easter is not one morning. It is a season long enough to learn what the morning means."
+    ],
+    pentecost: [
+      "Pentecost is the fiftieth day, and the name is the Greek number. In Jerusalem it was already the Jewish feast of Weeks, fifty days after Passover, when Acts tells of a wind, of fire, and of a crowd that heard the apostles each in its own language. The Christian year treats that day as the gift of the Spirit and the sending of the church. The fifty days of Easter end here. What was promised at the Ascension is given.",
+      "The English name is Whitsunday, white Sunday, usually explained by the white robes of those baptized at the feast. Red is the color, for the fire, and it has been a Western color for this day since the medieval schemes of vestments. Older prayer books kept an octave, Whitsun week, and only then Trinity Sunday. From Trinity they numbered the rest of the year after Trinity, not after Pentecost. Trinity Sunday, as a feast of the whole Western church, dates from the fourteenth century, though England kept it earlier.",
+      "On this wheel the red ring is one week, May 16 through May 22. Trinity Sunday, May 23, opens the long green season. The week is a pause between the resurrection and the counted Sundays: the church stands in the story of its own beginning, and then it is sent to live the rest of the year from that day."
+    ],
+    ordinary: [
+      "Ordinary Time is the long green season. The word does not mean plain. It means the counted Sundays. The older Anglican prayer books did not use the modern name. They said after Epiphany and after Trinity. The calendar behind these readings took up the newer name, and on this wheel the long count still begins at Trinity rather than the day after Pentecost. That is the older English shape: Trinity first, then the numbered Sundays.",
+      "The season runs from Trinity Sunday, May 23, to November 27, the eve of the next Advent. Green has marked the days outside feast and fast in the West since the medieval writers on vestments. The work of the weeks is the public life of Jesus, read in course: parables, healings, disputes, the sending of the Twelve, the cost of following. In Year B the Gospel is Mark, with John brought in where Mark is brief. These Sundays are not a lesser substitute for Easter. They are the life the resurrection makes possible.",
+      "Certain days break the green without ending it. The Transfiguration falls on August 6, Holy Cross on September 14, All Saints on November 1. The last Sunday, November 21 this year, is Christ the King. That feast was appointed for the Roman church in 1925 and later moved to the end of the year. It is kept here as the Sunday before Advent: a last claim that the counted weeks have a Lord. Then the year turns back to the dark and begins again."
+    ]
+  };
   var INCENSE_COLORS = {
     advent: { fill: "#734878", ink: "#f7f3ea" },
     christmas: { fill: "#e3d2a4", ink: "#5c4930" },
@@ -545,6 +405,29 @@
       if (iso >= SEASON_CUTS[i][1] && iso < SEASON_CUTS[i][2]) return SEASON_CUTS[i][0];
     }
     return "ordinary";
+  }
+  function seasonSpan(id) {
+    var cut = null;
+    for (var i = 0; i < SEASON_CUTS.length; i++) {
+      if (SEASON_CUTS[i][0] === id) cut = SEASON_CUTS[i];
+    }
+    if (!cut) return "";
+    function one(iso, back) {
+      var bits = iso.split("-");
+      var t = Date.UTC(Number(bits[0]), Number(bits[1]) - 1, Number(bits[2]));
+      if (back) t -= 86400000;
+      var d = new Date(t);
+      return MONTH_NAME[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + d.getUTCFullYear();
+    }
+    return one(cut[1], false) + " – " + one(cut[2], true);
+  }
+  function seasonCard(id) {
+    var story = SEASON_STORY[id];
+    if (!story) return "";
+    var fog = state.style === "fog";
+    var stripe = fog ? (FOG_COLORS[id] || FOG_COLORS.ordinary).fill : (STRIPE[id] || "#6e5430");
+    var paras = story.map(function (paragraph) { return "<p>" + esc(paragraph) + "</p>"; }).join("");
+    return '<aside class="dial-read"><article class="season-essay" style="--season:' + stripe + '"><header><p class="season-kicker">The season</p><h3>' + esc(seasonName(id)) + "</h3><time>" + esc(seasonSpan(id)) + "</time></header>" + paras + "</article></aside>";
   }
   function monthNumber(key) {
     var bits = String(key).split("-");
@@ -797,7 +680,11 @@
         var tone = colors[id] || colors.ordinary;
         var name = seasonName(id);
         var box = bands.season;
-        parts.push('<g data-cut="season" data-id="' + id + '" role="button" tabindex="0" aria-label="' + esc(name + ", " + p.days.length + " days") + '"><path class="slice" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + tone.fill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(name) + "</title></path>" + ringLabel(name, p.a0, p.a1, box[0], box[1], tone.ink, "season-name") + "</g>");
+        var seasonOn = state.card === id;
+        var seasonStroke = seasonOn
+          ? ' stroke="' + (fog ? "#f5f5f7" : "#1c1612") + '" stroke-width="2.8"'
+          : (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"');
+        parts.push('<g data-cut="season" data-id="' + id + '" role="button" tabindex="0" aria-pressed="' + (seasonOn ? "true" : "false") + '" aria-label="' + esc(name) + ', history of this season"><path class="slice' + (seasonOn ? " is-season" : "") + '" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + tone.fill + '"' + seasonStroke + '><title>' + esc(name) + "</title></path>" + ringLabel(name, p.a0, p.a1, box[0], box[1], tone.ink, "season-name") + "</g>");
       });
     }
     function joinYearMonth(pieces) {
@@ -819,9 +706,7 @@
         var label = MONTH_SHORT[p.days[0].m - 1];
         var full = monthLabel(key);
         var box = bands.month;
-        var attr = ' data-cut="month" data-key="' + key + '"';
-        if (kind === "season") attr += ' data-sid="' + state.slice.id + '"';
-        parts.push('<g' + attr + ' role="button" tabindex="0" aria-label="' + esc(full + ", " + p.days.length + " days") + '"><path class="slice" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + monthFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, p.a0, p.a1, box[0], box[1], monthInk, "month-name") + "</g>");
+        parts.push('<g><path class="slice" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + monthFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, p.a0, p.a1, box[0], box[1], monthInk, "month-name") + "</g>");
       });
     }
     if (bands.week) {
@@ -833,12 +718,13 @@
         var a = w.days[0], b = w.days[w.days.length - 1];
         var label = a.d === b.d ? String(a.d) : a.d + "–" + b.d;
         var full = weekRangeLabel(w.days);
-        var attr = ' data-cut="week" data-start="' + a.iso + '" data-end="' + b.iso + '" data-key="' + a.monthKey + '"';
-        if (sid) attr += ' data-sid="' + sid + '"';
-        parts.push('<g' + attr + ' role="button" tabindex="0" aria-label="' + esc(full) + '"><path class="slice" d="' + wedgePath(weekBox[0], weekBox[1], a0, a1) + '" fill="' + weekFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, a0, a1, weekBox[0], weekBox[1], weekInk, "week-name") + "</g>");
+        parts.push('<g><path class="slice" d="' + wedgePath(weekBox[0], weekBox[1], a0, a1) + '" fill="' + weekFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, a0, a1, weekBox[0], weekBox[1], weekInk, "week-name") + "</g>");
       });
     }
     var hot = null;
+    var todayPath = "";
+    var todayNow = new Date();
+    var todayIso = todayNow.getFullYear() + "-" + pad2(todayNow.getMonth() + 1) + "-" + pad2(todayNow.getDate());
     weeks.forEach(function (w, wi) {
       var a0 = angAt(wi, nW);
       var a1 = angAt(wi + 1, nW);
@@ -848,8 +734,10 @@
         var names = [];
         day.propers.forEach(function (idx) { names.push(PROPERS[idx].name); });
         if (day.feast && names.indexOf(day.feast) === -1) names.push(day.feast);
+        var isToday = day.iso === todayIso;
         var aria = WEEKDAY[day.dow] + ", " + MONTH_NAME[day.m - 1] + " " + day.d + ", " + day.y + ", " + seasonName(day.season);
         if (names.length) aria += ", " + names.join(", ");
+        if (isToday) aria += ", today";
         var fullRing = (a1 - a0) >= Math.PI * 1.99;
         var labelA = fullRing ? -Math.PI / 2 : (a0 + a1) / 2;
         var midR = (ring[0] + ring[1]) / 2;
@@ -869,6 +757,7 @@
         if (day.iso === state.day) stroke = ' stroke="' + (fog ? "#f5f5f7" : "#6e5430") + '" stroke-width="2.4"';
         var path = wedgePath(ring[0], ring[1], a0, a1);
         if (day.iso === state.day) hot = path;
+        if (isToday) todayPath = path;
         var mark = "";
         if (day.feast || (day.propers.length && total <= 120)) {
           var markA = labelA + (fullRing ? 0.42 : Math.min(0.18, (a1 - a0) * 0.28));
@@ -878,7 +767,7 @@
           var ink = fog ? "#f5f5f7" : (tone.ink === "#5c4930" ? "#8a6434" : "#f7f3ea");
           mark = '<rect x="' + n(mp[0] - size / 2) + '" y="' + n(mp[1] - size / 2) + '" width="' + size + '" height="' + size + '" transform="rotate(45 ' + n(mp[0]) + " " + n(mp[1]) + ')" fill="' + ink + '" pointer-events="none"/>';
         }
-        parts.push('<g data-cut="day" data-iso="' + day.iso + '" data-dow="' + day.dow + '" role="button" tabindex="0" aria-label="' + esc(aria) + '"><path class="slice' + (day.iso === state.day ? " is-on" : "") + '" d="' + path + '" fill="' + tone.fill + '"' + stroke + '><title>' + esc(aria) + "</title></path>" + textAt(label, labelA, midR, font, tone.ink, cls, radial) + mark + "</g>");
+        parts.push('<g data-cut="day" data-iso="' + day.iso + '" data-dow="' + day.dow + '"' + (isToday ? ' data-today="1"' : "") + ' role="button" tabindex="0" aria-label="' + esc(aria) + '"><path class="slice' + (day.iso === state.day ? " is-on" : "") + (isToday ? " is-today" : "") + '" d="' + path + '" fill="' + tone.fill + '"' + stroke + '><title>' + esc(aria) + "</title></path>" + textAt(label, labelA, midR, font, tone.ink, cls, radial) + mark + "</g>");
       });
     });
     if (!fog) {
@@ -892,6 +781,7 @@
     }
     parts.push('<circle cx="500" cy="500" r="104" fill="' + (fog ? "#000" : "#f4f1eb") + '" pointer-events="none"/>');
     if (hot) parts.push('<path d="' + hot + '" fill="none" stroke="' + (fog ? "#f5f5f7" : "#6e5430") + '" stroke-width="2.6" pointer-events="none"/>');
+    if (todayPath) parts.push('<path class="today-beat" d="' + todayPath + '" fill="' + (fog ? "rgba(245,245,247,0.28)" : "rgba(255,248,231,0.55)") + '" stroke="' + (fog ? "#f5f5f7" : "#fff8e7") + '" stroke-width="3.2" pointer-events="none"/>');
 
     var title = "The year";
     var sub = days.length + " days · 2026–27";
@@ -946,11 +836,12 @@
     var tools = '<div class="dial-styles" role="group" aria-label="Appearance"><button type="button" data-style="fog" aria-pressed="' + (fog ? "true" : "false") + '">Fog</button><button type="button" data-style="incense" aria-pressed="' + (fog ? "false" : "true") + '">Incense</button></div>';
     if (kind !== "year" && properCount) tools += '<button type="button" class="dial-text" data-board>Readings</button>';
     tools += '<button type="button" class="dial-text" data-fullwheel aria-pressed="' + (fullOn ? "true" : "false") + '">' + (fullOn ? "Leave full screen" : "Full screen") + "</button>";
-    tools += '<a class="dial-legacy" href="circle.html">Earlier circle</a>';
     var read = "";
     var chosen = null;
     days.forEach(function (d) { if (d.iso === state.day) chosen = d; });
-    if (chosen) {
+    if (state.card && SEASON_STORY[state.card]) {
+      read = seasonCard(state.card);
+    } else if (chosen) {
       var stripe = fog ? (colors[chosen.season] || colors.ordinary).fill : (STRIPE[chosen.season] || "#6e5430");
       var body = chosen.propers.length
         ? chosen.propers.map(function (idx) { return sundayCard(PROPERS[idx]); }).join("")
@@ -1057,14 +948,14 @@
   }
 
   function renderStage() {
+    if (document.body.getAttribute("data-desk") === "books") {
+      document.body.setAttribute("data-wheel", state.style);
+      return;
+    }
+    var analysis = document.body.getAttribute("data-desk") === "analysis";
     var body = "";
-    if (state.module === "year") {
-      if (legacy) {
-        body = state.depth === "season" ? drillBoard() : wheel();
-        if (state.depth !== "season") {
-          body = body.replace('<div class="wheel-stage">', '<p class="wheel-aside"><a href="app.html">The new wheel</a></p><div class="wheel-stage">');
-        }
-      } else body = state.board ? drillBoard() : dial();
+    if (analysis || state.module === "year") {
+      body = state.board ? drillBoard() : dial();
     } else if (state.module === "topics") body = topics();
     else if (state.module === "audience") body = audiences();
     else if (state.module === "formation") body = formation();
@@ -1072,11 +963,11 @@
     else if (state.module === "prayer") body = byFormats(["Devotional", "Prayer"]);
     else body = events();
     var stage = document.getElementById("stage");
-    stage.classList.toggle("is-year", state.module === "year");
+    stage.classList.toggle("is-year", analysis || state.module === "year");
     if (legacy) document.body.removeAttribute("data-wheel");
     else document.body.setAttribute("data-wheel", state.style);
-    var lens = !legacy && (state.module === "year" || state.module === "topics" || state.module === "audience") ? lensBar() : "";
-    stage.innerHTML = composer() + lens + body;
+    var lens = !analysis && !legacy && (state.module === "year" || state.module === "topics" || state.module === "audience") ? lensBar() : "";
+    stage.innerHTML = (analysis ? "" : composer()) + lens + body;
     state.settle = false;
     var form = document.getElementById("add-form");
     if (form) {
@@ -1116,11 +1007,10 @@
     sessionStorage.setItem("ar-level", state.level);
     state.module = "year";
     state.season = item.season;
-    if (!legacy && item.season && item.season !== "feasts") {
-      state.slice = { kind: "season", id: item.season };
+    if (!legacy) {
+      state.slice = { kind: "year" };
       state.board = false;
       state.depth = "year";
-      state.day = null;
     }
     syncPressed();
     renderStage();
@@ -1200,10 +1090,66 @@
     } else {
       var readTitle = state.bible.book || "Bible";
       if (state.bible.chapter) readTitle += " " + state.bible.chapter;
-      html = bibleHeader(readTitle, "Books") + '<div class="bible-body" id="bible-prose"><p class="lede">Opening the book…</p></div>';
+      var backLabel = "Books";
+      if (state.bible.xrefHome) {
+        var home = state.bible.xrefHome;
+        var homeName = home.book === "Psalms" ? "Psalm" : home.book;
+        backLabel = homeName + " " + home.chapter;
+      }
+      html = bibleHeader(readTitle, backLabel) + '<div class="bible-body" id="bible-prose"><p class="lede">Opening the book…</p></div>';
     }
     pane.innerHTML = html;
     if (state.bible.level === "read") loadBook();
+  }
+
+  var xrefCache = {};
+  var xrefWaiters = {};
+
+  function loadXrefs(book, done) {
+    if (Object.prototype.hasOwnProperty.call(xrefCache, book)) { done(xrefCache[book]); return; }
+    if (xrefWaiters[book]) { xrefWaiters[book].push(done); return; }
+    xrefWaiters[book] = [done];
+    fetch("cross-refs/" + slug(book) + ".json").then(function (res) {
+      if (!res.ok) throw new Error("missing");
+      return res.json();
+    }).then(function (data) {
+      xrefCache[book] = data;
+    }).catch(function () {
+      xrefCache[book] = null;
+    }).then(function () {
+      var waiters = xrefWaiters[book] || [];
+      delete xrefWaiters[book];
+      waiters.forEach(function (fn) { fn(xrefCache[book]); });
+    });
+  }
+
+  function xrefHtml(data, chapter) {
+    if (!data) {
+      return '<section class="xrefs" aria-label="Cross references"><h3>Cross references</h3><p class="xref-note">Cross references for this chapter did not open.</p></section>';
+    }
+    var rows = data[chapter - 1] || [];
+    var items = [];
+    rows.forEach(function (refs, index) {
+      if (!refs || !refs.length) return;
+      var verse = index + 1;
+      var links = refs.map(function (cite) {
+        return '<button type="button" data-ref="' + esc(cite) + '">' + esc(citeLabel(cite)) + "</button>";
+      }).join("");
+      items.push('<li><button type="button" class="xref-verse" data-xref-verse="v-' + chapter + "-" + verse + '" aria-label="Verse ' + verse + '">' + verse + '</button><span class="xref-refs">' + links + "</span></li>");
+    });
+    var note = items.length
+      ? "Treasury of Scripture Knowledge."
+      : "This chapter has no cross references in the Treasury of Scripture Knowledge.";
+    return '<section class="xrefs" aria-label="Cross references"><h3>Cross references</h3><p class="xref-note">' + note + "</p>" + (items.length ? "<ol>" + items.join("") + "</ol>" : "") + "</section>";
+  }
+
+  function mountXrefs(host, book, chapter) {
+    if (!host || !state.bible.xrefs || state.bible.book !== book || Number(state.bible.chapter) !== Number(chapter)) return;
+    var old = host.querySelector(".xrefs");
+    if (old) old.remove();
+    host.insertAdjacentHTML("afterbegin", xrefHtml(xrefCache[book], chapter));
+    var block = host.querySelector(".xrefs");
+    if (block) block.scrollIntoView({ block: "start" });
   }
 
   function loadBook() {
@@ -1233,6 +1179,15 @@
         var el = document.getElementById("v-" + state.bible.chapter + "-" + v);
         if (el) el.classList.add("verse-hit");
       });
+      if (state.bible.xrefs) {
+        target.insertAdjacentHTML("afterbegin", '<section class="xrefs" aria-label="Cross references"><h3>Cross references</h3><p class="xref-note">Opening the Treasury of Scripture Knowledge…</p></section>');
+        var wantBook = book;
+        var wantChapter = state.bible.chapter;
+        loadXrefs(wantBook, function () {
+          mountXrefs(document.getElementById("bible-prose"), wantBook, wantChapter);
+        });
+        return;
+      }
       var hit = target.querySelector(".verse-hit");
       var chapter = document.getElementById("c-" + state.bible.chapter);
       if (hit) hit.scrollIntoView({ block: "center" });
@@ -1250,7 +1205,7 @@
     });
   }
 
-  function openBibleAt(ref) {
+  function openBibleAt(ref, opts) {
     var parsed = ref ? parseRef(ref) : null;
     state.bible.open = true;
     if (!parsed) {
@@ -1274,8 +1229,19 @@
         }
       });
     }
+    if (opts && opts.xrefs && parsed) {
+      state.bible.xrefs = true;
+      state.bible.xrefHome = null;
+      state.bible.verses = [];
+      state.bible.toEnd = false;
+    }
     renderBible();
   }
+
+  document.addEventListener("ar-open-chapter", function (event) {
+    var ref = event.detail && event.detail.ref;
+    openBibleAt(ref || "", { xrefs: true });
+  });
 
   function syncPressed() {
     document.querySelectorAll("[data-role]").forEach(function (btn) {
@@ -1307,6 +1273,53 @@
       expMenu.setAttribute("hidden", "");
       var opener = expRoot.querySelector(".person-btn");
       if (opener) opener.setAttribute("aria-expanded", "false");
+    }
+    var appNav = document.querySelector(".app-nav");
+    var appMenu = document.getElementById("app-menu");
+    if (appMenu && !appMenu.hasAttribute("hidden") && appNav && !appNav.contains(event.target)) {
+      appMenu.setAttribute("hidden", "");
+      var menuOpener = document.getElementById("app-menu-btn");
+      if (menuOpener) menuOpener.setAttribute("aria-expanded", "false");
+    }
+    var zoomRoot = document.querySelector(".magnifier");
+    var zoomMenu = document.getElementById("zoom-menu");
+    if (zoomMenu && !zoomMenu.hasAttribute("hidden") && zoomRoot && !zoomRoot.contains(event.target)) {
+      zoomMenu.setAttribute("hidden", "");
+      var zoomOpener = document.getElementById("zoom-btn");
+      if (zoomOpener) zoomOpener.setAttribute("aria-expanded", "false");
+    }
+    if (event.target.closest("#app-full")) {
+      toggleAppFull();
+      return;
+    }
+    var vizPath = event.composedPath ? event.composedPath() : [];
+    var inViz = event.target.closest(".viz-panel");
+    if (!inViz) {
+      for (var vi = 0; vi < vizPath.length; vi++) {
+        if (vizPath[vi].classList && vizPath[vi].classList.contains("viz-panel")) { inViz = true; break; }
+      }
+    }
+    if (inViz) return;
+    var menuBtn = event.target.closest("#app-menu-btn");
+    if (menuBtn && appMenu) {
+      var menuOpen = appMenu.hasAttribute("hidden");
+      if (menuOpen) appMenu.removeAttribute("hidden");
+      else appMenu.setAttribute("hidden", "");
+      menuBtn.setAttribute("aria-expanded", menuOpen ? "true" : "false");
+      return;
+    }
+    var zoomBtn = event.target.closest("#zoom-btn");
+    if (zoomBtn && zoomMenu) {
+      var zoomOpen = zoomMenu.hasAttribute("hidden");
+      if (zoomOpen) zoomMenu.removeAttribute("hidden");
+      else zoomMenu.setAttribute("hidden", "");
+      zoomBtn.setAttribute("aria-expanded", zoomOpen ? "true" : "false");
+      return;
+    }
+    var zoomAct = event.target.closest("[data-zoom]");
+    if (zoomAct) {
+      stepZoom(zoomAct.getAttribute("data-zoom"));
+      return;
     }
     var personBtn = event.target.closest(".person-btn");
     if (personBtn) {
@@ -1374,6 +1387,7 @@
           state.depth = "year";
           state.slice = { kind: "year" };
           state.day = null;
+          state.card = null;
           state.settle = true;
         }
       }
@@ -1427,22 +1441,21 @@
       var cutKind = cut.getAttribute("data-cut");
       if (cutKind === "year") {
         state.slice = { kind: "year" };
+        state.card = null;
       } else if (cutKind === "season") {
-        state.slice = { kind: "season", id: cut.getAttribute("data-id") };
-        state.season = state.slice.id;
-      } else if (cutKind === "month") {
-        state.slice = { kind: "month", key: cut.getAttribute("data-key"), season: cut.getAttribute("data-sid") || "" };
-      } else if (cutKind === "week") {
-        state.slice = {
-          kind: "week",
-          start: cut.getAttribute("data-start"),
-          end: cut.getAttribute("data-end"),
-          key: cut.getAttribute("data-key") || "",
-          season: cut.getAttribute("data-sid") || ""
-        };
+        var seasonId = cut.getAttribute("data-id");
+        if (!seasonId || !SEASON_STORY[seasonId] || state.slice.kind !== "year") return;
+        state.card = seasonId;
+        state.board = false;
+        state.depth = "year";
+        renderStage();
+        return;
+      } else if (cutKind === "month" || cutKind === "week") {
+        return;
       } else if (cutKind === "day") {
         var iso = cut.getAttribute("data-iso");
         state.day = iso;
+        state.card = null;
         yearDays().forEach(function (d) { if (d.iso === iso) state.season = d.season; });
       }
       state.board = false;
@@ -1452,31 +1465,9 @@
     }
     var season = event.target.closest("[data-season]");
     if (season && legacy) {
-      var seasonId = season.getAttribute("data-season");
-      if (!PROPERS.some(function (day) { return day.season === seasonId; })) {
-        state.season = seasonId;
-        renderStage();
-        return;
-      }
-      if (drillLock) return;
-      drillLock = true;
-      state.season = seasonId;
-      var stageEl = document.querySelector(".wheel-stage");
-      var ox = season.getAttribute("data-ox");
-      var oy = season.getAttribute("data-oy");
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (stageEl && !reduce) {
-        if (ox) stageEl.style.transformOrigin = ox + "% " + oy + "%";
-        stageEl.classList.add("is-drilling");
-      }
-      setTimeout(function () {
-        drillLock = false;
-        if (state.module !== "year") return;
-        state.depth = "season";
-        renderStage();
-        var pane = document.getElementById("stage");
-        if (pane) pane.scrollTop = 0;
-      }, reduce || !stageEl ? 0 : 420);
+      state.season = season.getAttribute("data-season");
+      state.depth = "year";
+      renderStage();
       return;
     }
     var topic = event.target.closest("[data-topic]");
@@ -1508,11 +1499,41 @@
       renderStage();
       return;
     }
+    var jump = event.target.closest("[data-xref-verse]");
+    if (jump) {
+      var vid = jump.getAttribute("data-xref-verse");
+      var verseEl = vid && document.getElementById(vid);
+      var prose = document.getElementById("bible-prose");
+      if (prose) prose.querySelectorAll(".verse-hit").forEach(function (el) { el.classList.remove("verse-hit"); });
+      if (verseEl) {
+        verseEl.classList.add("verse-hit");
+        verseEl.scrollIntoView({ block: "center" });
+      }
+      return;
+    }
     var ref = event.target.closest("[data-ref]");
-    if (ref) { openBibleAt(ref.getAttribute("data-ref")); return; }
+    if (ref) {
+      if (ref.closest(".xrefs") && state.bible.xrefs && state.bible.level === "read") {
+        state.bible.xrefHome = {
+          book: state.bible.book,
+          chapter: state.bible.chapter,
+          testament: state.bible.testament,
+          section: state.bible.section
+        };
+      } else {
+        state.bible.xrefHome = null;
+      }
+      state.bible.xrefs = false;
+      openBibleAt(ref.getAttribute("data-ref"));
+      return;
+    }
     if (event.target.closest("#bible-open")) {
       if (state.bible.open) { state.bible.open = false; renderBible(); }
-      else openBibleAt(null);
+      else {
+        state.bible.xrefs = false;
+        state.bible.xrefHome = null;
+        openBibleAt(null);
+      }
       return;
     }
     if (event.target.closest("[data-bible-close]")) { state.bible.open = false; renderBible(); return; }
@@ -1542,16 +1563,34 @@
       renderBible();
       return;
     }
-    if (event.target.closest("[data-book]")) {
+    if (event.target.closest("#bible [data-book]")) {
       state.bible.book = event.target.closest("[data-book]").getAttribute("data-book");
       state.bible.chapter = 1;
       state.bible.verses = [];
       state.bible.toEnd = false;
+      state.bible.xrefs = false;
+      state.bible.xrefHome = null;
       state.bible.level = "read";
       renderBible();
       return;
     }
     if (event.target.closest("[data-bible-back]")) {
+      if (state.bible.level === "read" && state.bible.xrefHome) {
+        var homeBack = state.bible.xrefHome;
+        state.bible.xrefHome = null;
+        state.bible.xrefs = true;
+        state.bible.book = homeBack.book;
+        state.bible.chapter = homeBack.chapter;
+        state.bible.testament = homeBack.testament;
+        state.bible.section = homeBack.section;
+        state.bible.verses = [];
+        state.bible.toEnd = false;
+        state.bible.level = "read";
+        renderBible();
+        return;
+      }
+      state.bible.xrefs = false;
+      state.bible.xrefHome = null;
       if (state.bible.level === "read") state.bible.level = "books";
       else if (state.bible.level === "books") state.bible.level = "section";
       else state.bible.level = "testament";
@@ -1559,6 +1598,30 @@
     }
   });
 
+  function syncAppFull() {
+    var btn = document.getElementById("app-full");
+    if (!btn) return;
+    var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "Leave full screen" : "Full screen");
+    var enter = btn.querySelector(".full-enter");
+    var leave = btn.querySelector(".full-leave");
+    if (enter) enter.hidden = on;
+    if (leave) leave.hidden = !on;
+  }
+  function toggleAppFull() {
+    var exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if ((document.fullscreenElement || document.webkitFullscreenElement) && exit) {
+      var leaving = exit.call(document);
+      if (leaving && leaving.catch) leaving.catch(function () {});
+      return;
+    }
+    var root = document.documentElement;
+    var req = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (!req) return;
+    var pending = req.call(root);
+    if (pending && pending.catch) pending.catch(function () {});
+  }
   function toggleWheelFull() {
     if (document.body.classList.contains("is-wheel-full")) {
       document.body.classList.remove("is-wheel-full");
@@ -1575,11 +1638,13 @@
     }
   }
   function onWheelFullChange() {
-    if (!document.fullscreenElement && document.body.classList.contains("is-wheel-full")) {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && document.body.classList.contains("is-wheel-full")) {
       document.body.classList.remove("is-wheel-full");
       if (!legacy && state.module === "year" && !state.board) renderStage();
     }
+    syncAppFull();
   }
+  syncAppFull();
   document.addEventListener("fullscreenchange", onWheelFullChange);
   document.addEventListener("webkitfullscreenchange", onWheelFullChange);
   document.addEventListener("keydown", function (event) {
@@ -1642,6 +1707,10 @@
 
   document.getElementById("search").addEventListener("input", function (event) {
     state.query = event.target.value.trim();
+    if (document.body.getAttribute("data-desk") === "books") {
+      document.dispatchEvent(new CustomEvent("ar-shelf-search"));
+      return;
+    }
     renderStage();
   });
 
@@ -1662,7 +1731,37 @@
     menu.setAttribute("data-ready", "1");
   }
 
+  var ZOOM_STEPS = [1, 1.5, 2, 3, 4, 6, 8];
+  function currentZoom() {
+    var z = parseFloat(sessionStorage.getItem("ar-zoom") || "1");
+    return z && z >= 1 ? z : 1;
+  }
+  function applyZoom() {
+    var box = document.getElementById("viz-zoom") || document.getElementById("stage");
+    var z = currentZoom();
+    if (box) box.style.zoom = z === 1 ? "" : String(z);
+    var label = document.getElementById("zoom-label");
+    if (label) label.textContent = z === 1 ? "Fit" : Math.round(z * 100) + "%";
+    var zoomBtn = document.getElementById("zoom-btn");
+    if (zoomBtn) zoomBtn.setAttribute("aria-pressed", z === 1 ? "false" : "true");
+  }
+  function stepZoom(dir) {
+    var z = currentZoom();
+    var next = z;
+    if (dir === "fit") next = 1;
+    else if (dir === "in") {
+      next = ZOOM_STEPS[ZOOM_STEPS.length - 1];
+      for (var i = 0; i < ZOOM_STEPS.length; i++) if (ZOOM_STEPS[i] > z + 0.01) { next = ZOOM_STEPS[i]; break; }
+    } else if (dir === "out") {
+      next = ZOOM_STEPS[0];
+      for (var j = ZOOM_STEPS.length - 1; j >= 0; j--) if (ZOOM_STEPS[j] < z - 0.01) { next = ZOOM_STEPS[j]; break; }
+    }
+    sessionStorage.setItem("ar-zoom", String(next));
+    applyZoom();
+  }
+
   mountExperience();
   syncPressed();
+  applyZoom();
   renderStage();
 })();
