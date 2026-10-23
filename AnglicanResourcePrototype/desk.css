@@ -1636,6 +1636,19 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   border-left: 0;
 }
 
+/* Canonical book clicks keep the hierarchy table at full width. The Bible pane covers the notes. */
+@media (min-width: 801px) {
+  body[data-module="literature"][data-lit="canonical"] .workspace { position: relative; }
+  body[data-module="literature"][data-lit="canonical"] .bible:not(.is-full) {
+    position: absolute;
+    z-index: 6;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: -10px 0 24px rgba(0, 0, 0, 0.14);
+  }
+}
+
 .bible-bar {
   display: flex;
   align-items: center;
