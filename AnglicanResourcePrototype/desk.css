@@ -2618,6 +2618,7 @@ body[data-wheel="fog"] .viz-head h2 {
 .sk-ribbon { opacity: 0.55; }
 .sk-sheet { pointer-events: none; }
 .sk-sheet path { opacity: 0.55; pointer-events: none; }
+.sk-sheet .sk-thread { opacity: 0.94; }
 .sk-ribbon.is-off { opacity: 0.04; }
 .sk-ribbon.is-on { opacity: 0.9; }
 .sk-node.is-off { opacity: 0.16; }

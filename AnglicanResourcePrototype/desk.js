@@ -193,6 +193,7 @@
     lit: "canonical",
     context: loadContext(),
     bible: { open: false, full: false, level: "section", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false, xrefs: false, xrefHome: null },
+    bibleAnchor: { book: "Genesis", chapter: 1 },
     books: {}
   };
   var canonBlobs = {};
@@ -2368,6 +2369,20 @@
     saveContext();
     renderStage();
   }
+  function applyBibleAnchor() {
+    var place = canonPlace(state.bibleAnchor.book);
+    state.bible.level = "read";
+    state.bible.book = place ? place.book : state.bibleAnchor.book;
+    state.bible.chapter = Number(state.bibleAnchor.chapter) || 1;
+    state.bible.verses = [];
+    state.bible.toEnd = false;
+    state.bible.xrefs = false;
+    state.bible.xrefHome = null;
+    if (place) {
+      state.bible.testament = place.section.testament;
+      state.bible.section = place.section.name;
+    }
+  }
   function openBibleBook(name) {
     var place = canonPlace(name);
     if (!place) return;
@@ -3276,6 +3291,7 @@
     var lensBtn = event.target.closest("[data-lens]");
     if (lensBtn && !legacy) {
       var lensId = lensBtn.getAttribute("data-lens");
+      var enteredLect = state.module !== "lectionary" && lensId === "lectionary";
       if (lensId === "browse" || lensId === "topic" || lensId === "audience") state.module = "browse";
       else if (lensId === "lectionary") state.module = "lectionary";
       else if (lensId === "literature") state.module = "literature";
@@ -3287,6 +3303,10 @@
       syncPressed();
       writeLitHash();
       renderStage();
+      if (enteredLect && state.bible.open) {
+        applyBibleAnchor();
+        renderBible();
+      }
       return;
     }
     var litBtn = event.target.closest("[data-lit]");
@@ -3480,7 +3500,11 @@
     }
     if (event.target.closest("#bible-open")) {
       if (state.bible.open) { state.bible.open = false; renderBible(); }
-      else {
+      else if (document.body.getAttribute("data-module") === "lectionary") {
+        applyBibleAnchor();
+        state.bible.open = true;
+        renderBible();
+      } else {
         state.bible.xrefs = false;
         state.bible.xrefHome = null;
         openBibleAt(null);
@@ -3684,6 +3708,19 @@
   document.addEventListener("pointermove", syncDayHub);
   document.addEventListener("mouseover", syncDayHub);
   document.addEventListener("ar-works-sync", syncWorkButtons);
+  document.addEventListener("ar-bible-drill", function (event) {
+    var after = event.detail && event.detail.after;
+    if (!after || !after.book) return;
+    var place = canonPlace(after.book);
+    state.bibleAnchor = {
+      book: after.book,
+      chapter: Number(after.chapter) || 1,
+      section: place ? place.section.name : (after.section || "")
+    };
+    if (document.body.getAttribute("data-module") !== "lectionary" || !state.bible.open) return;
+    applyBibleAnchor();
+    renderBible();
+  });
   document.addEventListener("ar-lect-drill", function (event) {
     var detail = event.detail || {};
     var before = detail.before || {};

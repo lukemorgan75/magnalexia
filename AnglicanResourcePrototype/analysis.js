@@ -10,6 +10,9 @@
   var sankeyFocus = null;
   var sankeyLatch = null;
   var sankeyDrill = [];
+  var sankeyTrue = true;
+  var sankeySeenWidth = 0;
+  var OVERVIEW_THREAD = 2.75;
   var downFocus = null;
   var hoverTimer = 0;
   var downHoverTimer = 0;
@@ -181,6 +184,36 @@
   function publishLectDrill(before, after) {
     if (sameLectDrill(before, after)) return;
     document.dispatchEvent(new CustomEvent("ar-lect-drill", { detail: { before: before, after: after } }));
+  }
+  function sameBibleDrill(a, b) {
+    return !!a && !!b && a.kind === b.kind && a.book === b.book && Number(a.chapter) === Number(b.chapter);
+  }
+  function bibleDrillState() {
+    var canon = { kind: "canon", section: "Law", book: "Genesis", chapter: 1 };
+    if (!DATA) return canon;
+    var leaf = bibleLeaf();
+    if (!leaf) return canon;
+    if (leaf.kind === "section") {
+      var sec = sectionById(leaf.id);
+      var bi = sec && sec.books && sec.books.length ? Number(sec.books[0]) : 0;
+      var book = DATA.books[bi];
+      return { kind: "section", section: sec ? sec.name : "", book: book ? book.name : "Genesis", chapter: 1 };
+    }
+    if (leaf.kind === "book") {
+      var chosen = DATA.books[Number(leaf.id)];
+      var chosenSec = chosen ? sectionById(chosen.section) : null;
+      return { kind: "book", section: chosenSec ? chosenSec.name : "", book: chosen ? chosen.name : "", chapter: 1 };
+    }
+    if (leaf.kind === "chapter") {
+      var chapterBook = DATA.books[Number(leaf.book)];
+      var chapterSec = chapterBook ? sectionById(chapterBook.section) : null;
+      return { kind: "chapter", section: chapterSec ? chapterSec.name : "", book: chapterBook ? chapterBook.name : "", chapter: Number(leaf.id) || 1 };
+    }
+    return canon;
+  }
+  function publishBibleDrill(before, after) {
+    if (sameBibleDrill(before, after)) return;
+    document.dispatchEvent(new CustomEvent("ar-bible-drill", { detail: { before: before, after: after } }));
   }
   function bookIdsInDrill() {
     var ids = [];
@@ -1345,6 +1378,12 @@
     if (units) drawUnits(parts, units, yBook, hBook);
     var overview = !sankeyDrill.length;
     var sheet = overview ? {} : null;
+    var threads = overview && !sankeyTrue ? {} : null;
+    var threadScale = 1040 / 1680;
+    if (threads) {
+      var threadRoot = document.getElementById("sankey-root");
+      if (threadRoot && threadRoot.clientWidth) threadScale = threadRoot.clientWidth / 1680;
+    }
     lect.placed.forEach(function (item) {
       var p = item.p;
       var book = DATA.books[p.b];
@@ -1362,6 +1401,10 @@
       if (overview) {
         var list = sheet[color.fill] || (sheet[color.fill] = []);
         list.push(band(sx, yStart, item.x, y1, sw));
+        if (threads && sw * threadScale < OVERVIEW_THREAD) {
+          var line = threads[color.fill] || (threads[color.fill] = []);
+          line.push(centerline(sx + sw / 2, yStart, item.x + sw / 2, y1));
+        }
         return;
       }
       var tip = citation(p) + " · Year " + p.y + " · " + p.n + " · " + seasonName(p.s) + ". " + nextKept(p);
@@ -1374,6 +1417,9 @@
       var painted = ['<g class="sk-sheet">'];
       Object.keys(sheet).forEach(function (fill) {
         painted.push('<path fill="' + fill + '" d="' + sheet[fill].join("") + '"/>');
+        if (threads && threads[fill]) {
+          painted.push('<path class="sk-thread" fill="none" stroke="' + fill + '" stroke-width="' + OVERVIEW_THREAD + '" vector-effect="non-scaling-stroke" stroke-linecap="butt" d="' + threads[fill].join("") + '"/>');
+        }
       });
       painted.push("</g>");
       parts.push(painted.join(""));
@@ -1445,9 +1491,14 @@
       });
     }
     var rest = sankeyDrill.length
-      ? "Hover a category or a band. Click a band to hold it. Click a category to open it. Click it again to return."
-      : "Hover a category. Click a category to open it. Bands can be selected once a category is open.";
-    root.innerHTML = '<div class="viz-head"><div><h2>Search the Lectionary by the Bible</h2>' + crumbBar(sankeyDrill, sankeyStepLabel, "Canon") + '</div></div><div class="viz-read-row"><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><button type="button" class="context-add" id="sankey-context" hidden>Add filter</button></div><svg viewBox="0 0 1680 690" role="img" aria-label="Search the Lectionary by the Bible">' + parts.join("") + "</svg>";
+      ? "Hover a category or a band. Click a band to hold it. Click a category to open it. Click it again to return. Reset returns to the top."
+      : (sankeyTrue
+        ? "Hover a category. Click a category to open it. Bands can be selected once a category is open. Width matches the length of each reading."
+        : "Hover a category. Click a category to open it. Bands can be selected once a category is open. Line width is exaggerated so thin bands stay visible.");
+    var headBtn = sankeyDrill.length
+      ? '<button type="button" class="context-add" id="sankey-reset">Reset</button>'
+      : '<button type="button" class="context-add" id="sankey-truth" aria-pressed="' + (sankeyTrue ? "false" : "true") + '">' + (sankeyTrue ? "Exaggerate Line Width for Clarity" : "Show True Resolution") + "</button>";
+    root.innerHTML = '<div class="viz-head"><div><h2>Search the Lectionary by the Bible</h2>' + crumbBar(sankeyDrill, sankeyStepLabel, "Canon") + "</div>" + headBtn + '</div><div class="viz-read-row"><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><button type="button" class="context-add" id="sankey-context" hidden>Add filter</button></div><svg viewBox="0 0 1680 690" role="img" aria-label="Search the Lectionary by the Bible">' + parts.join("") + "</svg>";
     applySankeyFocus();
     if (sankeyLatch) {
       var held = root.querySelector('.sk-ribbon[data-id="' + sankeyLatch.id + '"]');
@@ -1842,10 +1893,12 @@
   function drillDown() {
     if (!canSankeyDrill()) return;
     var before = lectDrillState();
+    var beforeBible = bibleDrillState();
     sankeyLatch = null;
     sankeyDrill.push(stepFrom(sankeyFocus));
     sankeyFocus = null;
     publishLectDrill(before, lectDrillState());
+    publishBibleDrill(beforeBible, bibleDrillState());
     drawSankey();
   }
 
@@ -1856,10 +1909,12 @@
     }
     if (idx < 0) return;
     var before = lectDrillState();
+    var beforeBible = bibleDrillState();
     sankeyLatch = null;
     var step = sankeyDrill.splice(idx, 1)[0];
     sankeyFocus = step;
     publishLectDrill(before, lectDrillState());
+    publishBibleDrill(beforeBible, bibleDrillState());
     drawSankey();
     var read = document.querySelector("#sankey-root .viz-read");
     if (read) read.textContent = sankeyStepLabel(step);
@@ -1884,10 +1939,12 @@
     var already = leaf && leaf.kind === "chapter" && String(leaf.book) === String(bi) && String(leaf.id) === String(chapter);
     if (!already) {
       var beforeLect = lectDrillState();
+      var beforeBible = bibleDrillState();
       sankeyLatch = null;
       sankeyDrill.push(stepFrom(pick));
       sankeyFocus = null;
       publishLectDrill(beforeLect, lectDrillState());
+      publishBibleDrill(beforeBible, bibleDrillState());
       drawSankey();
     }
     var book = DATA.books[bi];
@@ -1974,14 +2031,36 @@
     panel.addEventListener("click", function (event) {
       if (which === "sankey") {
         cancelSankeyHover();
+        var truth = event.target.closest("#sankey-truth");
+        if (truth && panel.contains(truth)) {
+          event.stopPropagation();
+          sankeyTrue = !sankeyTrue;
+          drawSankey();
+          return;
+        }
+        var reset = event.target.closest("#sankey-reset");
+        if (reset && panel.contains(reset)) {
+          event.stopPropagation();
+          var beforeReset = lectDrillState();
+          var beforeResetBible = bibleDrillState();
+          sankeyLatch = null;
+          sankeyFocus = null;
+          sankeyDrill = [];
+          publishLectDrill(beforeReset, lectDrillState());
+          publishBibleDrill(beforeResetBible, bibleDrillState());
+          drawSankey();
+          return;
+        }
         var crumb = event.target.closest("[data-crumb]");
         if (event.target.closest("[data-context-add]")) return;
         if (crumb && panel.contains(crumb)) {
           var beforeCrumb = lectDrillState();
+          var beforeCrumbBible = bibleDrillState();
           sankeyLatch = null;
           sankeyDrill = sankeyDrill.slice(0, Number(crumb.getAttribute("data-crumb")));
           sankeyFocus = null;
           publishLectDrill(beforeCrumb, lectDrillState());
+          publishBibleDrill(beforeCrumbBible, bibleDrillState());
           drawSankey();
           return;
         }
@@ -2136,6 +2215,16 @@
 
   wire(document.getElementById("chord-panel"), "chord");
   wire(document.getElementById("sankey-panel"), "sankey");
+  var sankeyResizeRoot = document.getElementById("sankey-root");
+  if (sankeyResizeRoot && window.ResizeObserver) {
+    new ResizeObserver(function (entries) {
+      var w = entries[0].contentRect.width;
+      if (!w || Math.abs(w - sankeySeenWidth) < 16) return;
+      sankeySeenWidth = w;
+      if (!DATA || sankeyTrue || sankeyDrill.length) return;
+      drawSankey();
+    }).observe(sankeyResizeRoot);
+  }
   wireDown(document.getElementById("sankey-down"));
   window.addEventListener("resize", sizeDownChart);
 
