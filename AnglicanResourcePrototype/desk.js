@@ -200,6 +200,7 @@
     books: {}
   };
   var canonBlobs = {};
+  var previewBlobs = {};
   var legacy = document.body.getAttribute("data-legacy-wheel") === "1";
   function themeIsDark() {
     return sessionStorage.getItem("ar-theme") === "dark";
@@ -2291,6 +2292,29 @@
     item.fileName = chosen.name;
     canonBlobs[item.id] = nextUrl;
   }
+  function attachPreview(item, form) {
+    if (!item || !form) return;
+    var input = form.querySelector("[name=preview]");
+    var chosen = input && input.files && input.files[0];
+    if (!chosen || extKind(fileExt(chosen.name)) !== "image") return;
+    var nextUrl = URL.createObjectURL(chosen);
+    if (previewBlobs[item.id]) {
+      try { URL.revokeObjectURL(previewBlobs[item.id]); } catch (e) {}
+    }
+    item.previewName = chosen.name;
+    previewBlobs[item.id] = nextUrl;
+  }
+  function plainKind(kind) {
+    return kind === "link" || kind === "book" || kind === "file" || kind === "audio" || kind === "text" || kind === "note";
+  }
+  function previewSrc(item) {
+    return item && previewBlobs[item.id] ? previewBlobs[item.id] : "";
+  }
+  function previewView(item, source) {
+    var src = plainKind(source && source.kind) ? previewSrc(item) : "";
+    if (!src) return "";
+    return '<img class="post-preview" src="' + esc(src) + '" alt="">';
+  }
   function writeLibraryBody(item, raw) {
     var body = String(raw || "").trim();
     var found = firstUrl(body);
@@ -2388,6 +2412,8 @@
   function feedWidget(item, source, open) {
     var expand = '<button type="button" class="post-expand" data-feed-act="expand">Expand</button>';
     var note = widgetNote(item);
+    var shot = previewView(item, source);
+    var shotClass = shot ? " has-preview" : "";
     if (source.kind === "youtube" || source.kind === "vimeo") {
       return '<div class="post-widget" data-feed-kind="' + source.kind + '">' + feedFrame(item, source) + note + expand + "</div>";
     }
@@ -2395,7 +2421,7 @@
       return '<div class="post-widget" data-feed-kind="video"><video controls playsinline preload="metadata" src="' + esc(source.play) + '"></video>' + note + expand + "</div>";
     }
     if (source.kind === "audio") {
-      return '<div class="post-widget is-audio" data-feed-kind="audio"><span class="post-widget-kicker">Audio</span><audio controls preload="metadata" src="' + esc(source.play) + '"></audio>' + note + expand + "</div>";
+      return '<div class="post-widget is-audio' + shotClass + '" data-feed-kind="audio">' + shot + '<span class="post-widget-kicker">Audio</span><audio controls preload="metadata" src="' + esc(source.play) + '"></audio>' + note + expand + "</div>";
     }
     if (source.kind === "image") {
       return '<button type="button" class="post-widget" data-feed-act="expand" data-feed-kind="image"><img src="' + esc(source.play) + '" alt=""><span class="post-expand">Expand</span></button>';
@@ -2405,19 +2431,19 @@
       return '<div class="post-widget is-book" data-feed-kind="pdf"><div class="post-doc-bar"><span>' + esc(docKicker) + "</span><strong>" + esc(source.label || "PDF") + '</strong></div><iframe class="post-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>' + note + expand + "</div>";
     }
     if (source.kind === "book") {
-      return '<div class="post-widget is-book is-link" data-feed-kind="book"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">Book</span><strong>' + esc(item.title) + '</strong><span class="post-url">' + esc(source.label || source.open) + "</span></a>" + note + expand + "</div>";
+      return '<div class="post-widget is-book is-link' + shotClass + '" data-feed-kind="book">' + shot + '<a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">Book</span><strong>' + esc(item.title) + '</strong><span class="post-url">' + esc(source.label || source.open) + "</span></a>" + note + expand + "</div>";
     }
     if (source.kind === "file") {
-      return '<button type="button" class="post-widget is-file" data-feed-act="expand" data-feed-kind="file"><span class="post-widget-kicker">File</span><strong>' + esc(source.label) + "</strong></button>";
+      return '<button type="button" class="post-widget is-file' + shotClass + '" data-feed-act="expand" data-feed-kind="file">' + shot + '<span class="post-widget-kicker">File</span><strong>' + esc(source.label) + "</strong></button>";
     }
     if (source.kind === "link") {
       var linkKicker = soleType(item, "book") || isPrintedBook(item) ? "Book" : (soleType(item, "video") ? "Video" : (soleType(item, "audio") ? "Audio" : "Link"));
-      return '<div class="post-widget is-link' + (linkKicker === "Book" ? " is-book" : "") + '" data-feed-kind="link"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">' + esc(linkKicker) + "</span><strong>" + esc(item.title) + '</strong><span class="post-url">' + esc(source.open) + "</span></a>" + note + expand + "</div>";
+      return '<div class="post-widget is-link' + (linkKicker === "Book" ? " is-book" : "") + shotClass + '" data-feed-kind="link">' + shot + '<a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">' + esc(linkKicker) + "</span><strong>" + esc(item.title) + '</strong><span class="post-url">' + esc(source.open) + "</span></a>" + note + expand + "</div>";
     }
     if (source.kind === "text") {
-      return '<div class="post-widget is-text" data-feed-kind="text"><span class="post-widget-kicker">' + esc(source.label) + '</span><span class="post-excerpt' + (open ? " is-full" : "") + '">' + esc(source.text) + "</span>" + expand + "</div>";
+      return '<div class="post-widget is-text' + shotClass + '" data-feed-kind="text">' + shot + '<span class="post-widget-kicker">' + esc(source.label) + '</span><span class="post-excerpt' + (open ? " is-full" : "") + '">' + esc(source.text) + "</span>" + expand + "</div>";
     }
-    return '<div class="post-widget is-note" data-feed-kind="note"><span class="post-widget-kicker">' + esc(source.label) + "</span><strong>No file attached</strong>" + expand + "</div>";
+    return '<div class="post-widget is-note' + shotClass + '" data-feed-kind="note">' + shot + '<span class="post-widget-kicker">' + esc(source.label) + "</span><strong>No file attached</strong>" + expand + "</div>";
   }
   function feedPost(item) {
     var source = feedSource(item);
@@ -2450,11 +2476,11 @@
     var view = "";
     if (source.kind === "youtube" || source.kind === "vimeo") view = '<div class="feed-view-frame">' + feedFrame(item, source) + "</div>";
     else if (source.kind === "video") view = '<video controls playsinline autoplay src="' + esc(source.play) + '"></video>';
-    else if (source.kind === "audio") view = '<audio controls autoplay src="' + esc(source.play) + '"></audio>';
+    else if (source.kind === "audio") view = previewView(item, source) + '<audio controls autoplay src="' + esc(source.play) + '"></audio>';
     else if (source.kind === "image") view = '<img src="' + esc(source.play) + '" alt="' + esc(item.title) + '">';
     else if (source.kind === "pdf") view = '<iframe class="feed-view-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>';
-    else if (source.kind === "link" || source.kind === "file" || source.kind === "book") view = '<p class="feed-view-url">' + esc(source.kind === "link" ? source.open : source.label) + "</p>";
-    else view = '<div class="feed-view-read">' + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") + (source.text ? '<div class="post-body">' + esc(source.text) + "</div>" : "") + "</div>";
+    else if (source.kind === "link" || source.kind === "file" || source.kind === "book") view = previewView(item, source) + '<p class="feed-view-url">' + esc(source.kind === "link" ? source.open : source.label) + "</p>";
+    else view = previewView(item, source) + '<div class="feed-view-read">' + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") + (source.text ? '<div class="post-body">' + esc(source.text) + "</div>" : "") + "</div>";
     var go = source.open ? '<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>" : "";
     return '<div id="feed-viewer" class="feed-view"><div class="feed-view-backdrop" data-feed-act="close-view"></div><div class="feed-view-panel" role="dialog" aria-modal="true" aria-label="' + esc(item.title) + '"><header><h2>' + esc(item.title) + '</h2><div class="post-actions">' + entryActions(item) + go + '<button type="button" data-feed-act="close-view">Close</button></div></header>' + view + "</div></div>";
   }
@@ -3209,6 +3235,12 @@
     }).join("");
     return filterField("Type", boxGrid(boxes));
   }
+  function previewField(editing) {
+    var current = editing && editing.previewName
+      ? '<p class="composer-note">Current preview: ' + esc(editing.previewName) + ". Choose another photo to replace it.</p>"
+      : "";
+    return '<label class="wide file-drop">Preview photo<input name="preview" type="file" accept="image/*"></label>' + current + '<p class="composer-note">A preview photo shows when the post has no picture of its own. It stays in this browser for this visit.</p>';
+  }
   function composer() {
     if (state.role !== "curator" || !state.compose) return "";
     var editing = editingItem();
@@ -3226,12 +3258,12 @@
       var fileNote = editing && editing.fileName
         ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
         : "";
-      return head + '<form id="add-form" data-shelf="canonical"' + editAttr + ' autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + fileNote + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
+      return head + '<form id="add-form" data-shelf="canonical"' + editAttr + ' autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + fileNote + previewField(editing) + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
     }
     var libraryFile = editing && editing.fileName
       ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
       : "";
-    return head + '<form id="add-form"' + editAttr + ' autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label class="wide file-drop">File<input name="file" type="file"></label>' + libraryFile + '<p class="composer-note">A video, book, or other file shows on the post. It stays in this browser for this visit. Nothing is sent to a server.</p>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
+    return head + '<form id="add-form"' + editAttr + ' autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label class="wide file-drop">File<input name="file" type="file"></label>' + libraryFile + previewField(editing) + '<p class="composer-note">A video, book, or other file shows on the post. It stays in this browser for this visit. Nothing is sent to a server.</p>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
   }
 
   function lensBar() {
@@ -3393,6 +3425,7 @@
     form.addEventListener("drop", function (event) {
       var fileInput = form.querySelector("[name=file]");
       if (!fileInput || !event.dataTransfer || !event.dataTransfer.files || !event.dataTransfer.files.length) return;
+      if (event.target && event.target.name === "preview") return;
       event.preventDefault();
       try { fileInput.files = event.dataTransfer.files; } catch (err) {}
     });
@@ -3417,7 +3450,7 @@
         }
         return;
       }
-      if (name === "title" || name === "summary" || name === "body" || name === "link" || name === "medium" || name === "file") return;
+      if (name === "title" || name === "summary" || name === "body" || name === "link" || name === "medium" || name === "file" || name === "preview") return;
       pullFiltersFromForm(form);
     });
   }
@@ -3610,6 +3643,7 @@
     };
     if (/^https?:\/\//i.test(link)) item.link = link;
     attachChosenFile(item, form);
+    attachPreview(item, form);
     stampExperience(item);
     copyContextOnto(item);
     readLectTags(form, item);
@@ -3757,6 +3791,7 @@
       if (/^https?:\/\//i.test(link)) item.link = link;
       else delete item.link;
       attachChosenFile(item, form);
+      attachPreview(item, form);
       stampTagsFromForm(form, item);
       item.shelf = "canonical";
       delete item.shelves;
@@ -3770,6 +3805,7 @@
       item.format = typeNames(types).join(", ");
       writeLibraryBody(item, body);
       attachChosenFile(item, form);
+      attachPreview(item, form);
       stampTagsFromForm(form, item);
     }
     var own = "canonical:" + item.id;
@@ -3799,6 +3835,10 @@
     if (canonBlobs[id]) {
       try { URL.revokeObjectURL(canonBlobs[id]); } catch (e) {}
       delete canonBlobs[id];
+    }
+    if (previewBlobs[id]) {
+      try { URL.revokeObjectURL(previewBlobs[id]); } catch (e) {}
+      delete previewBlobs[id];
     }
     var own = "canonical:" + id;
     var before = state.context.works.length;
@@ -3872,6 +3912,7 @@
     };
     writeLibraryBody(item, body);
     attachChosenFile(item, form);
+    attachPreview(item, form);
     stampExperience(item);
     copyContextOnto(item);
     readLectTags(form, item);

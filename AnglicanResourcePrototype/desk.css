@@ -954,6 +954,26 @@ body[data-need-app="1"] .bar .view-tabs button {
   line-height: 1.4;
 }
 .card .post-widget { margin-top: 12px; }
+.post-widget.has-preview.is-text,
+.post-widget.has-preview.is-link,
+.post-widget.has-preview.is-audio,
+.post-widget.has-preview.is-note,
+.post-widget.has-preview.is-file { padding: 0; }
+.post-widget.has-preview.is-link a { padding: 12px 96px 16px 14px; }
+.post-widget.has-preview.is-audio .post-widget-kicker,
+.post-widget.has-preview.is-text .post-widget-kicker,
+.post-widget.has-preview.is-note .post-widget-kicker,
+.post-widget.has-preview.is-text .post-excerpt,
+.post-widget.has-preview.is-note strong { display: block; margin: 12px 96px 0 14px; }
+.post-widget.has-preview.is-audio audio {
+  display: block;
+  width: calc(100% - 110px);
+  margin: 8px 96px 0 14px;
+}
+.post-widget.has-preview.is-file .post-widget-kicker,
+.post-widget.has-preview.is-file strong { display: block; margin: 12px 14px 0; }
+.post-widget.has-preview.is-file { padding-bottom: 16px; }
+.post-widget.has-preview .post-note { margin: 0 14px; }
 .post-expand, .post-actions button, .post-actions a, .feed-view-panel .post-actions button, .feed-view-panel .post-actions a {
   appearance: none;
   border: 1px solid var(--line);
