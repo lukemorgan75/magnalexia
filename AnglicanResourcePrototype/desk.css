@@ -1873,6 +1873,8 @@ body[data-module="literature"][data-lit="national"] #nation-home {
 body:not([data-desk="analysis"]) #stage.is-year .dial {
   flex: 1 0 100%;
   min-height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 body:not([data-desk="analysis"]) #stage.is-year .dial-stage {
   flex: 1 1 auto;
@@ -2098,6 +2100,46 @@ body:not([data-desk="analysis"]) #stage.is-year .occasion-board {
 body[data-need-app="1"]:not([data-desk]) #stage.is-year .dial-read {
   align-self: center;
 }
+body:not([data-desk="analysis"]) #stage.is-year .dial-read.is-today {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+body:not([data-desk="analysis"]) #stage.is-year .dial-read.is-today > .sundays {
+  flex: 0 0 auto;
+  max-height: 46%;
+  overflow: auto;
+}
+.upcoming {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.upcoming > .season-kicker {
+  flex: 0 0 auto;
+  margin: 16px 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.upcoming-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+.upcoming-list .sundays { padding-bottom: 0; }
 .dial-read .sundays {
   flex-direction: column;
   align-items: stretch;
@@ -2574,6 +2616,8 @@ body[data-wheel="fog"] .viz-head h2 {
 .ch-label.is-touch { opacity: 0.85; }
 
 .sk-ribbon { opacity: 0.55; }
+.sk-sheet { pointer-events: none; }
+.sk-sheet path { opacity: 0.55; pointer-events: none; }
 .sk-ribbon.is-off { opacity: 0.04; }
 .sk-ribbon.is-on { opacity: 0.9; }
 .sk-node.is-off { opacity: 0.16; }
@@ -2626,6 +2670,25 @@ body[data-wheel="fog"] { --chord: rgba(236, 236, 240, 0.55); }
     letter-spacing: 0;
   }
   body:not([data-desk="analysis"]) #stage.is-year .dial-stage { height: auto; min-height: 0; }
+  body:not([data-desk="analysis"]) #stage.is-year .dial {
+    max-height: none;
+    overflow: visible;
+  }
+  body:not([data-desk="analysis"]) #stage.is-year .dial.is-today {
+    flex: 0 0 auto;
+    min-height: 0;
+    height: auto;
+  }
+  body:not([data-desk="analysis"]) #stage.is-year .dial.is-today .dial-stage,
+  body:not([data-desk="analysis"]) #stage.is-year .dial.is-today .dial-col {
+    flex: 0 0 auto;
+    height: auto;
+  }
+  body:not([data-desk="analysis"]) #stage.is-year .dial-read.is-today {
+    height: auto;
+    max-height: 42vh;
+    width: 100%;
+  }
   .dial-stage { flex-direction: column; justify-content: flex-start; align-items: center; row-gap: 16px; }
   .dial-col { max-width: 100%; height: auto; width: 100%; }
   .dial-frame { max-width: 100%; height: auto; width: min(100%, calc(100vh - 280px)); }

@@ -4,6 +4,7 @@
 
   var DATA = null;
   var VERSE = null;
+  var FLOW = null;
   var markCache = {};
   var chordFocus = null;
   var sankeyFocus = null;
@@ -59,6 +60,65 @@
     if (!a || !b) return false;
     return a.kind === b.kind && String(a.id) === String(b.id) && (a.year || "") === (b.year || "") && (a.lect || "") === (b.lect || "") && (a.season || "") === (b.season || "") && (a.book || "") === (b.book || "") && (a.chapter || "") === (b.chapter || "");
   }
+  function buildFlowIndex() {
+    var book = [];
+    var section = {};
+    var year = {};
+    var season = {};
+    (DATA.books || []).forEach(function () { book.push({ years: {}, seasons: {} }); });
+    (DATA.passages || []).forEach(function (p) {
+      var info = DATA.books[p.b];
+      if (!info || !book[p.b]) return;
+      var slot = book[p.b];
+      slot.years[p.y] = true;
+      slot.seasons[p.y + "|" + p.s] = true;
+      var sec = section[info.section] || (section[info.section] = { years: {}, seasons: {}, books: {} });
+      sec.years[p.y] = true;
+      sec.seasons[p.y + "|" + p.s] = true;
+      sec.books[p.b] = true;
+      var yr = year[p.y] || (year[p.y] = { books: {}, sections: {}, seasons: {} });
+      yr.books[p.b] = true;
+      yr.sections[info.section] = true;
+      yr.seasons[p.y + "|" + p.s] = true;
+      var key = p.y + "|" + p.s;
+      var row = season[key] || (season[key] = { books: {}, sections: {} });
+      row.books[p.b] = true;
+      row.sections[info.section] = true;
+    });
+    FLOW = { book: book, section: section, year: year, season: season };
+  }
+  function copyFlags(from, into) {
+    if (!from) return;
+    Object.keys(from).forEach(function (key) { into[key] = true; });
+  }
+  function markOverview(pick, books, sections, seasons, years) {
+    if (!pick || !FLOW) return;
+    if (pick.kind === "section" && FLOW.section[pick.id]) {
+      var sec = FLOW.section[pick.id];
+      sections[pick.id] = true;
+      copyFlags(sec.books, books);
+      copyFlags(sec.years, years);
+      copyFlags(sec.seasons, seasons);
+    } else if (pick.kind === "book" && FLOW.book[Number(pick.id)]) {
+      var bk = FLOW.book[Number(pick.id)];
+      books[String(pick.id)] = true;
+      if (DATA.books[Number(pick.id)]) sections[DATA.books[Number(pick.id)].section] = true;
+      copyFlags(bk.years, years);
+      copyFlags(bk.seasons, seasons);
+    } else if (pick.kind === "cycle" && FLOW.year[pick.id]) {
+      var yr = FLOW.year[pick.id];
+      years[pick.id] = true;
+      copyFlags(yr.books, books);
+      copyFlags(yr.sections, sections);
+      copyFlags(yr.seasons, seasons);
+    } else if (pick.kind === "season" && FLOW.season[pick.year + "|" + pick.id]) {
+      var row = FLOW.season[pick.year + "|" + pick.id];
+      years[pick.year] = true;
+      seasons[pick.year + "|" + pick.id] = true;
+      copyFlags(row.books, books);
+      copyFlags(row.sections, sections);
+    }
+  }
   function lectName(id) {
     var found = "";
     (DATA.lects || []).forEach(function (lect) { if (lect.id === id) found = lect.name; });
@@ -93,6 +153,34 @@
       if (step.kind === "cycle" || step.kind === "season" || step.kind === "day") last = step;
     });
     return last;
+  }
+  function lectDrillState() {
+    var year = "";
+    var season = "";
+    var day = null;
+    sankeyDrill.forEach(function (step) {
+      if (step.kind === "cycle") year = String(step.id || "");
+      if (step.kind === "season") {
+        year = String(step.year || year || "");
+        season = String(step.id || "");
+      }
+      if (step.kind === "day") {
+        year = String(step.year || year || "");
+        season = String(step.season || season || "");
+        day = { id: String(step.id || ""), year: year, season: season, label: String(step.name || "Day") };
+      }
+    });
+    if (day) { day.year = year; day.season = season; }
+    return { year: year, season: season, day: day };
+  }
+  function sameLectDrill(a, b) {
+    var ad = a && a.day;
+    var bd = b && b.day;
+    return !!a && !!b && a.year === b.year && a.season === b.season && String((ad && ad.id) || "") === String((bd && bd.id) || "") && String((ad && ad.year) || "") === String((bd && bd.year) || "") && String((ad && ad.season) || "") === String((bd && bd.season) || "");
+  }
+  function publishLectDrill(before, after) {
+    if (sameLectDrill(before, after)) return;
+    document.dispatchEvent(new CustomEvent("ar-lect-drill", { detail: { before: before, after: after } }));
   }
   function bookIdsInDrill() {
     var ids = [];
@@ -1255,6 +1343,8 @@
       });
     }
     if (units) drawUnits(parts, units, yBook, hBook);
+    var overview = !sankeyDrill.length;
+    var sheet = overview ? {} : null;
     lect.placed.forEach(function (item) {
       var p = item.p;
       var book = DATA.books[p.b];
@@ -1268,13 +1358,26 @@
         if (sx + sw > box.x + box.w) sx = Math.max(box.x, box.x + box.w - sw);
       }
       var color = seasonColor(p.s);
-      var tip = citation(p) + " · Year " + p.y + " · " + p.n + " · " + seasonName(p.s) + ". " + nextKept(p);
       var yStart = barBottom;
+      if (overview) {
+        var list = sheet[color.fill] || (sheet[color.fill] = []);
+        list.push(band(sx, yStart, item.x, y1, sw));
+        return;
+      }
+      var tip = citation(p) + " · Year " + p.y + " · " + p.n + " · " + seasonName(p.s) + ". " + nextKept(p);
       parts.push('<g class="sk-ribbon" data-kind="ribbon" data-idx="' + item.idx + '" data-id="' + item.idx + '" data-book="' + p.b + '" data-section="' + esc(book.section) + '" data-year="' + esc(p.y) + '" data-season="' + esc(p.s) + '" data-day="' + esc(p.i) + '" data-tip="' + esc(tip) + '">'
         + '<path fill="' + color.fill + '" style="pointer-events:none" d="' + band(sx, yStart, item.x, y1, sw) + '"/>'
         + '<path class="sk-hit" stroke-width="' + r1(Math.max(sw, 8)) + '" d="' + centerline(sx + sw / 2, y0, item.x + sw / 2, y1) + '"/>'
         + "</g>");
     });
+    if (overview) {
+      var painted = ['<g class="sk-sheet">'];
+      Object.keys(sheet).forEach(function (fill) {
+        painted.push('<path fill="' + fill + '" d="' + sheet[fill].join("") + '"/>');
+      });
+      painted.push("</g>");
+      parts.push(painted.join(""));
+    }
     if (!items.length && sankeyDrill.length) {
       parts.push('<text x="840" y="340" text-anchor="middle" fill="' + muted() + '" font-size="14" font-family="system-ui, sans-serif">Nothing in this selection is appointed in the Revised Common Lectionary.</text>');
     }
@@ -1341,7 +1444,9 @@
         fill: dayTone.fill, ink: dayTone.ink, label: leaf.name || "Day"
       });
     }
-    var rest = "Hover a category or a band. Click a band to hold it. Click a category to open it. Click it again to return.";
+    var rest = sankeyDrill.length
+      ? "Hover a category or a band. Click a band to hold it. Click a category to open it. Click it again to return."
+      : "Hover a category. Click a category to open it. Bands can be selected once a category is open.";
     root.innerHTML = '<div class="viz-head"><div><h2>Search the Lectionary by the Bible</h2>' + crumbBar(sankeyDrill, sankeyStepLabel, "Canon") + '</div></div><div class="viz-read-row"><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><button type="button" class="context-add" id="sankey-context" hidden>Add filter</button></div><svg viewBox="0 0 1680 690" role="img" aria-label="Search the Lectionary by the Bible">' + parts.join("") + "</svg>";
     applySankeyFocus();
     if (sankeyLatch) {
@@ -1599,7 +1704,9 @@
     var activeDays = {};
     var activeReadings = {};
     var activeSpans = [];
-    root.querySelectorAll(".sk-ribbon").forEach(function (el) {
+    var overview = !sankeyDrill.length;
+    if (overview) markOverview(pick, activeBooks, activeSections, activeSeasons, activeYears);
+    else root.querySelectorAll(".sk-ribbon").forEach(function (el) {
       var on = pick ? flowOn(el, pick) : false;
       el.classList.toggle("is-on", !!pick && on);
       el.classList.toggle("is-off", !!pick && !on);
@@ -1734,9 +1841,11 @@
 
   function drillDown() {
     if (!canSankeyDrill()) return;
+    var before = lectDrillState();
     sankeyLatch = null;
     sankeyDrill.push(stepFrom(sankeyFocus));
     sankeyFocus = null;
+    publishLectDrill(before, lectDrillState());
     drawSankey();
   }
 
@@ -1746,9 +1855,11 @@
       if (samePick(sankeyDrill[i], pick)) { idx = i; break; }
     }
     if (idx < 0) return;
+    var before = lectDrillState();
     sankeyLatch = null;
     var step = sankeyDrill.splice(idx, 1)[0];
     sankeyFocus = step;
+    publishLectDrill(before, lectDrillState());
     drawSankey();
     var read = document.querySelector("#sankey-root .viz-read");
     if (read) read.textContent = sankeyStepLabel(step);
@@ -1772,9 +1883,11 @@
     var leaf = bibleLeaf();
     var already = leaf && leaf.kind === "chapter" && String(leaf.book) === String(bi) && String(leaf.id) === String(chapter);
     if (!already) {
+      var beforeLect = lectDrillState();
       sankeyLatch = null;
       sankeyDrill.push(stepFrom(pick));
       sankeyFocus = null;
+      publishLectDrill(beforeLect, lectDrillState());
       drawSankey();
     }
     var book = DATA.books[bi];
@@ -1864,9 +1977,11 @@
         var crumb = event.target.closest("[data-crumb]");
         if (event.target.closest("[data-context-add]")) return;
         if (crumb && panel.contains(crumb)) {
+          var beforeCrumb = lectDrillState();
           sankeyLatch = null;
           sankeyDrill = sankeyDrill.slice(0, Number(crumb.getAttribute("data-crumb")));
           sankeyFocus = null;
+          publishLectDrill(beforeCrumb, lectDrillState());
           drawSankey();
           return;
         }
@@ -2060,6 +2175,7 @@
     .then(function (pair) {
       DATA = pair[0];
       VERSE = pair[1];
+      buildFlowIndex();
       if (deskName === "down") {
         drawDownSankey();
         return;

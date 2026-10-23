@@ -247,7 +247,7 @@
     catch (e) { return []; }
   }
   function emptyContext() {
-    return { season: "", audience: "", topic: "", sub: "", shelf: "", testament: "", section: "", book: "", occasions: [], works: [] };
+    return { season: "", lectYear: "", lectDay: null, audience: "", topic: "", sub: "", shelf: "", testament: "", section: "", book: "", occasions: [], works: [] };
   }
   function loadContext() {
     var ctx = emptyContext();
@@ -292,6 +292,14 @@
           ctx.shelf = "canonical";
         }
       }
+      var lectDay = raw.lectDay;
+      var lectYearOk = raw.lectYear === "A" || raw.lectYear === "B" || raw.lectYear === "C";
+      var lectDayOk = lectDay && (lectDay.year === "A" || lectDay.year === "B" || lectDay.year === "C") && SEASONS.some(function (s) { return s.id === lectDay.season; }) && lectDay.id != null && String(lectDay.id) !== "";
+      if (lectDayOk) {
+        ctx.lectDay = { id: String(lectDay.id), year: lectDay.year, season: lectDay.season, label: String(lectDay.label || "Day") };
+        ctx.lectYear = lectDay.year;
+        ctx.season = lectDay.season;
+      } else if (lectYearOk) ctx.lectYear = raw.lectYear;
     } catch (e) {}
     return ctx;
   }
@@ -737,8 +745,13 @@
   }
   function dayArticles(day) {
     if (day.propers.length) return day.propers.map(function (idx) { return sundayCard(PROPERS[idx]); }).join("");
-    var found = lectForYear(shownYear().startYear)[day.iso] || [];
+    var found = lectForYear(startYearContaining(day.iso))[day.iso] || [];
     return found.map(sundayCard).join("");
+  }
+  function dayCardBody(day) {
+    var body = dayArticles(day);
+    if (body) return body;
+    return '<article class="sunday"><header><h3>' + esc(day.feast || WEEKDAY[day.dow]) + "</h3><time>" + esc(MONTH_NAME[day.m - 1] + " " + day.d + ", " + day.y) + "</time></header><p class=\"sunday-note\">" + esc(seasonName(day.season)) + "</p></article>";
   }
   function ensureLect() {
     if (ensureLect.started) return;
@@ -1097,15 +1110,17 @@
     if (!PROPER_AT[iso]) PROPER_AT[iso] = [];
     PROPER_AT[iso].push(i);
   });
-  function yearDays() {
-    var year = shownYear();
-    if (yearDays.cache && yearDays.cacheKey === year.startIso) return yearDays.cache;
+  function daysForYear(year) {
     var list = [];
     var origin = Date.parse(year.startIso + "T00:00:00Z");
     for (var i = 0; i < year.count; i++) {
       var t = origin + i * 86400000;
       var iso = isoFromUTC(t);
       var dt = new Date(t);
+      var season = "ordinary";
+      for (var c = 0; c < year.cuts.length; c++) {
+        if (iso >= year.cuts[c][1] && iso < year.cuts[c][2]) { season = year.cuts[c][0]; break; }
+      }
       list.push({
         i: i,
         iso: iso,
@@ -1113,12 +1128,18 @@
         m: dt.getUTCMonth() + 1,
         d: dt.getUTCDate(),
         dow: dt.getUTCDay(),
-        season: seasonOfIso(iso),
+        season: season,
         monthKey: iso.slice(0, 7),
         propers: PROPER_AT[iso] || [],
         feast: year.feasts[iso] || ""
       });
     }
+    return list;
+  }
+  function yearDays() {
+    var year = shownYear();
+    if (yearDays.cache && yearDays.cacheKey === year.startIso) return yearDays.cache;
+    var list = daysForYear(year);
     yearDays.cache = list;
     yearDays.cacheKey = year.startIso;
     return list;
@@ -1207,6 +1228,23 @@
     }
     if (holy === WEEKDAY[day.dow] && names.length) holy = names[0];
     return holy;
+  }
+  function isNamedOccasion(day) {
+    if (day.dow === 0) return true;
+    if (day.feast) return true;
+    return holyName(day) !== WEEKDAY[day.dow];
+  }
+  function upcomingOccasions(fromIso, count) {
+    var start = startYearContaining(fromIso);
+    var found = [];
+    for (var step = 0; step < 3 && found.length < count; step++) {
+      var list = daysForYear(buildYear(start + step));
+      for (var i = 0; i < list.length && found.length < count; i++) {
+        if (list[i].iso <= fromIso) continue;
+        if (isNamedOccasion(list[i])) found.push(list[i]);
+      }
+    }
+    return found;
   }
   function dayCenter(day) {
     var names = liturgicalNames(day);
@@ -1603,15 +1641,27 @@
     var tools = "";
     if (kind !== "year" && properCount) tools += '<button type="button" class="dial-text" data-board>Readings</button>';
     var read = "";
+    var showUpcoming = false;
     var chosen = null;
     days.forEach(function (d) { if (d.iso === state.day) chosen = d; });
     if (state.card && SEASON_STORY[state.card]) {
       read = seasonCard(state.card);
     } else if (chosen) {
       var stripe = fog ? (colors[chosen.season] || colors.ordinary).fill : (STRIPE[chosen.season] || "#6e5430");
-      var body = dayArticles(chosen);
-      if (!body) body = '<article class="sunday"><header><h3>' + esc(chosen.feast || WEEKDAY[chosen.dow]) + "</h3><time>" + esc(MONTH_NAME[chosen.m - 1] + " " + chosen.d + ", " + chosen.y) + "</time></header><p class=\"sunday-note\">" + esc(seasonName(chosen.season)) + "</p></article>";
-      read = '<aside class="dial-read"><div class="sundays" style="--season:' + stripe + '">' + body + "</div></aside>";
+      var body = dayCardBody(chosen);
+      var upcoming = "";
+      if (!document.body.getAttribute("data-desk") && chosen.iso === localTodayIso()) {
+        var nextDays = upcomingOccasions(chosen.iso, 4);
+        if (nextDays.length) {
+          var blocks = nextDays.map(function (day) {
+            var dayStripe = fog ? (colors[day.season] || colors.ordinary).fill : (STRIPE[day.season] || "#6e5430");
+            return '<div class="sundays" style="--season:' + dayStripe + '">' + dayCardBody(day) + "</div>";
+          }).join("");
+          upcoming = '<section class="upcoming" aria-label="Upcoming"><p class="season-kicker">Upcoming</p><div class="upcoming-list">' + blocks + "</div></section>";
+        }
+      }
+      showUpcoming = !!upcoming;
+      read = '<aside class="dial-read' + (upcoming ? " is-today" : "") + '"><div class="sundays" style="--season:' + stripe + '">' + body + "</div>" + upcoming + "</aside>";
     }
     var library = "";
     if (kind !== "year") {
@@ -1623,7 +1673,7 @@
     var arrive = state.settle ? " is-arriving" : "";
     var bar = "";
     if (crumbs.length || tools) bar = '<div class="dial-bar"><nav class="crumbs" aria-label="Slice">' + crumbs.join('<span class="crumb-sep" aria-hidden="true">/</span>') + '</nav><div class="dial-tools">' + tools + '</div></div>';
-    return '<div class="dial' + arrive + '" data-look="' + state.style + '">' + bar + '<div class="dial-stage"><div class="dial-col">' + yearSwitch() + '<div class="dial-frame"><svg class="dial-svg" viewBox="0 0 1000 1000" role="group" aria-label="Liturgical year ' + esc(yearTag(year)) + '. Sundays sit on the outer ring, and each week snakes inward to Saturday.">' + parts.join("") + '</svg><div class="dial-hub"><p class="dial-kicker" data-rest="' + esc(kicker) + '">' + esc(kicker) + "</p><h2" + (title.length > 16 ? ' class="is-long"' : "") + " data-rest=\"" + esc(title) + "\">" + esc(title) + '</h2><p class="dial-sub" data-rest="' + esc(sub) + '">' + esc(sub) + "</p></div></div></div>" + read + "</div>" + library + "</div>";
+    return '<div class="dial' + arrive + (showUpcoming ? " is-today" : "") + '" data-look="' + state.style + '">' + bar + '<div class="dial-stage"><div class="dial-col">' + yearSwitch() + '<div class="dial-frame"><svg class="dial-svg" viewBox="0 0 1000 1000" role="group" aria-label="Liturgical year ' + esc(yearTag(year)) + '. Sundays sit on the outer ring, and each week snakes inward to Saturday.">' + parts.join("") + '</svg><div class="dial-hub"><p class="dial-kicker" data-rest="' + esc(kicker) + '">' + esc(kicker) + "</p><h2" + (title.length > 16 ? ' class="is-long"' : "") + " data-rest=\"" + esc(title) + "\">" + esc(title) + '</h2><p class="dial-sub" data-rest="' + esc(sub) + '">' + esc(sub) + "</p></div></div></div>" + read + "</div>" + library + "</div>";
   }
 
   function topics() {
@@ -1798,7 +1848,9 @@
   function matchesContext(item, opts) {
     var c = state.context;
     opts = opts || {};
+    if (c.lectYear && item.lectYear !== c.lectYear) return false;
     if (c.season && item.season !== c.season) return false;
+    if (c.lectDay && (String(item.lectDay || "") !== String(c.lectDay.id) || item.lectDayYear !== c.lectDay.year || item.lectDaySeason !== c.lectDay.season)) return false;
     if (c.audience && item.audience !== c.audience) return false;
     if (c.topic && item.topic !== c.topic) return false;
     if (c.sub && item.sub !== c.sub) return false;
@@ -1905,7 +1957,9 @@
     if (kind === "feast") return "Feast";
     if (kind === "holiday") return "Holiday";
     if (kind === "national") return "National";
+    if (kind === "lectYear") return "Year";
     if (kind === "season") return "Season";
+    if (kind === "lectDay") return "Day";
     if (kind === "topic") return "Topic";
     if (kind === "sub") return "Subtopic";
     if (kind === "audience") return "Audience";
@@ -1934,7 +1988,9 @@
       if (!id) return;
       pills.push('<button type="button" class="context-pill" data-context-remove="' + esc(kind) + '" data-context-id="' + esc(id) + '" aria-label="Remove ' + esc(label) + '"><span>' + kindName(kind) + "</span>" + esc(label) + " ×</button>");
     }
+    one("lectYear", state.context.lectYear, state.context.lectYear);
     one("season", state.context.season, seasonName(state.context.season));
+    if (state.context.lectDay) one("lectDay", state.context.lectDay.id, state.context.lectDay.label);
     one("topic", state.context.topic, (TOPICS.filter(function (t) { return t.id === state.context.topic; })[0] || { name: state.context.topic }).name);
     one("sub", state.context.sub, state.context.sub);
     one("audience", state.context.audience, state.context.audience);
@@ -2075,7 +2131,9 @@
     var meta = [];
     if (types.length > 1) meta.push(types.slice(1).join(", "));
     if (item.audience) meta.push(item.audience);
+    if (item.lectYear) meta.push("Year " + item.lectYear);
     if (item.season) meta.push(seasonName(item.season));
+    if (item.lectDayLabel) meta.push(item.lectDayLabel);
     var summary = item.summary ? '<p class="post-summary">' + esc(item.summary) + "</p>" : "";
     var actions = "";
     if (open) {
@@ -2132,7 +2190,7 @@
     var collapsed = filtersCollapsed();
     pane.classList.toggle("is-collapsed", collapsed);
     var toggle = '<button type="button" class="context-collapse" data-filters-toggle aria-expanded="' + (collapsed ? "false" : "true") + '" aria-label="' + (collapsed ? "Expand filters" : "Collapse filters") + '">' + (collapsed ? "Filters" : "Collapse") + "</button>";
-    pane.innerHTML = '<div class="context-sticky"><div class="context-bar"><h2>Filters</h2>' + toggle + '</div><div class="context-body"><p class="context-note">Scholarship and posture are context filters. Change them in their menu. Feast days, holidays, national days, and literature items can be combined. Season, topic, audience, and shelf each take one. Remove a pill to drop that filter.</p>' + contextPills() + "</div></div>";
+    pane.innerHTML = '<div class="context-sticky"><div class="context-bar"><h2>Filters</h2>' + toggle + '</div><div class="context-body"><p class="context-note">Scholarship and posture are context filters. Change them in their menu. Feast days, holidays, national days, and literature items can be combined. Year, season, day, topic, audience, and shelf each take one. Remove a pill to drop that filter.</p>' + contextPills() + "</div></div>";
     pane.scrollTop = scroll;
     syncWorkButtons();
     renderContentFeed();
@@ -2260,7 +2318,9 @@
       state.context.occasions = state.context.occasions.filter(function (o) { return o.id !== id; });
     } else if (kind === "work") {
       state.context.works = state.context.works.filter(function (w) { return w.id !== id; });
-    } else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf" || kind === "testament" || kind === "section" || kind === "book") {
+    } else if (kind === "lectYear") state.context.lectYear = "";
+    else if (kind === "lectDay") state.context.lectDay = null;
+    else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf" || kind === "testament" || kind === "section" || kind === "book") {
       state.context[kind] = "";
       if (kind === "topic") state.context.sub = "";
     }
@@ -2347,9 +2407,9 @@
     if (kind === "canonical") {
       var posts = shelvedPosts("canonical");
       var anyCanon = state.added.some(function (item) { return item.shelf === "canonical"; });
-      var list = !posts.length
-        ? '<p class="empty">' + (anyCanon ? "Nothing matches these filters." : "Nothing is on this shelf yet.") + "</p>"
-        : '<div class="cards">' + posts.map(canonCard).join("") + "</div>";
+      var list = posts.length
+        ? '<div class="cards">' + posts.map(canonCard).join("") + "</div>"
+        : (anyCanon ? '<p class="empty">Nothing matches these filters.</p>' : "");
       return canonTree() + list;
     }
     return '<p class="empty">Nothing is on this shelf yet.</p>';
@@ -2597,8 +2657,21 @@
   }
 
   function copyContextOnto(item) {
+    if (state.context.lectYear) item.lectYear = state.context.lectYear;
+    else delete item.lectYear;
     if (state.context.season) item.season = state.context.season;
     else delete item.season;
+    if (state.context.lectDay) {
+      item.lectDay = state.context.lectDay.id;
+      item.lectDayYear = state.context.lectDay.year;
+      item.lectDaySeason = state.context.lectDay.season;
+      item.lectDayLabel = state.context.lectDay.label;
+    } else {
+      delete item.lectDay;
+      delete item.lectDayYear;
+      delete item.lectDaySeason;
+      delete item.lectDayLabel;
+    }
     if (state.context.audience) item.audience = state.context.audience;
     else delete item.audience;
     if (state.context.topic) item.topic = state.context.topic;
@@ -3611,6 +3684,44 @@
   document.addEventListener("pointermove", syncDayHub);
   document.addEventListener("mouseover", syncDayHub);
   document.addEventListener("ar-works-sync", syncWorkButtons);
+  document.addEventListener("ar-lect-drill", function (event) {
+    var detail = event.detail || {};
+    var before = detail.before || {};
+    var after = detail.after || {};
+    var changed = false;
+    var yearOk = after.year === "A" || after.year === "B" || after.year === "C";
+    if (yearOk) {
+      if (state.context.lectYear !== after.year) { state.context.lectYear = after.year; changed = true; }
+    } else if (before.year && state.context.lectYear === before.year) {
+      state.context.lectYear = "";
+      changed = true;
+    }
+    var seasonOk = SEASONS.some(function (s) { return s.id === after.season; });
+    if (after.season && seasonOk) {
+      if (state.context.season !== after.season) { state.context.season = after.season; changed = true; }
+    } else if (before.season && state.context.season === before.season) {
+      state.context.season = "";
+      changed = true;
+    }
+    var day = after.day;
+    var dayOk = day && day.id != null && String(day.id) !== "" && (day.year === "A" || day.year === "B" || day.year === "C") && SEASONS.some(function (s) { return s.id === day.season; });
+    if (dayOk) {
+      var held = state.context.lectDay;
+      var sameDay = held && String(held.id) === String(day.id) && held.year === day.year && held.season === day.season;
+      if (!sameDay) {
+        state.context.lectDay = { id: String(day.id), year: day.year, season: day.season, label: String(day.label || "Day") };
+        changed = true;
+      }
+    } else if (before.day && state.context.lectDay && String(state.context.lectDay.id) === String(before.day.id) && state.context.lectDay.year === before.day.year && state.context.lectDay.season === before.day.season) {
+      state.context.lectDay = null;
+      changed = true;
+    }
+    if (!changed) return;
+    saveContext();
+    renderContextPane();
+    var form = document.getElementById("add-form");
+    if (form) applyContextToForm(form);
+  });
 
   var bookSearch = document.getElementById("book-search");
   if (bookSearch) bookSearch.addEventListener("input", function () {
