@@ -106,8 +106,10 @@ html[data-theme="dark"] .dial-sub {
   color: rgba(28, 22, 18, 0.64);
 }
 
-body[data-need-app="1"][data-wheel="fog"] .mark-ink { display: none; }
-body[data-need-app="1"][data-wheel="fog"] .mark-fog { display: block; }
+body[data-need-app="1"][data-wheel="fog"] .mark-ink,
+html[data-theme="dark"] body[data-need-app="1"] .mark-ink { display: none; }
+body[data-need-app="1"][data-wheel="fog"] .mark-fog,
+html[data-theme="dark"] body[data-need-app="1"] .mark-fog { display: block; }
 .mark-fog { display: none; }
 
 body[data-need-app="1"][data-wheel="fog"] .prose {
@@ -150,6 +152,18 @@ body[data-need-app="1"][data-wheel="fog"] .composer h2 {
 #app-full[aria-pressed="true"] .full-leave { display: block; }
 .icon-btn[aria-pressed="true"],
 .icon-btn:hover { color: var(--brown); }
+.latch-btn {
+  box-sizing: border-box;
+  border: 1.6px solid currentColor;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1;
+}
+.latch-btn[aria-pressed="true"] {
+  background: var(--wash);
+  color: var(--brown);
+}
 
 .role {
   display: flex;
@@ -467,21 +481,54 @@ body[data-need-app="1"] .bar .view-tabs button {
 .context-pane {
   flex: 0 0 300px;
   width: 300px;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   border-right: 1px solid var(--line);
   background: var(--sheet);
-  padding: 16px 14px 28px;
+  padding: 0;
 }
 .context-pane[hidden] { display: none; }
 .context-sticky {
-  position: sticky;
-  top: 0;
+  flex: 0 0 auto;
+  position: relative;
   z-index: 2;
-  margin: -16px -14px 14px;
-  padding: 16px 14px 12px;
+  margin: 0;
+  padding: 16px 14px 8px;
   background: var(--sheet);
-  border-bottom: 1px solid var(--line);
 }
+.context-pane .context-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 14px 12px;
+}
+.context-clear {
+  flex: 0 0 auto;
+  padding: 12px 14px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--sheet);
+}
+.context-clear p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.context-clear-actions { display: flex; gap: 8px; }
+.context-clear button {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.context-clear button[data-filters-clear="yes"] { background: var(--wash); }
+.context-pane.is-collapsed .context-clear { display: none; }
 .context-bar {
   display: flex;
   align-items: center;
@@ -518,6 +565,21 @@ body[data-need-app="1"] .bar .view-tabs button {
   flex-direction: column;
   margin: 0;
 }
+.context-bar-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.context-pane .experience { position: relative; }
+.context-pane .experience-menu {
+  position: fixed;
+  z-index: 40;
+  right: auto;
+}
+.context-pane.is-collapsed .context-bar-tools {
+  flex-direction: column;
+  align-items: center;
+}
 .context-pane.is-collapsed .context-bar h2 { display: none; }
 .context-pane.is-collapsed .context-sticky {
   margin: 0;
@@ -534,12 +596,6 @@ body[data-need-app="1"] .bar .view-tabs button {
   font-family: "Iowan Old Style", Palatino, Georgia, serif;
   font-size: 16px;
   letter-spacing: 0.06em;
-}
-.context-note {
-  margin: 0 0 10px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
 }
 .context-pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .context-pill {
@@ -573,8 +629,8 @@ body[data-need-app="1"] .bar .view-tabs button {
 .content-dock.is-collapsed { height: auto !important; }
 .content-dock-edge {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: var(--dock-inset-left, 0px);
+  right: var(--dock-inset-right, 0px);
   top: -6px;
   height: 12px;
   cursor: ns-resize;
@@ -599,11 +655,19 @@ body[data-need-app="1"] .bar .view-tabs button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
   min-height: 42px;
+  margin-left: var(--dock-inset-left, 0px);
+  margin-right: var(--dock-inset-right, 0px);
   padding: 6px 16px;
 }
 .content-dock-bar h2 {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: "Iowan Old Style", Palatino, Georgia, serif;
   font-size: 18px;
   font-weight: 500;
@@ -636,7 +700,10 @@ body[data-need-app="1"] .bar .view-tabs button {
 .content-dock .composer { margin: 0 0 12px; }
 .content-dock-scroll {
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
+  margin-left: var(--dock-inset-left, 0px);
+  margin-right: var(--dock-inset-right, 0px);
   overflow: auto;
   overscroll-behavior: contain;
   padding: 0 16px 14px;
@@ -646,8 +713,31 @@ body[data-need-app="1"] .bar .view-tabs button {
   flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
+  min-width: 0;
+  margin-left: var(--dock-inset-left, 0px);
+  margin-right: var(--dock-inset-right, 0px);
   padding: 0 16px 10px;
+}
+.type-bulk {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  padding-left: 8px;
+}
+.type-filters .type-link {
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.3;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .content-dock.is-collapsed .type-filters { display: none; }
 .type-filters button {
@@ -683,6 +773,11 @@ body[data-need-app="1"] .bar .view-tabs button {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+.type-pick-grid.filter-scroll {
+  max-height: 168px;
+  overflow: auto;
+  align-content: flex-start;
 }
 .type-pick label {
   display: inline-flex;
@@ -1346,6 +1441,7 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   color: var(--muted);
   font-size: 13px;
 }
+.sunday .holy-use { margin-top: 10px; }
 .sunday-note {
   margin: 0;
   color: var(--muted);
@@ -1478,7 +1574,7 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   text-transform: uppercase;
 }
 
-.topic-grid button, .age-grid button {
+.age-grid button {
   appearance: none;
   text-align: left;
   padding: 16px;
@@ -1490,23 +1586,47 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   font-size: 16px;
   cursor: pointer;
 }
+.age-grid button[aria-pressed="true"] { border-color: var(--brown); }
 
-.topic-grid button {
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--field);
+  color: var(--ink);
+}
+.choice.is-on { border-color: var(--brown); }
+.choice-hit {
+  appearance: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
+.choice-hit:focus-visible { outline: 2px solid var(--brown); outline-offset: 3px; }
 .choice-name { font-size: 16px; }
 .choice-line {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.35;
 }
-
-.topic-grid button[aria-pressed="true"],
-.age-grid button[aria-pressed="true"] { border-color: var(--brown); }
+.choice .chips { margin: 0; }
+.choice-act { display: flex; }
+.choice .context-add { width: auto; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
 
@@ -1564,6 +1684,35 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   color: var(--ink);
   background: var(--wash);
   border-color: transparent;
+}
+.composer .lect-pick .lect-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+.composer .lect-pick .lect-row label {
+  display: grid;
+  gap: 4px;
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+.lect-days-label {
+  margin: 10px 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.lect-pick [data-lect-days] .composer-note { margin: 8px 0 0; }
+.lect-pick [data-lect-days] .type-pick-grid {
+  max-height: 168px;
+  overflow: auto;
+}
+@media (max-width: 800px) {
+  .composer .lect-pick .lect-row { grid-template-columns: 1fr; }
 }
 
 .composer input, .composer select, .composer textarea {
@@ -2243,11 +2392,9 @@ body.is-wheel-full .bible.is-full {
   min-width: 0;
 }
 
-.app-nav,
-.magnifier { position: relative; }
+.app-nav { position: relative; }
 
-.app-menu,
-.zoom-menu {
+.app-menu {
   position: absolute;
   z-index: 40;
   top: calc(100% + 8px);
@@ -2261,8 +2408,7 @@ body.is-wheel-full .bible.is-full {
   box-shadow: 0 16px 40px var(--shadow);
 }
 
-.app-menu[hidden],
-.zoom-menu[hidden] { display: none; }
+.app-menu[hidden] { display: none; }
 
 .app-menu a {
   display: block;
@@ -2333,40 +2479,6 @@ body.is-wheel-full .bible.is-full {
 .bar-end .experience-menu {
   left: auto;
   right: 0;
-}
-
-.zoom-menu {
-  left: auto;
-  right: 0;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-}
-
-.zoom-menu button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 14px;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.zoom-menu button:hover,
-.zoom-menu button:focus-visible { background: var(--wash); }
-
-#zoom-label {
-  min-width: 52px;
-  text-align: center;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
 }
 
 body[data-desk="analysis"] .analysis-scroll,
@@ -2661,6 +2773,11 @@ body[data-wheel="fog"] { --chord: rgba(236, 236, 240, 0.55); }
     max-height: none;
     padding: 8px 12px;
   }
+  .context-pane.is-collapsed .context-bar,
+  .context-pane.is-collapsed .context-bar-tools {
+    flex-direction: row;
+    align-items: center;
+  }
   .context-pane.is-collapsed .context-collapse {
     writing-mode: horizontal-tb;
     transform: none;
@@ -2707,4 +2824,31 @@ body[data-wheel="fog"] { --chord: rgba(236, 236, 240, 0.55); }
     width: auto;
   }
   .composer form { grid-template-columns: 1fr; }
+}
+
+/* The content window sits behind the full-height filter and Bible columns.
+   The stage keeps the band above the window so the chart and calendar stay clear. */
+@media (min-width: 801px) {
+  body[data-need-app="1"]:not([data-desk]) .app { position: relative; }
+  body[data-need-app="1"]:not([data-desk]) .context-pane { z-index: 5; }
+  body[data-need-app="1"]:not([data-desk]) #viz-zoom {
+    z-index: 1;
+    padding-bottom: var(--dock-cover, 0px);
+  }
+  /* The liturgical wheel keeps the full column. The content window covers it instead of scaling it. */
+  body[data-need-app="1"]:not([data-desk])[data-module="year"] #viz-zoom { padding-bottom: 0; }
+  body[data-need-app="1"]:not([data-desk])[data-module="year"] #stage.is-year::after {
+    content: "";
+    flex: 0 0 var(--dock-cover, 0px);
+    height: var(--dock-cover, 0px);
+  }
+  body[data-need-app="1"]:not([data-desk]):not(.is-wheel-full) .bible:not(.is-full) { z-index: 5; }
+  body[data-need-app="1"]:not([data-desk]) .content-dock {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    max-height: 100%;
+  }
 }

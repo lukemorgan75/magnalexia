@@ -1623,19 +1623,7 @@
     var nextScroll = root.querySelector(".sk-scroll");
     if (nextScroll) nextScroll.scrollTop = kept;
     sizeDownChart();
-    applyDownZoom();
     applyDownFocus();
-  }
-
-  function applyDownZoom() {
-    var svg = document.querySelector("#sankey-down-root svg.sk-down");
-    if (!svg) return;
-    var z = 1;
-    if (document.body.getAttribute("data-zoom-live") === "1") {
-      z = parseFloat(sessionStorage.getItem("ar-zoom") || "1");
-      if (!z || z < 1) z = 1;
-    }
-    svg.style.zoom = z === 1 ? "" : String(z);
   }
 
   function sizeDownChart(tries) {
