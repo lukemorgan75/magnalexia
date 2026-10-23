@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="ar.css" />
   <link rel="stylesheet" href="books.css?v=work1" />
   <link rel="stylesheet" href="nation.css?v=work1" />
-  <link rel="stylesheet" href="desk.css?v=typesrc1" />
+  <link rel="stylesheet" href="desk.css?v=fit1" />
 </head>
 <body data-need-app="1">
   <header class="bar">
@@ -88,7 +88,7 @@
 
   <div class="app">
     <div class="workspace">
-      <aside id="context-pane" class="context-pane" aria-label="Filters"></aside>
+      <aside id="context-pane" class="context-pane is-collapsed" aria-label="Filters"></aside>
       <div id="viz-zoom">
         <div id="lit-bar" hidden></div>
         <main id="stage"></main>
@@ -322,13 +322,13 @@
       </div>
       <aside id="bible" class="bible" hidden aria-label="Bible"></aside>
     </div>
-    <section id="content-dock" class="content-dock" aria-label="Content">
+    <section id="content-dock" class="content-dock is-collapsed" aria-label="Content">
       <div id="content-dock-edge" class="content-dock-edge" role="separator" aria-orientation="horizontal" aria-label="Resize content" tabindex="0"></div>
       <div class="content-dock-bar">
         <h2>Content <span id="content-dock-count"></span></h2>
         <div class="content-dock-actions">
           <span id="library-launch"></span>
-          <button type="button" id="content-dock-toggle" aria-expanded="true">Collapse</button>
+          <button type="button" id="content-dock-toggle" aria-expanded="false">Expand</button>
         </div>
       </div>
       <div id="type-filters" class="type-filters" role="group" aria-label="Type"></div>
@@ -339,8 +339,8 @@
     </section>
   </div>
 
-  <script src="ar.js?v=pass1"></script>
-  <script src="desk.js?v=typesrc1"></script>
+  <script src="ar.js?v=fit1"></script>
+  <script src="desk.js?v=fit1"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="analysis.js?v=filt1"></script>
   <script src="books.js?v=work1"></script>

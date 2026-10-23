@@ -41,6 +41,8 @@
     });
     wire(document.getElementById("login-form"), document.getElementById("login-notice"), function () {
       sessionStorage.setItem(APP, "1");
+      sessionStorage.setItem("ar-filters-collapsed", "1");
+      sessionStorage.setItem("ar-content-collapsed", "1");
       window.location.href = "app.html";
     });
   }

@@ -715,18 +715,171 @@ body[data-need-app="1"] .bar .view-tabs button {
   padding: 0;
 }
 .context-feed li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 8px 16px;
-  min-height: 52px;
-  padding: 14px 2px;
-  border-bottom: 1px solid var(--line);
+  display: block;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
-.context-feed li span { color: var(--brown); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
-.context-feed li strong { font-weight: 600; font-size: 14px; }
 .context-feed .empty { margin: 4px 0 8px; }
+.post {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 12px 2px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.post:focus-visible { outline: 2px solid var(--brown); outline-offset: 2px; }
+.post.is-open { background: var(--wash); border-radius: 16px; }
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--wash);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 650;
+}
+.post.is-open .post-avatar { background: var(--sheet); }
+.post-id { display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; }
+.post-name { font-size: 15px; font-weight: 700; }
+.post-meta { color: var(--muted); font-size: 14px; }
+.post-title {
+  margin: 1px 0 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.post-summary {
+  margin: 4px 0 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.post:not(.is-open) .post-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.post-widget {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--paper);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.post-frame, .post-widget video, .post-widget img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #111;
+  border: 0;
+}
+.post-frame { aspect-ratio: 16 / 9; background: #111; }
+.post-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.post-widget.is-text, .post-widget.is-link, .post-widget.is-audio, .post-widget.is-note { padding: 12px 96px 16px 14px; }
+.post-widget.is-file { padding: 12px 14px 16px; }
+.post-widget.is-link a {
+  display: grid;
+  gap: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+.post-widget-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.post-excerpt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.post-excerpt.is-full { display: block; -webkit-line-clamp: unset; }
+.post-widget audio, .post-widget video { cursor: auto; }
+.post-widget.is-audio audio { width: 100%; }
+.post-expand, .post-actions button, .post-actions a, .feed-view-panel .post-actions button, .feed-view-panel .post-actions a {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.post-expand {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  padding: 4px 10px;
+}
+.post-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.post-actions button, .post-actions a { padding: 5px 12px; }
+.feed-view {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+}
+.feed-view-backdrop { position: absolute; inset: 0; background: rgba(20, 16, 12, 0.72); }
+.feed-view-panel {
+  position: relative;
+  width: min(920px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 16px 18px 20px;
+  border-radius: 16px;
+  background: var(--sheet);
+  color: var(--ink);
+}
+.feed-view-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.feed-view-panel header h2 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.feed-view-panel header .post-actions { margin-top: 0; flex: 0 0 auto; }
+.feed-view-frame, .feed-view-panel video, .feed-view-doc {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #111;
+}
+.feed-view-frame { aspect-ratio: 16 / 9; overflow: hidden; }
+.feed-view-frame iframe, .feed-view-panel video, .feed-view-doc { height: min(70vh, 540px); }
+.feed-view-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.feed-view-panel img { display: block; width: 100%; height: auto; margin-top: 12px; border-radius: 12px; }
+.feed-view-url { margin: 16px 0 0; color: var(--muted); word-break: break-word; }
+.feed-view-read { max-width: 66ch; margin-top: 8px; }
+.feed-view-read p, .post-body { margin: 8px 0 0; font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 18px; line-height: 1.45; }
 body[data-need-app="1"]:not([data-desk]) .workspace { overflow: hidden; }
 body[data-need-app="1"]:not([data-desk])[data-module="lectionary"] #sankey-panel {
   min-height: 0;
@@ -978,6 +1131,97 @@ body[data-module="literature"][data-lit="national"] #nation-home {
 .empty {
   margin: 8px 0 0;
   color: var(--muted);
+}
+
+.canon-tree {
+  display: grid;
+  grid-template-columns: 7.25rem 2.7rem minmax(8.75rem, 11.5rem) minmax(16rem, 1fr);
+  width: max(100%, 44rem);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--field);
+}
+.canon-tree > * {
+  margin: 0;
+  min-height: 2.75rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.canon-tree button {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  padding: 8px;
+}
+.canon-tree button[aria-pressed="true"] { background: var(--wash); }
+.canon-tree > .canon-testament,
+.canon-tree > .canon-section {
+  position: relative;
+  padding: 0;
+}
+.canon-testament {
+  grid-column: 1;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 18px;
+  line-height: 1.15;
+}
+.canon-testament > span {
+  position: absolute;
+  top: 12px;
+  left: 8px;
+  right: 8px;
+  display: block;
+  text-align: center;
+}
+.canon-tree > .canon-section {
+  grid-column: 2;
+  min-height: 9.5rem;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+.canon-tree > .canon-section > span {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  writing-mode: vertical-rl;
+  transform: translateX(-50%);
+  padding: 0;
+  line-height: 1.2;
+}
+.canon-book {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 8px 12px;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 17px;
+}
+.canon-blurb {
+  grid-column: 4;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.canon-blurb.is-on {
+  background: var(--wash);
+  color: var(--ink);
+}
+.canon-credit {
+  margin: 10px 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .year {
@@ -1611,6 +1855,20 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   flex: 1 0 auto;
   height: min(68vh, 640px);
   min-height: 440px;
+}
+
+body:not([data-desk="analysis"]) #stage.is-year .dial {
+  flex: 1 0 100%;
+  min-height: 100%;
+}
+body:not([data-desk="analysis"]) #stage.is-year .dial-stage {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+body:not([data-desk="analysis"]) #stage.is-year .occasion-board {
+  width: min(920px, 100%);
+  margin-top: 28px;
 }
 
 #stage.is-year .composer,

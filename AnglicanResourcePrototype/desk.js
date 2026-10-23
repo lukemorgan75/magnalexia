@@ -88,23 +88,76 @@
     { testament: "New Testament", name: "General letters", books: ["Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude"] },
     { testament: "New Testament", name: "Prophecy", books: ["Revelation"] }
   ];
+  var BOOK_BLURBS = {
+    "Genesis": "In chapters 1-11, the book of Genesis recounts God’s good world and humanity’s repeated rebellion. How will God restore blessing to the world? We find the answer in the family of Abraham. | Through Abraham’s family, God promises to bless all nations. Genesis follows four generations of human failure set against God’s continued faithfulness. As Joseph says, “You planned this for evil, but God planned it for good” (Gen. 50:20). The book ends with the promise of a future king who will restore blessing to the nations.",
+    "Exodus": "How does God respond when his people cry out to him? The first part of the book of Exodus recounts a powerful confrontation between God and the unjust Pharaoh. This section is a fast-paced narrative that leads to divine justice, rescue, and deliverance. | The first part of Exodus shows God freeing Israel from Egypt. Then, at Mount Sinai, Moses receives God’s law, but Israel breaks the covenant. Moses pleads with God, who renews his promises. After the tabernacle is built, God’s glory fills it, but Moses can’t enter due to his own rebellion.",
+    "Leviticus": "Israel cannot enter God’s presence because of their corruption. In response, God introduces sacrifices, the priesthood, and purity laws.",
+    "Numbers": "Numbers tells of Israel’s repeated rebellion in the wilderness, met by God’s justice and mercy. God responds with short-term severity and long-term generosity.",
+    "Deuteronomy": "Moses gives Israel final words of warning and blessing: the story so far, a collection of laws, and a charge to listen and obey. He knows they will rebel, yet he looks forward to their promised hope.",
+    "Joshua": "Joshua shows God’s covenant faithfulness in bringing Israel into the land promised to Abraham. The book points to covenant obedience before, during, and after God fulfills his promises.",
+    "Judges": "After Joshua’s death, Israel spirals downward, and Judges highlights six judges and their increasing corruption. The center of the book says that Israel had no king, and everyone did what was right in their own eyes.",
+    "Ruth": "Ruth follows Naomi, her Moabite daughter-in-law Ruth, and the farmer Boaz during the time of the judges. Their story of tragedy turned to joy becomes part of the line of King David and the Messiah.",
+    "1 Samuel": "1 Samuel focuses on Samuel, Saul, and David. A poem near the start sets the themes: God’s opposition to the proud, the lifting up of the humble, and the promise of a messianic king.",
+    "2 Samuel": "2 Samuel shows humility, the destructiveness of pride, and the faithfulness of God’s promise. David succeeds and fails, and the promise of a future king stands at the beginning and the end.",
+    "1 Kings": "Kings recounts Israel’s rulers from Solomon until the exile. The question at the center is whether God’s promised Messiah will rescue Israel in spite of their failures.",
+    "2 Kings": "Kings recounts Israel’s rulers from Solomon until the exile. The question at the center is whether God’s promised Messiah will rescue Israel in spite of their failures.",
+    "1 Chronicles": "Chronicles invites readers back through David, Solomon, the temple, and the kings of Judah. It leaves the reader waiting for the promised Messiah who will restore Israel’s covenant partnership with God.",
+    "2 Chronicles": "Chronicles invites readers back through David, Solomon, the temple, and the kings of Judah. It leaves the reader waiting for the promised Messiah who will restore Israel’s covenant partnership with God.",
+    "Ezra": "Ezra–Nehemiah recounts the return from exile and the rebuilding of the temple in Jerusalem. Ezra, a descendant of Aaron, arrives later and teaches God’s law to the post-exile generation.",
+    "Nehemiah": "Nehemiah rebuilds the walls of Jerusalem after the return from exile. Ezra arrives later and teaches God’s law to that generation.",
+    "Esther": "Though God is never named in Esther, he is at work behind the scenes, and Haman’s plot against the Jewish people is thwarted. Even when God seems absent, he has not abandoned his promises.",
+    "Job": "Job, his wife, and his friends speculate on why an upright man suffers so much. God reminds him that the world is ordered and beautiful, and also wild, and that pain can be brought to God.",
+    "Psalms": "Psalms is a designed collection of poetry about God’s character, made for a lifetime of contemplation. It holds prayer, pain, praise, and the fulfillment of prophecy.",
+    "Proverbs": "Linked to Solomon and other wise men, Proverbs is hundreds of short sayings on how to live wisely. Each one touches a common part of life in God’s good world.",
+    "Ecclesiastes": "Ecclesiastes answers Proverbs: life is not as simple as fearing God and choosing wisdom. Life is unpredictable and fleeting, and still it has a point.",
+    "Song of Solomon": "Song of Songs is a love song between two lovers, and it works on two levels. It celebrates human intimacy and points to being united with God and his wisdom.",
+    "Isaiah": "The book of Isaiah is filled with sobering accounts of Israel’s sin and rebellion and warnings of their coming judgement. But along with warnings, Isaiah also offers a message of hope—a suffering servant, a Messiah, will come to establish God’s Kingdom on Earth and create a new Jerusalem. | Isaiah calls for Israel and the surrounding rebellious nations to repent and turn to God, warning of the judgment that will come if they do not. But Isiah’s message is not without hope. He continually points to a coming servant, Immanuel, who will establish a new Israel and bring God's Kingdom to Earth. Jesus reads from the scroll of Isaiah and declares that the book’s messianic promises were being fulfilled in him.",
+    "Jeremiah": "Jeremiah announced that God would judge Israel’s sins with exile to Babylon, and then he lived through it. The book shows how disobedience leads to destruction.",
+    "Lamentations": "Lamentations is a collection of poems on Israel’s grief after Jerusalem’s destruction, caused by rebellion against God. The people confess their sins and seek restoration.",
+    "Ezekiel": "Ezekiel is a prophet living in exile in Babylon. Ezekiel boldly speaks God’s message of Israel’s rebellion and makes clear that this exile is punishment for their covenant unfaithfulness. God's presence being revealed to Ezekiel demonstrates that holiness has nothing to do with geographical location—it’s about the condition of the heart. God is moved by the faithfulness of men like Ezekiel, who became his priest not because of status but because of his faith in dark circumstances. His example is a model for believers everywhere. | Ezekiel is a prophet living in exile in Babylon. God’s presence being revealed to Ezekiel demonstrates that holiness has nothing to do with geographical location—it’s about the condition of the heart. God is moved by the faithfulness of men like Ezekiel, who became his priest not because of status but because of his faith in dark circumstances.",
+    "Daniel": "Daniel’s visions point to the coming Son of Man, the messianic king who will deliver Israel and the nations. The book is also about staying faithful to the Lord in exile.",
+    "Hosea": "God sends Hosea to Israel to speak his grief over their idolatry and reliance on other nations. The people have failed the covenant, and God’s commitment to them remains.",
+    "Joel": "Joel speaks of the day of the Lord, when evil empires are brought low and God’s people are delivered. God will not let evil keep wrecking his good world.",
+    "Amos": "God calls the shepherd Amos to confront Israel’s wrongdoing and offer one more chance before judgment. God is grieved by the evil, and he still offers them a way to change.",
+    "Obadiah": "Obadiah is short, and it speaks against the arrogance of Edom and other nations. Through him God declares judgment on Edom.",
+    "Jonah": "Jonah asks whether we forgive our enemies, and whether we run from God when we fail. The story teaches trust in God’s decision to save.",
+    "Micah": "Micah describes coming judgment on Israel for exploiting the poor and twisting the Torah. God is also faithful and merciful, and he promises a faithful remnant and a new Jerusalem.",
+    "Nahum": "Nahum is a collection of poems announcing the downfall of some of Israel’s worst oppressors. The fall of Nineveh and Assyria shows how God works in history.",
+    "Habakkuk": "Babylon stands for any nation that exalts itself and practices injustice, violence, and idolatry. God tells Habakkuk that he will deal with evil, and that faithfulness can wait on his timing.",
+    "Zephaniah": "Zephaniah warns that God will judge the nations with fire and purify them from sin, evil, and violence. That purification opens a future in which humanity can flourish.",
+    "Haggai": "Haggai tells the returned exiles to remember the covenant and build the temple before their own houses. God promises a new Jerusalem, the defeat of evil, and his presence among them.",
+    "Zechariah": "Zechariah is a series of dream visions, and it does not follow a neat pattern. It shows God guiding history, and it asks for faithfulness while we hope for his kingdom.",
+    "Malachi": "Malachi indicts Israel’s rebellion and still offers hope. After years of rebellion and exile, God has not abandoned Israel, and he promises to defeat evil and purify a faithful remnant.",
+    "Matthew": "Matthew begins with a genealogy that shows Jesus as a descendant from the line of David, a king and a fulfillment of God’s covenant promises to David and all of Israel. Matthew’s gospel account shows readers how the promises and prophecies God made to his people in the Old Testament came to pass through Jesus. | Matthew’s gospel opens with Jesus’ genealogy, showing him as David’s descendant and fulfillment of God’s promises to Israel. Throughout the narrative, Matthew weaves together Jesus’ teachings, miracles, and ministry to show readers how the promises and prophecies God made to his people in the Old Testament came to pass through Jesus.",
+    "Mark": "Mark tells Jesus’ life and ministry without an early, plain statement of who he is, and that is intentional. The second half of the book gives strong evidence that Jesus is the Messiah.",
+    "Luke": "Luke documents how Jesus expands God's Kingdom and covenant by creating a new Israel that includes the poor, outcasts, and others to whom Jesus brings restoration and reverses their life circumstances as he gives them freedom and release from the tyranny of evil and sin. Throughout the book, we see that Jesus is indeed the messianic King, but he will reign over Israel by suffering. His actions usher in an upside-down Kingdom marked by self-giving love, and he challenges his disciples to follow his example and share in his ministry. | Luke documents how Jesus expands God’s Kingdom and covenant by creating a new Israel that includes the poor and outcasts. Throughout the book, we see that Jesus is indeed the messianic King, but he will reign over Israel by suffering. His actions usher in an upside-down Kingdom marked by self-giving love.",
+    "John": "John's Gospel emphasizes Jesus' identity as the Messiah and Son of God. Because of this divine identity, Jesus is able to give eternal life to everyone who believes in him. We see this reality through the signs and miracles he performs. And seven times, he answers \"I Am\" when people question his identity, echoing God's personal name revealed in Exodus 3. John's Gospel also shows Jesus using his time on earth to introduce people to the new birth. By believing that he is the Messiah and God's son, they have eternal life and freedom from sin and are empowered to perform radical acts of kindness, generosity, and selfless love as they live their lives in devotion to Jesus and his Kingdom.",
+    "Acts": "Jesus' followers received the Holy Spirit on Pentecost and became filled and equipped to spread the good news that would restore God's kingdom over the world. Through persecution, the believers were scattered. They continued to preach, and the church at Antioch was born. It grew into the first multiethnic, international church from which missionaries were sent throughout the world to preach about Jesus, the messianic Messiah and risen king of all nations. Paul even continued to preach despite imprisonment and wrote important letters to the churches. | Jesus’ followers received the Holy Spirit at Pentecost and were equipped to spread the good news that would restore God’s Kingdom on Earth. Through persecution, followers of Jesus were scattered, so missionaries went out to preach about Jesus, the Messiah and risen King of all nations.",
+    "Romans": "The people of Israel tried to obey God and follow the law, but they didn’t succeed. Only faith in Jesus’ death and resurrection can justify humanity and fulfill God’s promise to create a covenant relationship with his people, the descendants of Abraham. | Watch our overview video on the book of Romans, which breaks down the literary design of the book and its flow of thought. This is the second of two videos dedicated to the book of Romans, which aims to help you see its unique contribution to the story of Jesus, but also how it works within the Bible’s overall framework.",
+    "1 Corinthians": "Paul’s first letter to Corinth is a wake-up call: the resurrection is a reason for unity, purity, and love. Believing Jesus was raised opens a new reality for every part of life.",
+    "2 Corinthians": "Paul asks the Corinthians to see life through the paradox of the cross. Because of the cross and the Spirit, Jesus’ followers can live the cruciform life themselves.",
+    "Galatians": "Galatians teaches that people are justified by the gospel of Jesus, not by the laws of the Torah. Believers are one multi-ethnic family, equipped by the Spirit to love God and others.",
+    "Ephesians": "Ephesians shows how the gospel makes one multi-ethnic covenant family and shapes ordinary life. By the Spirit, believers can stand against the evil that threatens their unity.",
+    "Philippians": "Philippians shows Christian life as a living expression of Jesus’ own story. Citizenship is in heaven, and closeness to Jesus gives hope in the darkest circumstances.",
+    "Colossians": "Colossians challenges the church to be transformed by Jesus’ resurrection and love. Because he was raised, they are reconciled to God, free from the law, and part of his new family.",
+    "1 Thessalonians": "Paul celebrates the Thessalonians’ holiness, love, and future hope as they stay faithful to Jesus. Despite persecution, the church has flourished.",
+    "2 Thessalonians": "Paul encourages the church to stay faithful, hopeful, and fearless while waiting for Jesus’ return. What we hope for shapes what we live for.",
+    "1 Timothy": "Paul tells Timothy how to answer corrupt leaders and false teaching in Ephesus. What a church believes shapes how its people live.",
+    "2 Timothy": "2 Timothy is Paul’s last letter, urging Timothy to accept his calling despite suffering. He is to keep faith in Jesus’ resurrection and raise leaders who teach the good news.",
+    "Titus": "Paul reminds believers on Crete that, despite the culture around them, the grace of Jesus can make them a new humanity. That is the same grace by which Jesus died to redeem them.",
+    "Philemon": "Paul asks Philemon to forgive Onesimus, who had run away. It is the gospel in action: people become equal partners in the new humanity.",
+    "Hebrews": "Hebrews urges believers to stay faithful to Jesus through hardship, following the models of faith in the Old Testament. Jesus is greater than any of those people or events, and he is worthy of devotion.",
+    "James": "James is short wisdom speeches, full of metaphors and lines that are easy to remember. It challenges believers on how they live: hearing God’s word and doing it.",
+    "1 Peter": "Peter writes to encourage Christians facing persecution. He tells them they are chosen by God, and that their suffering can show others the generosity and love of Jesus.",
+    "2 Peter": "Peter warns against corrupt teachers who deny Jesus’ resurrection and lead the community astray. On the day of the Lord, God will expose evil and make way for a new heaven and earth.",
+    "1 John": "1 John answers teachers who no longer confess Jesus as the Messiah and Son of God. True teachers tell the truth about Jesus and the cross, and they love others.",
+    "2 John": "John warns the church not to receive teachers who deny that Jesus came in the flesh. Legitimate teachers tell the truth about him and love others.",
+    "3 John": "John writes to Gaius about hospitality for traveling workers and a conflict with Diotrephes. True teachers spread love rather than fear.",
+    "Jude": "Jude uses the Hebrew Bible and Jewish stories to picture God’s judgment on rebellion. He tells the church to contend for the faith, because God’s grace asks for a whole life.",
+    "Revelation": "The book of Revelation is not a secret code for deciphering the timeline of Jesus’ return. It’s a work of apocalyptic literature that shows how every human kingdom eventually becomes Babylon and must be resisted. Revelation prophecies that Jesus, who died for the sins of the world, will return one day as King to prompt repentance.",
+  };
   var POETRY = { Job: 1, Psalms: 1, Proverbs: 1, "Song of Solomon": 1, Lamentations: 1 };
-  var LIBRARY = [
-    { id: "s1", title: "The greatest commandment", summary: "A parish sermon on loving God and neighbor, from Matthew 22.", format: "Sermon", types: ["sermon"], level: "parish", use: "both", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Adults", access: "Free", body: "The question is a test, and Jesus does not dodge it. The whole law hangs on love of God and love of neighbor. A parish can hear that without a lecture, and still leave knowing the two are not rivals." },
-    { id: "s2", title: "Two commandments, for children", summary: "A short children’s moment that stays with the gospel and does not wander off into a mascot.", format: "Children", types: ["youth"], level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Children 6–12", access: "Free", body: "Ask the children who they love, and who loves them. Then tell them Jesus put love of God first, and love of the person next to them second. Stop there." },
-    { id: "s3", title: "Our dwelling place", summary: "A devotion on Psalm 90 for the week Moses dies on the mountain.", format: "Devotional", types: ["devotional"], level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Lord, you have been our dwelling place. The psalm does not pretend the years are long. It asks for the work of our hands to matter anyway." },
-    { id: "s4", title: "Nebo, and the land he may see", summary: "A close reading of Deuteronomy 34 for someone preparing a lecture or a teaching sermon.", format: "Commentary", types: ["commentary"], level: "academic", use: "educational", season: "ordinary", topic: "scripture", sub: "Interpretation", audience: "Clergy", access: "Premium", body: "The death notice is also a succession text. Joshua receives the spirit of wisdom by the laying on of hands, and the narrator will not let Moses’ uniqueness cancel that succession." },
-    { id: "s5", title: "A great multitude", summary: "An All Saints sermon that stays with Revelation 7 and the Beatitudes together.", format: "Sermon", types: ["sermon"], level: "parish", use: "devotional", season: "ordinary", topic: "worship", sub: "Liturgy", audience: "All ages", access: "Free", body: "The multitude is not a metaphor for our nicest members. It is the church the Lamb has gathered, and the Beatitudes are how that crowd already sounds." },
-    { id: "s6", title: "Blessed are you", summary: "A youth session on the Beatitudes that does not turn them into a personality quiz.", format: "Youth", types: ["youth"], level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Youth", access: "Free", body: "Read Matthew 5:1–12 aloud once, slowly. Ask which blessing sounds least like the school they attend. Stay with that one." },
-    { id: "s7", title: "Wise and foolish, a parish forum", summary: "A one-session adult forum on Matthew 25, with a leader page and a question sheet.", format: "Curriculum", types: ["curriculum"], level: "parish", use: "educational", season: "ordinary", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "The oil is not a trick. The parable is about a community that expected to wait, and some of whom did not prepare for the wait. Let the room argue about what preparation looks like here." },
-    { id: "s8", title: "Watch, therefore", summary: "Preaching notes for clergy on the delay in Matthew 25.", format: "Sermon", types: ["sermon"], level: "ordained", use: "educational", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Clergy", access: "Free", body: "Do not scold the congregation for failing to be bridesmaids. Preach the delay as the time the church has actually been given, and the oil as the practices that survive a long week." },
-    { id: "s9", title: "Four weeks of waiting", summary: "A household devotion for Advent, one page a week.", format: "Devotional", types: ["devotional"], level: "devotional", use: "devotional", season: "advent", topic: "prayer", sub: "Daily Office", audience: "All ages", access: "Free", body: "Light one candle. Read a short gospel sentence. Ask what the household is actually waiting for. Pray the collect, then stop." },
-    { id: "s10", title: "A parish Lent library", summary: "A short stack for a formation hour: one sermon, one prayer, one conversation.", format: "Curriculum", types: ["curriculum"], level: "parish", use: "both", season: "lent", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "Keep the stack small enough that a vestry could actually use it. One Sunday sermon, one midweek prayer, one question that a small group can finish." },
-    { id: "s11", title: "Compline for a hard week", summary: "A brief order for the end of the day, in contemporary language.", format: "Prayer", types: ["prayer"], level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Guide us waking, and guard us sleeping, that awake we may watch with Christ, and asleep we may rest in peace." },
-    { id: "s12", title: "The long obedience of a vestry", summary: "An essay for wardens and clergy on staying with a parish through an ordinary year.", format: "Article", types: ["article"], level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Vestry", audience: "Clergy", access: "Free", body: "Most of the work is not a crisis. It is the next meeting, the next budget line, and the decision not to invent a new vision every September." },
-    { id: "s13", title: "Five books for a new curate", summary: "A short reading list for the first year of ordained ministry.", format: "Book", types: ["book"], level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Clergy wellness", audience: "Clergy", access: "Premium", body: "A prayer book you will actually use, one gospel commentary, one book of pastoral theology, one poet, and one history of the parish you serve." },
-    { id: "s14", title: "A note on the collects", summary: "A short unmarked note, waiting for a primary-use tag.", format: "Article", types: ["article"], level: "parish", use: null, season: "ordinary", topic: "worship", sub: "Liturgy", audience: "Adults", access: "Free", body: "The collect already knows the week. A parish can read it before anyone has decided whether the hour is study or prayer." }
-  ];
+  var LIBRARY = [];
   var EVENTS = [
     { date: "Nov 12", name: "Preaching workshop", where: "A midweek gathering for clergy and licensed lay preachers.", kind: "Workshop" },
     { date: "Nov 18", name: "The Daily Office, online", where: "An hour on Morning and Evening Prayer for people who have never led it.", kind: "Webinar" },
@@ -126,6 +179,8 @@
     compose: false,
     added: loadAdded(),
     openBody: {},
+    feedOpen: "",
+    feedMedia: "",
     depth: "year",
     settle: false,
     style: "incense",
@@ -192,7 +247,7 @@
     catch (e) { return []; }
   }
   function emptyContext() {
-    return { season: "", audience: "", topic: "", sub: "", shelf: "", occasions: [], works: [] };
+    return { season: "", audience: "", topic: "", sub: "", shelf: "", testament: "", section: "", book: "", occasions: [], works: [] };
   }
   function loadContext() {
     var ctx = emptyContext();
@@ -219,6 +274,23 @@
           if (!w || !knownWork(String(w.id || ""))) return;
           ctx.works.push({ id: String(w.id), label: workLabel(w.id) || String(w.label || w.id) });
         });
+      }
+      var bookPlace = canonPlace(raw.book);
+      if (bookPlace) {
+        ctx.book = bookPlace.book;
+        ctx.section = bookPlace.section.name;
+        ctx.testament = bookPlace.section.testament;
+        ctx.shelf = "canonical";
+      } else {
+        var sectionPlace = canonSectionNamed(raw.section);
+        if (sectionPlace) {
+          ctx.section = sectionPlace.name;
+          ctx.testament = sectionPlace.testament;
+          ctx.shelf = "canonical";
+        } else if (raw.testament === "Old Testament" || raw.testament === "New Testament") {
+          ctx.testament = raw.testament;
+          ctx.shelf = "canonical";
+        }
       }
     } catch (e) {}
     return ctx;
@@ -359,7 +431,10 @@
     return '<article class="card"><header><span>' + esc(item.format) + "</span>" + (useText ? "<span>" + esc(useText) + "</span>" : "") + "</header><h3>" + esc(item.title) + "</h3><p>" + esc(item.summary) + '</p><p class="meta">' + esc(bits.join(" · ")) + "</p>" + action + "</article>";
   }
   function cards(list) {
-    if (!list.length) return '<p class="empty">Nothing in this view matches what you have set.</p>';
+    if (!list.length) {
+      var any = state.added.concat(LIBRARY).length;
+      return '<p class="empty">' + (any ? "Nothing in this view matches what you have set." : "Nothing is in the library yet.") + "</p>";
+    }
     return '<div class="cards">' + list.map(card).join("") + "</div>";
   }
 
@@ -1740,6 +1815,9 @@
       c.works.forEach(function (w) { if (works.indexOf(w.id) !== -1) workHit = true; });
       if (!workHit) return false;
     }
+    if (c.testament && item.testament !== c.testament) return false;
+    if (c.section && item.section !== c.section) return false;
+    if (c.book && item.book !== c.book) return false;
     return true;
   }
   function feedItems() {
@@ -1833,6 +1911,9 @@
     if (kind === "audience") return "Audience";
     if (kind === "shelf") return "Shelf";
     if (kind === "work") return "Literature";
+    if (kind === "testament") return "Testament";
+    if (kind === "section") return "Section";
+    if (kind === "book") return "Book";
     return "Context";
   }
   function fixedPill(kind, label) {
@@ -1858,20 +1939,191 @@
     one("sub", state.context.sub, state.context.sub);
     one("audience", state.context.audience, state.context.audience);
     one("shelf", state.context.shelf, shelfLabel(state.context.shelf));
+    one("testament", state.context.testament, state.context.testament);
+    one("section", state.context.section, state.context.section);
+    one("book", state.context.book, state.context.book);
     state.context.occasions.forEach(function (o) { one(o.kind, o.id, o.label); });
     state.context.works.forEach(function (w) { one("work", w.id, w.label); });
     return '<div class="context-pills">' + pills.join("") + "</div>";
   }
+  function resourceById(id) {
+    var found = null;
+    state.added.concat(LIBRARY).forEach(function (item) { if (item.id === id) found = item; });
+    return found;
+  }
+  function safeHttp(url) {
+    return /^https?:\/\//i.test(String(url || "")) ? String(url) : "";
+  }
+  function itemLink(item) {
+    if (safeHttp(item.link)) return item.link;
+    var body = String(item.body || "").trim();
+    if (safeHttp(body) && body.indexOf(" ") === -1) return body;
+    return "";
+  }
+  function itemText(item) {
+    var body = String(item.body || "").trim();
+    if (!body || (safeHttp(body) && body.indexOf(" ") === -1)) return "";
+    return body;
+  }
+  function fileExt(name) {
+    var clean = String(name || "").split("?")[0].split("#")[0];
+    var dot = clean.lastIndexOf(".");
+    return dot === -1 ? "" : clean.slice(dot + 1).toLowerCase();
+  }
+  function extKind(ext) {
+    if (["mp4", "webm", "ogv", "mov"].indexOf(ext) !== -1) return "video";
+    if (["mp3", "m4a", "wav", "ogg", "aac"].indexOf(ext) !== -1) return "audio";
+    if (["jpg", "jpeg", "png", "gif", "webp", "avif"].indexOf(ext) !== -1) return "image";
+    if (ext === "pdf") return "pdf";
+    return "";
+  }
+  function youtubeId(url) {
+    try {
+      var parsed = new URL(url);
+      var host = parsed.hostname.replace(/^www\./, "");
+      var id = "";
+      if (host === "youtu.be") id = parsed.pathname.slice(1);
+      else if (host === "youtube.com" || host === "m.youtube.com" || host === "music.youtube.com" || host === "youtube-nocookie.com") {
+        if (parsed.pathname === "/watch") id = parsed.searchParams.get("v") || "";
+        else if (parsed.pathname.indexOf("/embed/") === 0) id = parsed.pathname.slice(7);
+        else if (parsed.pathname.indexOf("/shorts/") === 0) id = parsed.pathname.slice(8);
+        else if (parsed.pathname.indexOf("/live/") === 0) id = parsed.pathname.slice(6);
+      }
+      id = String(id).split("/")[0];
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+    } catch (err) { return ""; }
+  }
+  function vimeoId(url) {
+    try {
+      var parsed = new URL(url);
+      var host = parsed.hostname.replace(/^www\./, "");
+      if (host !== "vimeo.com" && host !== "player.vimeo.com") return "";
+      var parts = parsed.pathname.split("/").filter(Boolean);
+      var id = parts[parts.length - 1] || "";
+      return /^[0-9]+$/.test(id) ? id : "";
+    } catch (err) { return ""; }
+  }
+  function linkHost(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ""); } catch (err) { return url; }
+  }
+  function feedSource(item) {
+    var link = itemLink(item);
+    var blob = canonBlobs[item.id] || "";
+    var name = item.fileName || "";
+    var types = typeNames(itemTypes(item));
+    var typeLabel = types[0] || item.format || "Note";
+    var yt = youtubeId(link);
+    if (yt) return { kind: "youtube", play: "https://www.youtube-nocookie.com/embed/" + yt, open: link, label: "Video" };
+    var vimeo = vimeoId(link);
+    if (vimeo) return { kind: "vimeo", play: "https://player.vimeo.com/video/" + vimeo, open: link, label: "Video" };
+    var blobKind = extKind(fileExt(name));
+    var linkKind = extKind(fileExt(link));
+    function direct(kind) {
+      if (blob && blobKind === kind) return { play: blob, open: blob, label: name || kind };
+      if (link && linkKind === kind) return { play: link, open: link, label: kind === "pdf" ? "PDF" : kind };
+      return null;
+    }
+    var video = direct("video");
+    if (video) return { kind: "video", play: video.play, open: video.open, label: video.label };
+    var audio = direct("audio");
+    if (audio) return { kind: "audio", play: audio.play, open: audio.open, label: audio.label };
+    var image = direct("image");
+    if (image) return { kind: "image", play: image.play, open: image.open, label: image.label };
+    var pdf = direct("pdf");
+    if (pdf) return { kind: "pdf", play: pdf.play, open: pdf.open, label: name || "PDF" };
+    if (blob) return { kind: "file", play: blob, open: blob, label: name || typeLabel };
+    if (link) return { kind: "link", play: "", open: link, label: linkHost(link) };
+    var text = itemText(item);
+    if (text) return { kind: "text", play: "", open: "", label: typeLabel, text: text };
+    return { kind: "note", play: "", open: "", label: typeLabel };
+  }
+  function feedFrame(item, source) {
+    var allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    return '<div class="post-frame"><iframe src="' + esc(source.play) + '" title="' + esc(item.title) + '" allow="' + allow + '" allowfullscreen></iframe></div>';
+  }
+  function feedWidget(item, source, open) {
+    var expand = '<button type="button" class="post-expand" data-feed-act="expand">Expand</button>';
+    if (source.kind === "youtube" || source.kind === "vimeo") {
+      return '<div class="post-widget" data-feed-kind="' + source.kind + '">' + feedFrame(item, source) + expand + "</div>";
+    }
+    if (source.kind === "video") {
+      return '<div class="post-widget" data-feed-kind="video"><video controls playsinline preload="metadata" src="' + esc(source.play) + '"></video>' + expand + "</div>";
+    }
+    if (source.kind === "audio") {
+      return '<div class="post-widget is-audio" data-feed-kind="audio"><span class="post-widget-kicker">Audio</span><audio controls preload="metadata" src="' + esc(source.play) + '"></audio>' + expand + "</div>";
+    }
+    if (source.kind === "image") {
+      return '<button type="button" class="post-widget" data-feed-act="expand" data-feed-kind="image"><img src="' + esc(source.play) + '" alt=""><span class="post-expand">Expand</span></button>';
+    }
+    if (source.kind === "pdf" || source.kind === "file") {
+      return '<button type="button" class="post-widget is-file" data-feed-act="expand" data-feed-kind="' + source.kind + '"><span class="post-widget-kicker">' + (source.kind === "pdf" ? "PDF" : "File") + "</span><strong>" + esc(source.label) + "</strong></button>";
+    }
+    if (source.kind === "link") {
+      return '<div class="post-widget is-link" data-feed-kind="link"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">Link</span><strong>' + esc(item.title) + "</strong><span>" + esc(source.label) + "</span></a>" + expand + "</div>";
+    }
+    if (source.kind === "text") {
+      return '<div class="post-widget is-text" data-feed-kind="text"><span class="post-widget-kicker">' + esc(source.label) + '</span><span class="post-excerpt' + (open ? " is-full" : "") + '">' + esc(source.text) + "</span>" + expand + "</div>";
+    }
+    return '<div class="post-widget is-note" data-feed-kind="note"><span class="post-widget-kicker">' + esc(source.label) + "</span><strong>No file attached</strong>" + expand + "</div>";
+  }
+  function feedPost(item) {
+    var source = feedSource(item);
+    var open = state.feedOpen === item.id;
+    var types = typeNames(itemTypes(item));
+    var name = types[0] || item.format || "Note";
+    var initial = (name.replace(/[^A-Za-z0-9]/g, "").slice(0, 1) || "N").toUpperCase();
+    var meta = [];
+    if (types.length > 1) meta.push(types.slice(1).join(", "));
+    if (item.audience) meta.push(item.audience);
+    if (item.season) meta.push(seasonName(item.season));
+    var summary = item.summary ? '<p class="post-summary">' + esc(item.summary) + "</p>" : "";
+    var actions = "";
+    if (open) {
+      var controls = ['<button type="button" data-feed-act="close">Close</button>', '<button type="button" data-feed-act="expand">Open item</button>'];
+      if (source.open) controls.push('<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>");
+      actions = '<div class="post-actions">' + controls.join("") + "</div>";
+    }
+    return '<article class="post' + (open ? " is-open" : "") + '" data-feed="' + esc(item.id) + '" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '"><div class="post-avatar" aria-hidden="true">' + esc(initial) + '</div><div class="post-main"><div class="post-id"><strong class="post-name">' + esc(name) + "</strong>" + (meta.length ? '<span class="post-meta"> · ' + esc(meta.join(" · ")) + "</span>" : "") + '</div><h3 class="post-title">' + esc(item.title) + "</h3>" + summary + feedWidget(item, source, open) + actions + "</div></article>";
+  }
+  function feedViewerHtml() {
+    if (!state.feedMedia) return "";
+    var item = resourceById(state.feedMedia);
+    if (!item) return "";
+    var source = feedSource(item);
+    var view = "";
+    if (source.kind === "youtube" || source.kind === "vimeo") view = '<div class="feed-view-frame">' + feedFrame(item, source) + "</div>";
+    else if (source.kind === "video") view = '<video controls playsinline autoplay src="' + esc(source.play) + '"></video>';
+    else if (source.kind === "audio") view = '<audio controls autoplay src="' + esc(source.play) + '"></audio>';
+    else if (source.kind === "image") view = '<img src="' + esc(source.play) + '" alt="' + esc(item.title) + '">';
+    else if (source.kind === "pdf") view = '<iframe class="feed-view-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>';
+    else if (source.kind === "link" || source.kind === "file") view = '<p class="feed-view-url">' + esc(source.label) + "</p>";
+    else view = '<div class="feed-view-read">' + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") + (source.text ? '<div class="post-body">' + esc(source.text) + "</div>" : "") + "</div>";
+    var go = source.open ? '<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>" : "";
+    return '<div id="feed-viewer" class="feed-view"><div class="feed-view-backdrop" data-feed-act="close-view"></div><div class="feed-view-panel" role="dialog" aria-modal="true" aria-label="' + esc(item.title) + '"><header><h2>' + esc(item.title) + '</h2><div class="post-actions">' + go + '<button type="button" data-feed-act="close-view">Close</button></div></header>' + view + "</div></div>";
+  }
+  function mountFeedViewer() {
+    var html = feedViewerHtml();
+    var current = document.getElementById("feed-viewer");
+    if (!html) {
+      if (current) current.remove();
+      return;
+    }
+    if (current) current.outerHTML = html;
+    else document.body.insertAdjacentHTML("beforeend", html);
+  }
   function contextFeedHtml() {
     var list = feedItems();
-    if (!list.length) return '<p class="empty">Nothing matches these filters.</p>';
-    return '<ul>' + list.map(function (item) {
-      var label = typeNames(itemTypes(item)).join(", ") || item.format || "Note";
-      return "<li><span>" + esc(label) + "</span><strong>" + esc(item.title) + "</strong></li>";
-    }).join("") + "</ul>";
+    if (!list.length) {
+      var anyPosts = state.added.concat(LIBRARY).length;
+      return '<p class="empty">' + (anyPosts ? "Nothing matches these filters." : "Nothing is in the library yet.") + "</p>";
+    }
+    return "<ul>" + list.map(function (item) { return "<li>" + feedPost(item) + "</li>"; }).join("") + "</ul>";
   }
   function filtersCollapsed() {
-    try { return sessionStorage.getItem("ar-filters-collapsed") === "1"; } catch (e) { return false; }
+    try { return sessionStorage.getItem("ar-filters-collapsed") !== "0"; } catch (e) { return true; }
+  }
+  function contentCollapsed() {
+    try { return sessionStorage.getItem("ar-content-collapsed") !== "0"; } catch (e) { return true; }
   }
   function renderContextPane() {
     var pane = document.getElementById("context-pane");
@@ -1910,9 +2162,14 @@
     if (!body) return;
     var scroll = scroller ? scroller.scrollTop : 0;
     var list = feedItems();
+    var shown = {};
+    list.forEach(function (item) { shown[item.id] = true; });
+    if (state.feedOpen && !shown[state.feedOpen]) state.feedOpen = "";
+    if (state.feedMedia && !shown[state.feedMedia]) state.feedMedia = "";
     if (count) count.textContent = String(list.length);
     body.innerHTML = contextFeedHtml();
     if (scroller) scroller.scrollTop = scroll;
+    mountFeedViewer();
     bindContentDock();
   }
   function bindContentDock() {
@@ -1939,6 +2196,7 @@
       toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
       toggle.textContent = collapsed ? "Expand" : "Collapse";
       edge.tabIndex = collapsed ? -1 : 0;
+      try { sessionStorage.setItem("ar-content-collapsed", collapsed ? "1" : "0"); } catch (e) {}
     }
     toggle.addEventListener("click", function () {
       var collapsed = !dock.classList.contains("is-collapsed");
@@ -1946,6 +2204,7 @@
       setCollapsed(collapsed);
       if (!collapsed && openHeight) dock.style.height = openHeight;
     });
+    setCollapsed(contentCollapsed());
     function dragTo(clientY, originY, originH) {
       setHeight(originH + (originY - clientY));
     }
@@ -2001,7 +2260,7 @@
       state.context.occasions = state.context.occasions.filter(function (o) { return o.id !== id; });
     } else if (kind === "work") {
       state.context.works = state.context.works.filter(function (w) { return w.id !== id; });
-    } else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf") {
+    } else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf" || kind === "testament" || kind === "section" || kind === "book") {
       state.context[kind] = "";
       if (kind === "topic") state.context.sub = "";
     }
@@ -2009,13 +2268,89 @@
     renderStage();
   }
 
+  function canonSectionNamed(name) {
+    for (var i = 0; i < CANON.length; i++) {
+      if (CANON[i].name === name) return CANON[i];
+    }
+    return null;
+  }
+  function canonPlace(book) {
+    for (var i = 0; i < CANON.length; i++) {
+      if (CANON[i].books.indexOf(book) !== -1) return { book: book, section: CANON[i] };
+    }
+    return null;
+  }
+  function applyCanonFilter(kind, id) {
+    if (kind === "book") {
+      var place = canonPlace(id);
+      if (!place) return;
+      state.context.book = place.book;
+      state.context.section = place.section.name;
+      state.context.testament = place.section.testament;
+      state.context.shelf = "canonical";
+    } else if (kind === "section") {
+      var section = canonSectionNamed(id);
+      if (!section) return;
+      state.context.section = section.name;
+      state.context.testament = section.testament;
+      state.context.shelf = "canonical";
+      if (state.context.book && section.books.indexOf(state.context.book) === -1) state.context.book = "";
+    } else if (kind === "testament") {
+      if (id !== "Old Testament" && id !== "New Testament") return;
+      state.context.testament = id;
+      state.context.shelf = "canonical";
+      var current = canonSectionNamed(state.context.section);
+      if (!current || current.testament !== id) {
+        state.context.section = "";
+        state.context.book = "";
+      }
+    } else return;
+    saveContext();
+    renderStage();
+  }
+  function openBibleBook(name) {
+    var place = canonPlace(name);
+    if (!place) return;
+    state.bible.open = true;
+    state.bible.level = "read";
+    state.bible.book = name;
+    state.bible.chapter = 1;
+    state.bible.verses = [];
+    state.bible.toEnd = false;
+    state.bible.xrefs = false;
+    state.bible.xrefHome = null;
+    state.bible.testament = place.section.testament;
+    state.bible.section = place.section.name;
+    renderBible();
+  }
+  function canonTree() {
+    var html = '<div class="canon-tree" aria-label="Biblical books">';
+    ["Old Testament", "New Testament"].forEach(function (name) {
+      var sections = CANON.filter(function (section) { return section.testament === name; });
+      var count = 0;
+      sections.forEach(function (section) { count += section.books.length; });
+      html += '<button type="button" class="canon-testament" style="grid-row:span ' + count + '" data-canon="testament" data-canon-id="' + esc(name) + '" aria-pressed="' + (state.context.testament === name ? "true" : "false") + '"><span>' + esc(name) + "</span></button>";
+      sections.forEach(function (section) {
+        html += '<button type="button" class="canon-section" style="grid-row:span ' + section.books.length + '" data-canon="section" data-canon-id="' + esc(section.name) + '" aria-pressed="' + (state.context.section === section.name ? "true" : "false") + '"><span>' + esc(section.name) + "</span></button>";
+        section.books.forEach(function (book) {
+          var on = state.context.book === book;
+          html += '<button type="button" class="canon-book' + (on ? " is-on" : "") + '" data-canon="book" data-canon-id="' + esc(book) + '" aria-pressed="' + (on ? "true" : "false") + '">' + esc(book) + "</button>";
+          html += '<p class="canon-blurb' + (on ? " is-on" : "") + '">' + esc(BOOK_BLURBS[book] || "") + "</p>";
+        });
+      });
+    });
+    html += '</div><p class="canon-credit">Book notes are the text BibleProject places under its overview videos. A book told in more than one video joins those notes with a pipe.</p>';
+    return html;
+  }
   function literatureBody(kind) {
     if (kind === "eccles" || kind === "national") return "";
     if (kind === "canonical") {
       var posts = shelvedPosts("canonical");
       var anyCanon = state.added.some(function (item) { return item.shelf === "canonical"; });
-      if (!posts.length) return '<p class="empty">' + (anyCanon ? "Nothing matches these filters." : "Nothing is on this shelf yet.") + "</p>";
-      return '<div class="cards">' + posts.map(canonCard).join("") + "</div>";
+      var list = !posts.length
+        ? '<p class="empty">' + (anyCanon ? "Nothing matches these filters." : "Nothing is on this shelf yet.") + "</p>"
+        : '<div class="cards">' + posts.map(canonCard).join("") + "</div>";
+      return canonTree() + list;
     }
     return '<p class="empty">Nothing is on this shelf yet.</p>';
   }
@@ -2270,6 +2605,12 @@
     else delete item.topic;
     if (state.context.sub) item.sub = state.context.sub;
     else delete item.sub;
+    if (state.context.testament) item.testament = state.context.testament;
+    else delete item.testament;
+    if (state.context.section) item.section = state.context.section;
+    else delete item.section;
+    if (state.context.book) item.book = state.context.book;
+    else delete item.book;
     var occ = state.context.occasions.map(function (o) { return o.id; });
     if (occ.length) item.occasions = occ;
     if (item.shelf !== "canonical") {
@@ -2677,8 +3018,44 @@
       var zoomOpener = document.getElementById("zoom-btn");
       if (zoomOpener) zoomOpener.setAttribute("aria-expanded", "false");
     }
+    if (event.target.closest && event.target.closest("#feed-viewer")) {
+      var viewAct = event.target.closest("[data-feed-act]");
+      if (viewAct) {
+        state.feedMedia = "";
+        renderContentFeed();
+      }
+      return;
+    }
     var composing = event.target.closest && event.target.closest(".composer");
     if (composing && !event.target.closest("[data-compose]")) return;
+    var feedAct = event.target.closest && event.target.closest("[data-feed-act]");
+    if (feedAct && feedAct.closest("#content-feed-list")) {
+      var feedHost = feedAct.closest("[data-feed]");
+      var feedId = feedHost ? feedHost.getAttribute("data-feed") : "";
+      var feedAction = feedAct.getAttribute("data-feed-act");
+      if (feedAction === "expand" && feedId) state.feedMedia = feedId;
+      else if (feedAction === "close" && state.feedOpen === feedId) state.feedOpen = "";
+      renderContentFeed();
+      if (state.feedMedia) {
+        var viewClose = document.querySelector("#feed-viewer .feed-view-panel [data-feed-act='close-view']");
+        if (viewClose) viewClose.focus();
+      }
+      return;
+    }
+    if (event.target.closest && event.target.closest("#content-feed-list a[href], #content-feed-list video, #content-feed-list audio, #content-feed-list iframe")) return;
+    var feedPostEl = event.target.closest && event.target.closest("#content-feed-list [data-feed]");
+    if (feedPostEl) {
+      var selection = window.getSelection ? String(window.getSelection()) : "";
+      if (selection && feedPostEl.contains(window.getSelection().anchorNode)) return;
+      var nextFeed = feedPostEl.getAttribute("data-feed");
+      if (state.feedOpen !== nextFeed) {
+        state.feedOpen = nextFeed;
+        renderContentFeed();
+        var openedPost = document.querySelector('#content-feed-list [data-feed="' + nextFeed + '"]');
+        if (openedPost && openedPost.scrollIntoView) openedPost.scrollIntoView({ block: "nearest" });
+      }
+      return;
+    }
     var typeBtn = event.target.closest && event.target.closest("[data-type]");
     if (typeBtn && typeBtn.closest("#type-filters")) {
       var typeId = typeBtn.getAttribute("data-type");
@@ -2705,7 +3082,7 @@
     }
     if (event.target.closest && event.target.closest("[data-filters-toggle]")) {
       try {
-        if (filtersCollapsed()) sessionStorage.removeItem("ar-filters-collapsed");
+        if (filtersCollapsed()) sessionStorage.setItem("ar-filters-collapsed", "0");
         else sessionStorage.setItem("ar-filters-collapsed", "1");
       } catch (e) {}
       renderContextPane();
@@ -2719,6 +3096,14 @@
     var dropCtx = event.target.closest("[data-context-remove]");
     if (dropCtx) {
       removeContext(dropCtx.getAttribute("data-context-remove"), dropCtx.getAttribute("data-context-id"));
+      return;
+    }
+    var canonBtn = event.target.closest && event.target.closest("[data-canon]");
+    if (canonBtn && canonBtn.closest("#stage")) {
+      var canonKind = canonBtn.getAttribute("data-canon");
+      var canonId = canonBtn.getAttribute("data-canon-id");
+      applyCanonFilter(canonKind, canonId);
+      if (canonKind === "book") openBibleBook(canonId);
       return;
     }
     if (event.target.closest("#app-full")) {
@@ -2777,6 +3162,7 @@
           dockToggle.setAttribute("aria-expanded", "true");
           dockToggle.textContent = "Collapse";
         }
+        try { sessionStorage.setItem("ar-content-collapsed", "0"); } catch (e) {}
         var dockEdge = document.getElementById("content-dock-edge");
         if (dockEdge) dockEdge.tabIndex = 0;
       }
@@ -3133,6 +3519,24 @@
   document.addEventListener("fullscreenchange", onWheelFullChange);
   document.addEventListener("webkitfullscreenchange", onWheelFullChange);
   document.addEventListener("keydown", function (event) {
+    if ((event.key === "Enter" || event.key === " ") && event.target && event.target.getAttribute && event.target.getAttribute("data-feed") && event.target.closest("#content-feed-list")) {
+      event.preventDefault();
+      if (state.feedOpen !== event.target.getAttribute("data-feed")) {
+        state.feedOpen = event.target.getAttribute("data-feed");
+        renderContentFeed();
+      }
+      return;
+    }
+    if (event.key === "Escape" && state.feedMedia) {
+      state.feedMedia = "";
+      renderContentFeed();
+      return;
+    }
+    if (event.key === "Escape" && state.feedOpen && !(event.target && event.target.closest && event.target.closest("input, textarea, select"))) {
+      state.feedOpen = "";
+      renderContentFeed();
+      return;
+    }
     if (event.key === "Escape") {
       var openMenu = document.getElementById("experience-menu");
       if (openMenu && !openMenu.hasAttribute("hidden")) {
