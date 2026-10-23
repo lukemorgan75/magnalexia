@@ -912,6 +912,48 @@ body[data-need-app="1"] .bar .view-tabs button {
 .post-excerpt.is-full { display: block; -webkit-line-clamp: unset; }
 .post-widget audio, .post-widget video { cursor: auto; }
 .post-widget.is-audio audio { width: 100%; }
+.post-widget.is-book:not(.is-link) { cursor: auto; }
+.post-doc-bar {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 96px 8px 14px;
+}
+.post-doc-bar span {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.post-doc-bar strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.post-doc {
+  display: block;
+  width: 100%;
+  height: 240px;
+  border: 0;
+  background: #fff;
+}
+.post-url {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  word-break: break-all;
+}
+.post-widget .post-note {
+  margin: 0;
+  padding: 8px 14px 12px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.card .post-widget { margin-top: 12px; }
 .post-expand, .post-actions button, .post-actions a, .feed-view-panel .post-actions button, .feed-view-panel .post-actions a {
   appearance: none;
   border: 1px solid var(--line);
@@ -933,6 +975,24 @@ body[data-need-app="1"] .bar .view-tabs button {
 }
 .post-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .post-actions button, .post-actions a { padding: 5px 12px; }
+.entry-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+.entry-actions p { margin: 0; font-size: 13px; line-height: 1.4; }
+.entry-actions button {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.entry-actions button[data-entry-delete="yes"] { background: var(--wash); }
+.card-actions .entry-actions,
+.post-actions .entry-actions { display: contents; }
+.card-actions .entry-actions { margin-top: 0; }
 .feed-view {
   position: fixed;
   inset: 0;

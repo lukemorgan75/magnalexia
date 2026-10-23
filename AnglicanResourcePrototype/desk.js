@@ -177,6 +177,8 @@
     age: null,
     query: "",
     compose: false,
+    editing: "",
+    deleteAsk: "",
     added: loadAdded(),
     openBody: {},
     feedOpen: "",
@@ -1974,7 +1976,8 @@
     return '<article class="card" data-canon-item="' + esc(item.id) + '"><header><span>' + esc(item.format) + "</span></header><h3>" + esc(item.title) + "</h3>" +
       (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") +
       (bits.length ? '<p class="meta">' + esc(bits.join(" · ")) + "</p>" : "") +
-      '<div class="card-actions">' + filter + links + "</div></article>";
+      feedWidget(item, feedSource(item), false) +
+      '<div class="card-actions">' + filter + links + entryActions(item) + "</div></article>";
   }
 
   function knownWork(id) {
@@ -2244,16 +2247,64 @@
   function safeHttp(url) {
     return /^https?:\/\//i.test(String(url || "")) ? String(url) : "";
   }
+  function firstUrl(text) {
+    var match = String(text || "").match(/https?:\/\/[^\s<>"']+/i);
+    if (!match) return "";
+    return match[0].replace(/[),.;]+$/, "");
+  }
   function itemLink(item) {
+    if (!item) return "";
     if (safeHttp(item.link)) return item.link;
-    var body = String(item.body || "").trim();
-    if (safeHttp(body) && body.indexOf(" ") === -1) return body;
-    return "";
+    var fromBody = firstUrl(item.body);
+    if (fromBody) return fromBody;
+    return firstUrl(item.summary);
   }
   function itemText(item) {
     var body = String(item.body || "").trim();
     if (!body || (safeHttp(body) && body.indexOf(" ") === -1)) return "";
     return body;
+  }
+  function widgetNote(item) {
+    var text = itemText(item);
+    var link = itemLink(item);
+    if (link && text.indexOf(link) !== -1) text = text.replace(link, " ").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    return '<p class="post-note">' + esc(text) + "</p>";
+  }
+  function isPrintedBook(item) {
+    var format = String(item && item.format || "");
+    return format === "Physical Bible" || format === "Physical Torah" || format === "Individual book";
+  }
+  function soleType(item, id) {
+    var types = itemTypes(item);
+    return types.length === 1 && types[0] === id;
+  }
+  function attachChosenFile(item, form) {
+    if (!item || !form) return;
+    var fileInput = form.querySelector("[name=file]");
+    var chosen = fileInput && fileInput.files && fileInput.files[0];
+    if (!chosen) return;
+    var nextUrl = URL.createObjectURL(chosen);
+    if (canonBlobs[item.id]) {
+      try { URL.revokeObjectURL(canonBlobs[item.id]); } catch (e) {}
+    }
+    item.fileName = chosen.name;
+    canonBlobs[item.id] = nextUrl;
+  }
+  function writeLibraryBody(item, raw) {
+    var body = String(raw || "").trim();
+    var found = firstUrl(body);
+    delete item.link;
+    delete item.body;
+    if (!body) return;
+    if (found && body === found) {
+      item.link = found;
+      return;
+    }
+    if (found) item.link = found;
+    var note = body;
+    if (found) note = body.replace(found, "").replace(/\s+/g, " ").trim();
+    if (note) item.body = note;
   }
   function fileExt(name) {
     var clean = String(name || "").split("?")[0].split("#")[0];
@@ -2265,6 +2316,7 @@
     if (["mp3", "m4a", "wav", "ogg", "aac"].indexOf(ext) !== -1) return "audio";
     if (["jpg", "jpeg", "png", "gif", "webp", "avif"].indexOf(ext) !== -1) return "image";
     if (ext === "pdf") return "pdf";
+    if (ext === "epub" || ext === "mobi") return "book";
     return "";
   }
   function youtubeId(url) {
@@ -2321,6 +2373,8 @@
     if (image) return { kind: "image", play: image.play, open: image.open, label: image.label };
     var pdf = direct("pdf");
     if (pdf) return { kind: "pdf", play: pdf.play, open: pdf.open, label: name || "PDF" };
+    var book = direct("book");
+    if (book) return { kind: "book", play: book.play, open: book.open, label: name || "Book" };
     if (blob) return { kind: "file", play: blob, open: blob, label: name || typeLabel };
     if (link) return { kind: "link", play: "", open: link, label: linkHost(link) };
     var text = itemText(item);
@@ -2333,23 +2387,32 @@
   }
   function feedWidget(item, source, open) {
     var expand = '<button type="button" class="post-expand" data-feed-act="expand">Expand</button>';
+    var note = widgetNote(item);
     if (source.kind === "youtube" || source.kind === "vimeo") {
-      return '<div class="post-widget" data-feed-kind="' + source.kind + '">' + feedFrame(item, source) + expand + "</div>";
+      return '<div class="post-widget" data-feed-kind="' + source.kind + '">' + feedFrame(item, source) + note + expand + "</div>";
     }
     if (source.kind === "video") {
-      return '<div class="post-widget" data-feed-kind="video"><video controls playsinline preload="metadata" src="' + esc(source.play) + '"></video>' + expand + "</div>";
+      return '<div class="post-widget" data-feed-kind="video"><video controls playsinline preload="metadata" src="' + esc(source.play) + '"></video>' + note + expand + "</div>";
     }
     if (source.kind === "audio") {
-      return '<div class="post-widget is-audio" data-feed-kind="audio"><span class="post-widget-kicker">Audio</span><audio controls preload="metadata" src="' + esc(source.play) + '"></audio>' + expand + "</div>";
+      return '<div class="post-widget is-audio" data-feed-kind="audio"><span class="post-widget-kicker">Audio</span><audio controls preload="metadata" src="' + esc(source.play) + '"></audio>' + note + expand + "</div>";
     }
     if (source.kind === "image") {
       return '<button type="button" class="post-widget" data-feed-act="expand" data-feed-kind="image"><img src="' + esc(source.play) + '" alt=""><span class="post-expand">Expand</span></button>';
     }
-    if (source.kind === "pdf" || source.kind === "file") {
-      return '<button type="button" class="post-widget is-file" data-feed-act="expand" data-feed-kind="' + source.kind + '"><span class="post-widget-kicker">' + (source.kind === "pdf" ? "PDF" : "File") + "</span><strong>" + esc(source.label) + "</strong></button>";
+    if (source.kind === "pdf") {
+      var docKicker = soleType(item, "book") || isPrintedBook(item) ? "Book" : "PDF";
+      return '<div class="post-widget is-book" data-feed-kind="pdf"><div class="post-doc-bar"><span>' + esc(docKicker) + "</span><strong>" + esc(source.label || "PDF") + '</strong></div><iframe class="post-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>' + note + expand + "</div>";
+    }
+    if (source.kind === "book") {
+      return '<div class="post-widget is-book is-link" data-feed-kind="book"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">Book</span><strong>' + esc(item.title) + '</strong><span class="post-url">' + esc(source.label || source.open) + "</span></a>" + note + expand + "</div>";
+    }
+    if (source.kind === "file") {
+      return '<button type="button" class="post-widget is-file" data-feed-act="expand" data-feed-kind="file"><span class="post-widget-kicker">File</span><strong>' + esc(source.label) + "</strong></button>";
     }
     if (source.kind === "link") {
-      return '<div class="post-widget is-link" data-feed-kind="link"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">Link</span><strong>' + esc(item.title) + "</strong><span>" + esc(source.label) + "</span></a>" + expand + "</div>";
+      var linkKicker = soleType(item, "book") || isPrintedBook(item) ? "Book" : (soleType(item, "video") ? "Video" : (soleType(item, "audio") ? "Audio" : "Link"));
+      return '<div class="post-widget is-link' + (linkKicker === "Book" ? " is-book" : "") + '" data-feed-kind="link"><a href="' + esc(source.open) + '" target="_blank" rel="noopener"><span class="post-widget-kicker">' + esc(linkKicker) + "</span><strong>" + esc(item.title) + '</strong><span class="post-url">' + esc(source.open) + "</span></a>" + note + expand + "</div>";
     }
     if (source.kind === "text") {
       return '<div class="post-widget is-text" data-feed-kind="text"><span class="post-widget-kicker">' + esc(source.label) + '</span><span class="post-excerpt' + (open ? " is-full" : "") + '">' + esc(source.text) + "</span>" + expand + "</div>";
@@ -2367,14 +2430,17 @@
     var audiences = itemList(item, "audience", "audiences");
     if (audiences.length) meta.push(audiences.join(", "));
     lectMeta(item).forEach(function (bit) { meta.push(bit); });
-    var summary = item.summary ? '<p class="post-summary">' + esc(item.summary) + "</p>" : "";
+    var summaryText = item.summary ? String(item.summary).trim() : "";
+    if (source.open && summaryText === source.open) summaryText = "";
+    var summary = summaryText ? '<p class="post-summary">' + esc(summaryText) + "</p>" : "";
+    var manage = entryActions(item);
     var actions = "";
     if (open) {
       var controls = ['<button type="button" data-feed-act="close">Close</button>', '<button type="button" data-feed-act="expand">Open item</button>'];
       if (source.open) controls.push('<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>");
       actions = '<div class="post-actions">' + controls.join("") + "</div>";
     }
-    return '<article class="post' + (open ? " is-open" : "") + '" data-feed="' + esc(item.id) + '" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '"><div class="post-avatar" aria-hidden="true">' + esc(initial) + '</div><div class="post-main"><div class="post-id"><strong class="post-name">' + esc(name) + "</strong>" + (meta.length ? '<span class="post-meta"> · ' + esc(meta.join(" · ")) + "</span>" : "") + '</div><h3 class="post-title">' + esc(item.title) + "</h3>" + summary + feedWidget(item, source, open) + actions + "</div></article>";
+    return '<article class="post' + (open ? " is-open" : "") + '" data-feed="' + esc(item.id) + '" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '"><div class="post-avatar" aria-hidden="true">' + esc(initial) + '</div><div class="post-main"><div class="post-id"><strong class="post-name">' + esc(name) + "</strong>" + (meta.length ? '<span class="post-meta"> · ' + esc(meta.join(" · ")) + "</span>" : "") + '</div><h3 class="post-title">' + esc(item.title) + "</h3>" + summary + feedWidget(item, source, open) + manage + actions + "</div></article>";
   }
   function feedViewerHtml() {
     if (!state.feedMedia) return "";
@@ -2387,10 +2453,10 @@
     else if (source.kind === "audio") view = '<audio controls autoplay src="' + esc(source.play) + '"></audio>';
     else if (source.kind === "image") view = '<img src="' + esc(source.play) + '" alt="' + esc(item.title) + '">';
     else if (source.kind === "pdf") view = '<iframe class="feed-view-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>';
-    else if (source.kind === "link" || source.kind === "file") view = '<p class="feed-view-url">' + esc(source.label) + "</p>";
+    else if (source.kind === "link" || source.kind === "file" || source.kind === "book") view = '<p class="feed-view-url">' + esc(source.kind === "link" ? source.open : source.label) + "</p>";
     else view = '<div class="feed-view-read">' + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") + (source.text ? '<div class="post-body">' + esc(source.text) + "</div>" : "") + "</div>";
     var go = source.open ? '<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>" : "";
-    return '<div id="feed-viewer" class="feed-view"><div class="feed-view-backdrop" data-feed-act="close-view"></div><div class="feed-view-panel" role="dialog" aria-modal="true" aria-label="' + esc(item.title) + '"><header><h2>' + esc(item.title) + '</h2><div class="post-actions">' + go + '<button type="button" data-feed-act="close-view">Close</button></div></header>' + view + "</div></div>";
+    return '<div id="feed-viewer" class="feed-view"><div class="feed-view-backdrop" data-feed-act="close-view"></div><div class="feed-view-panel" role="dialog" aria-modal="true" aria-label="' + esc(item.title) + '"><header><h2>' + esc(item.title) + '</h2><div class="post-actions">' + entryActions(item) + go + '<button type="button" data-feed-act="close-view">Close</button></div></header>' + view + "</div></div>";
   }
   function mountFeedViewer() {
     var html = feedViewerHtml();
@@ -2806,11 +2872,37 @@
     return '<option value="' + esc(value) + '"' + (selected ? " selected" : "") + ">" + esc(label) + "</option>";
   }
 
+  function editingItem() {
+    if (state.role !== "curator" || !state.editing) return null;
+    var found = null;
+    state.added.forEach(function (item) {
+      if (item && item.id === state.editing) found = item;
+    });
+    return found;
+  }
+  function ownsEntry(item) {
+    if (!item || state.role !== "curator" || !item.id) return false;
+    return state.added.some(function (row) { return row && row.id === item.id; });
+  }
+  function entryActions(item) {
+    if (!ownsEntry(item)) return "";
+    if (state.deleteAsk === item.id) {
+      return '<div class="entry-actions"><p>Delete this entry?</p><button type="button" data-entry-delete="yes" data-entry-id="' + esc(item.id) + '">Delete</button><button type="button" data-entry-delete="no" data-entry-id="' + esc(item.id) + '">Cancel</button></div>';
+    }
+    return '<div class="entry-actions"><button type="button" data-entry-edit="' + esc(item.id) + '">Edit</button><button type="button" data-entry-delete="ask" data-entry-id="' + esc(item.id) + '">Delete</button></div>';
+  }
   function composerIsCanonical() {
+    var editing = editingItem();
+    if (editing) return editing.shelf === "canonical";
     return state.module === "literature" && litKind() === "canonical";
   }
 
   function landingSentence() {
+    var editing = editingItem();
+    if (editing) {
+      if (editing.shelf === "canonical") return "Checked fields are this entry's tags. It stays on the Canonical shelf. The filters on the left stay as they are.";
+      return "Checked fields are this entry's tags. The filters on the left stay as they are.";
+    }
     var filed = composerIsCanonical() || scalarList("shelf").indexOf("canonical") !== -1;
     var where = filed ? "This post will be filed under Canonical." : "This post will be filed in the library, with no shelf.";
     return "Every filter is set in this form. What is checked is tagged on the post and shown in the filter list. " + where;
@@ -3110,16 +3202,36 @@
       item.lectDayLabel = days[0].label;
     }
   }
+  function entryTypePick(item) {
+    var selected = itemTypes(item);
+    var boxes = TYPES.map(function (type) {
+      return checkLabel("entryTypes", type.id, type.name, selected.indexOf(type.id) !== -1);
+    }).join("");
+    return filterField("Type", boxGrid(boxes));
+  }
   function composer() {
     if (state.role !== "curator" || !state.compose) return "";
-    var filters = filterPick() + lectPick();
+    var editing = editingItem();
+    var filters = (editing ? entryTypePick(editing) : "") + filterPick() + lectPick();
+    var heading = editing ? "Edit entry" : "Add to the library";
+    var submit = editing ? "Save" : "Add";
+    var editAttr = editing ? ' data-edit="' + esc(editing.id) + '"' : "";
+    var typeError = editing ? "Select at least one type." : "Select at least one type above.";
+    var head = '<section class="composer"><h2>' + heading + ' <button type="button" data-compose>Close</button></h2>';
     if (composerIsCanonical()) {
-      var media = '<option value="" selected disabled>Choose</option>' + CANON_MEDIA.map(function (name) {
-        return option(name, name, false);
+      var selectedMedium = editing && CANON_MEDIA.indexOf(editing.format) !== -1 ? editing.format : "";
+      var media = '<option value=""' + (selectedMedium ? "" : " selected") + ' disabled>Choose</option>' + CANON_MEDIA.map(function (name) {
+        return option(name, name, name === selectedMedium);
       }).join("");
-      return '<section class="composer"><h2>Add to the library <button type="button" data-compose>Close</button></h2><form id="add-form" data-shelf="canonical" autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>Select at least one type above.</p><button class="signup" type="submit">Add</button></form></section>';
+      var fileNote = editing && editing.fileName
+        ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
+        : "";
+      return head + '<form id="add-form" data-shelf="canonical"' + editAttr + ' autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + fileNote + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
     }
-    return '<section class="composer"><h2>Add to the library <button type="button" data-compose>Close</button></h2><form id="add-form" autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>Select at least one type above.</p><button class="signup" type="submit">Add</button></form></section>';
+    var libraryFile = editing && editing.fileName
+      ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
+      : "";
+    return head + '<form id="add-form"' + editAttr + ' autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label class="wide file-drop">File<input name="file" type="file"></label>' + libraryFile + '<p class="composer-note">A video, book, or other file shows on the post. It stays in this browser for this visit. Nothing is sent to a server.</p>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
   }
 
   function lensBar() {
@@ -3288,6 +3400,12 @@
       var el = event.target;
       if (!el || !el.name) return;
       var name = el.name;
+      if (state.editing) {
+        if (name === "lectionary" || name === "cycle" || name === "daySeason") {
+          fillLectDays(form, null, { dropOutside: true });
+        }
+        return;
+      }
       if (name === "lectionary" || name === "cycle" || name === "daySeason") {
         fillLectDays(form, null, { dropOutside: !latchOn() });
         if (!latchOn()) {
@@ -3309,30 +3427,45 @@
     var host = document.getElementById("library-composer");
     if (!launch || !host) return;
     if (state.role !== "curator") {
+      state.editing = "";
+      state.deleteAsk = "";
+      state.compose = false;
       launch.innerHTML = "";
       host.innerHTML = "";
       return;
     }
+    if (state.editing && !editingItem()) {
+      state.editing = "";
+      state.compose = false;
+    }
     if (!state.compose) {
+      state.editing = "";
       launch.innerHTML = '<button type="button" class="signup" data-compose>Add to the library</button>';
       host.innerHTML = "";
       return;
     }
     launch.innerHTML = "";
     var form = host.querySelector("#add-form");
+    var item = editingItem();
+    var editId = item ? item.id : "";
     var wantCanon = composerIsCanonical();
-    var keepForm = !!(form && ((form.getAttribute("data-shelf") === "canonical") === wantCanon));
-    var draft = (!keepForm && form) ? captureDraft(form) : null;
+    var keepForm = !!(form
+      && ((form.getAttribute("data-shelf") === "canonical") === wantCanon)
+      && (form.getAttribute("data-edit") || "") === editId);
+    var draft = (!keepForm && form && !editId) ? captureDraft(form) : null;
     if (keepForm) {
-      applyFiltersToForm(form);
-      refreshLandingNote(form);
-      if (state.types.length) showTypeError(form, false);
+      if (!editId) {
+        applyFiltersToForm(form);
+        refreshLandingNote(form);
+        if (state.types.length) showTypeError(form, false);
+      }
       return;
     }
     host.innerHTML = composer();
     var openedForm = host.querySelector("#add-form");
-    if (draft) restoreDraft(openedForm, draft);
-    else fillLectDays(openedForm, initialLectChecks());
+    if (item) applyEntryToForm(openedForm, item);
+    else if (draft) restoreDraft(openedForm, draft);
+    else if (openedForm) fillLectDays(openedForm, initialLectChecks());
     bindForm(openedForm);
     var scroller = document.getElementById("content-feed-body");
     if (scroller) scroller.scrollTop = 0;
@@ -3466,8 +3599,6 @@
     var medium = String(data.get("medium") || "").trim();
     if (!title || !medium || CANON_MEDIA.indexOf(medium) === -1 || !types.length) return;
     var link = String(data.get("link") || "").trim();
-    var fileInput = form.querySelector("[name=file]");
-    var chosen = fileInput && fileInput.files && fileInput.files[0];
     var item = {
       id: "canon-" + Date.now(),
       shelf: "canonical",
@@ -3478,10 +3609,7 @@
       access: "Free"
     };
     if (/^https?:\/\//i.test(link)) item.link = link;
-    if (chosen) {
-      item.fileName = chosen.name;
-      canonBlobs[item.id] = URL.createObjectURL(chosen);
-    }
+    attachChosenFile(item, form);
     stampExperience(item);
     copyContextOnto(item);
     readLectTags(form, item);
@@ -3503,9 +3631,224 @@
     else delete item.works;
   }
 
+  function applyEntryToForm(form, item) {
+    if (!form || !item) return;
+    var prev = formSyncing;
+    formSyncing = true;
+    function setVal(name, value) {
+      var el = form.querySelector("[name=" + name + "]");
+      if (el) el.value = value == null ? "" : value;
+    }
+    setVal("title", item.title || "");
+    setVal("summary", item.summary || "");
+    if (item.shelf === "canonical") {
+      setVal("medium", CANON_MEDIA.indexOf(item.format) !== -1 ? item.format : "");
+      setVal("link", item.link || "");
+    } else {
+      var prose = String(item.body || "");
+      var keptLink = safeHttp(item.link) ? item.link : "";
+      if (keptLink && prose.indexOf(keptLink) === -1) prose = prose ? prose.replace(/\s+$/, "") + "\n" + keptLink : keptLink;
+      setVal("body", prose);
+    }
+    var levels = itemList(item, "level", "levels");
+    if (!levels.length) levels = ["parish"];
+    checkGroup(form, "levels", levels);
+    var use = primaryUse(item);
+    var posture = use === "devotional" || use === "educational" || use === "both" ? use : "";
+    form.querySelectorAll("[name=posture]").forEach(function (el) {
+      el.checked = el.value === posture;
+    });
+    checkGroup(form, "audiences", itemList(item, "audience", "audiences"));
+    checkGroup(form, "topics", itemList(item, "topic", "topics"));
+    checkGroup(form, "subs", itemList(item, "sub", "subs"));
+    checkGroup(form, "shelves", item.shelf === "canonical" ? ["canonical"] : itemList(item, "shelf", "shelves"));
+    checkGroup(form, "testaments", itemList(item, "testament", "testaments"));
+    checkGroup(form, "sections", itemList(item, "section", "sections"));
+    checkGroup(form, "books", itemList(item, "book", "books"));
+    checkGroup(form, "occasions", listOf(item.occasions).map(String));
+    var works = [];
+    listOf(item.works).forEach(function (id) {
+      if (works.indexOf(id) === -1) works.push(id);
+    });
+    checkGroup(form, "works", works);
+    var years = itemList(item, "lectYear", "lectYears");
+    var seasons = itemList(item, "season", "seasons");
+    var days = itemLectDays(item);
+    checkGroup(form, "lectYears", years);
+    checkGroup(form, "seasons", seasons);
+    checkGroup(form, "entryTypes", itemTypes(item));
+    var lectEl = form.querySelector("[name=lectionary]");
+    var cycleEl = form.querySelector("[name=cycle]");
+    var daySeasonEl = form.querySelector("[name=daySeason]");
+    if (lectEl) lectEl.value = (item.lectionary === "rcl" || years.length || days.length) ? "rcl" : "";
+    if (cycleEl) cycleEl.value = (days[0] && days[0].year) || years[0] || "";
+    if (daySeasonEl) daySeasonEl.value = (days[0] && days[0].season) || seasons[0] || "";
+    fillLectDays(form, days.map(function (day) { return day.year + "|" + day.season + "|" + day.id; }), { replace: true });
+    formSyncing = prev;
+  }
+  function stampTagsFromForm(form, item) {
+    var levels = allowedChecked(form, "levels", function (id) {
+      return LEVELS.some(function (level) { return level.id === id; });
+    });
+    if (!levels.length) levels = ["parish"];
+    item.level = levels[0];
+    if (levels.length > 1) item.levels = levels.slice();
+    else delete item.levels;
+    var postureEl = form.querySelector("[name=posture]:checked");
+    var posture = postureEl ? postureEl.value : "";
+    if (posture === "devotional" || posture === "educational" || posture === "both") item.use = posture;
+    else item.use = null;
+    stampPair(item, "audience", "audiences", allowedChecked(form, "audiences", function (id) { return AUDIENCES.indexOf(id) !== -1; }));
+    stampPair(item, "topic", "topics", allowedChecked(form, "topics", function (id) { return !!topicById(id); }));
+    stampPair(item, "sub", "subs", allowedChecked(form, "subs", function (id) {
+      return TOPICS.some(function (topic) { return topic.subs.indexOf(id) !== -1; });
+    }));
+    stampPair(item, "testament", "testaments", allowedChecked(form, "testaments", function (id) {
+      return id === "Old Testament" || id === "New Testament";
+    }));
+    stampPair(item, "section", "sections", allowedChecked(form, "sections", function (id) { return !!canonSectionNamed(id); }));
+    stampPair(item, "book", "books", allowedChecked(form, "books", function (id) { return !!canonPlace(id); }));
+    stampPair(item, "shelf", "shelves", allowedChecked(form, "shelves", function (id) { return SHELF_LANDINGS.indexOf(id) !== -1; }));
+    var occasions = [];
+    form.querySelectorAll("[name=occasions]:checked").forEach(function (el) {
+      var kind = el.getAttribute("data-kind");
+      var id = el.value;
+      if (kind !== "feast" && kind !== "holiday" && kind !== "national") return;
+      if (String(id).indexOf(kind + ":") !== 0) return;
+      if (occasions.indexOf(id) === -1) occasions.push(id);
+    });
+    if (occasions.length) item.occasions = occasions;
+    else delete item.occasions;
+    readLectTags(form, item);
+    assignWorks(item, form);
+  }
+  function entryTypesFromForm(form) {
+    var picked = checkedValues(form, "entryTypes");
+    return TYPES.map(function (type) { return type.id; }).filter(function (id) { return picked.indexOf(id) !== -1; });
+  }
+  function showEntryTypeError(form, show) {
+    var error = form && form.querySelector("[data-type-error]");
+    if (error) error.hidden = !show;
+    if (show && form) {
+      var first = form.querySelector("[name=entryTypes]");
+      if (first) first.focus();
+    }
+  }
+  function saveEdit(form) {
+    var item = editingItem();
+    if (!item || !form || state.role !== "curator") return;
+    var types = entryTypesFromForm(form);
+    if (!types.length) {
+      showEntryTypeError(form, true);
+      return;
+    }
+    showEntryTypeError(form, false);
+    var data = new FormData(form);
+    var title = String(data.get("title") || "").trim();
+    if (!title) return;
+    if (item.shelf === "canonical") {
+      var medium = String(data.get("medium") || "").trim();
+      if (!medium || CANON_MEDIA.indexOf(medium) === -1) return;
+      item.title = title;
+      item.summary = String(data.get("summary") || "").trim();
+      item.format = medium;
+      item.types = types;
+      var link = String(data.get("link") || "").trim();
+      if (/^https?:\/\//i.test(link)) item.link = link;
+      else delete item.link;
+      attachChosenFile(item, form);
+      stampTagsFromForm(form, item);
+      item.shelf = "canonical";
+      delete item.shelves;
+    } else {
+      var summary = String(data.get("summary") || "").trim();
+      if (!summary) return;
+      var body = String(data.get("body") || "").trim();
+      item.title = title;
+      item.summary = summary;
+      item.types = types;
+      item.format = typeNames(types).join(", ");
+      writeLibraryBody(item, body);
+      attachChosenFile(item, form);
+      stampTagsFromForm(form, item);
+    }
+    var own = "canonical:" + item.id;
+    var renamed = false;
+    state.context.works.forEach(function (work) {
+      if (work.id === own && work.label !== item.title) {
+        work.label = item.title;
+        renamed = true;
+      }
+    });
+    if (renamed) saveContext();
+    state.editing = "";
+    state.compose = false;
+    state.deleteAsk = "";
+    storeAdded();
+    renderStage();
+  }
+  function deleteEntry(id) {
+    if (state.role !== "curator" || !id) return;
+    var had = state.added.some(function (item) { return item.id === id; });
+    if (!had) {
+      state.deleteAsk = "";
+      renderStage();
+      return;
+    }
+    state.added = state.added.filter(function (item) { return item.id !== id; });
+    if (canonBlobs[id]) {
+      try { URL.revokeObjectURL(canonBlobs[id]); } catch (e) {}
+      delete canonBlobs[id];
+    }
+    var own = "canonical:" + id;
+    var before = state.context.works.length;
+    state.context.works = state.context.works.filter(function (work) { return work.id !== own; });
+    if (state.context.works.length !== before) saveContext();
+    if (state.feedOpen === id) state.feedOpen = "";
+    if (state.feedMedia === id) state.feedMedia = "";
+    if (state.editing === id) {
+      state.editing = "";
+      state.compose = false;
+    }
+    state.deleteAsk = "";
+    storeAdded();
+    renderStage();
+  }
+  function openComposerDock() {
+    var dock = document.getElementById("content-dock");
+    var dockToggle = document.getElementById("content-dock-toggle");
+    if (dock) {
+      dock.classList.remove("is-collapsed");
+      if (dock.getBoundingClientRect().height < 420) dock.style.height = "420px";
+    }
+    if (dockToggle) {
+      dockToggle.setAttribute("aria-expanded", "true");
+      dockToggle.textContent = "Collapse";
+    }
+    try { sessionStorage.setItem("ar-content-collapsed", "0"); } catch (e) {}
+    var dockEdge = document.getElementById("content-dock-edge");
+    if (dockEdge) dockEdge.tabIndex = 0;
+  }
+  function beginEdit(id) {
+    if (state.role !== "curator") return;
+    var item = null;
+    state.added.forEach(function (row) { if (row.id === id) item = row; });
+    if (!item) return;
+    state.editing = id;
+    state.deleteAsk = "";
+    state.compose = true;
+    state.feedMedia = "";
+    openComposerDock();
+    renderStage();
+  }
   function onAdd(event) {
     event.preventDefault();
     var form = event.target;
+    if (state.role !== "curator") return;
+    if (state.editing) {
+      saveEdit(form);
+      return;
+    }
     var types = chosenTypes();
     if (!types.length) {
       showTypeError(form, true);
@@ -3527,8 +3870,8 @@
       types: types,
       access: "Free"
     };
-    if (/^https?:\/\//i.test(body)) item.link = body;
-    else if (body) item.body = body;
+    writeLibraryBody(item, body);
+    attachChosenFile(item, form);
     stampExperience(item);
     copyContextOnto(item);
     readLectTags(form, item);
@@ -3819,6 +4162,33 @@
       var menuOpener = document.getElementById("app-menu-btn");
       if (menuOpener) menuOpener.setAttribute("aria-expanded", "false");
     }
+    var entryBtn = event.target.closest && event.target.closest("[data-entry-edit], [data-entry-delete]");
+    if (entryBtn) {
+      if (state.role !== "curator") return;
+      var editId = entryBtn.getAttribute("data-entry-edit");
+      if (editId) {
+        beginEdit(editId);
+        return;
+      }
+      var entryAct = entryBtn.getAttribute("data-entry-delete");
+      var entryId = entryBtn.getAttribute("data-entry-id");
+      if (entryAct === "ask") {
+        state.deleteAsk = entryId || "";
+        renderStage();
+        return;
+      }
+      if (entryAct === "no") {
+        state.deleteAsk = "";
+        renderStage();
+        return;
+      }
+      if (entryAct === "yes" && entryId) {
+        deleteEntry(entryId);
+        return;
+      }
+      return;
+    }
+    if (event.target.closest && event.target.closest(".entry-actions")) return;
     if (event.target.closest && event.target.closest("#feed-viewer")) {
       var viewAct = event.target.closest("[data-feed-act]");
       if (viewAct) {
@@ -3830,9 +4200,10 @@
     var composing = event.target.closest && event.target.closest(".composer");
     if (composing && !event.target.closest("[data-compose]")) return;
     var feedAct = event.target.closest && event.target.closest("[data-feed-act]");
-    if (feedAct && feedAct.closest("#content-feed-list")) {
-      var feedHost = feedAct.closest("[data-feed]");
-      var feedId = feedHost ? feedHost.getAttribute("data-feed") : "";
+    var feedPlace = feedAct && (feedAct.closest("#content-feed-list") || feedAct.closest("#stage [data-canon-item]"));
+    if (feedAct && feedPlace) {
+      var feedHost = feedAct.closest("[data-feed], [data-canon-item]");
+      var feedId = feedHost ? (feedHost.getAttribute("data-feed") || feedHost.getAttribute("data-canon-item") || "") : "";
       var feedAction = feedAct.getAttribute("data-feed-act");
       if (feedAction === "expand" && feedId) state.feedMedia = feedId;
       else if (feedAction === "close" && state.feedOpen === feedId) state.feedOpen = "";
@@ -3843,7 +4214,7 @@
       }
       return;
     }
-    if (event.target.closest && event.target.closest("#content-feed-list a[href], #content-feed-list video, #content-feed-list audio, #content-feed-list iframe")) return;
+    if (event.target.closest && event.target.closest("#content-feed-list .post-widget, #stage .post-widget")) return;
     var feedPostEl = event.target.closest && event.target.closest("#content-feed-list [data-feed]");
     if (feedPostEl) {
       var selection = window.getSelection ? String(window.getSelection()) : "";
@@ -3993,21 +4364,13 @@
       return;
     }
     if (event.target.closest("[data-compose]")) {
-      state.compose = !state.compose;
       if (state.compose) {
-        var dock = document.getElementById("content-dock");
-        var dockToggle = document.getElementById("content-dock-toggle");
-        if (dock) {
-          dock.classList.remove("is-collapsed");
-          if (dock.getBoundingClientRect().height < 420) dock.style.height = "420px";
-        }
-        if (dockToggle) {
-          dockToggle.setAttribute("aria-expanded", "true");
-          dockToggle.textContent = "Collapse";
-        }
-        try { sessionStorage.setItem("ar-content-collapsed", "0"); } catch (e) {}
-        var dockEdge = document.getElementById("content-dock-edge");
-        if (dockEdge) dockEdge.tabIndex = 0;
+        state.compose = false;
+        state.editing = "";
+      } else {
+        state.editing = "";
+        state.compose = true;
+        openComposerDock();
       }
       renderStage();
       return;
