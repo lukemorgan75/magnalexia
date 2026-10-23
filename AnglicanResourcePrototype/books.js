@@ -1,5 +1,5 @@
 (function () {
-  if (document.body.getAttribute("data-desk") !== "books") return;
+  if (!document.getElementById("shelf")) return;
 
   if (window.pdfjsLib) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
@@ -215,7 +215,7 @@
   }
 
   function query() {
-    var input = document.getElementById("search");
+    var input = document.getElementById("book-search");
     return input ? input.value.trim().toLowerCase() : "";
   }
 
@@ -258,9 +258,21 @@
       card.appendChild(cover);
       card.appendChild(h);
       card.appendChild(p);
-      grid.appendChild(card);
+      var tile = document.createElement("div");
+      tile.className = "book-tile";
+      var filter = document.createElement("button");
+      filter.type = "button";
+      filter.className = "context-add";
+      filter.setAttribute("data-context-add", "work");
+      filter.setAttribute("data-context-id", "eccles:" + book.id);
+      filter.setAttribute("data-context-label", book.title);
+      filter.textContent = "Add filter";
+      tile.appendChild(card);
+      tile.appendChild(filter);
+      grid.appendChild(tile);
     });
     empty.hidden = shown !== 0;
+    document.dispatchEvent(new CustomEvent("ar-works-sync"));
   }
 
   function activePart() {
@@ -414,18 +426,25 @@
     else paintScan();
   }
 
+  function ecclesBits() {
+    var bits = location.hash.replace(/^#/, "").split("/");
+    if (bits[0] !== "literature" || bits[1] !== "eccles") return [];
+    return bits.slice(2).filter(Boolean);
+  }
+
   function setHash(book, part) {
-    var next = "#" + book.id + "/" + part.id;
+    var next = "#literature/eccles/" + book.id + "/" + part.id;
     if (location.hash === next) return;
     hashLock = true;
-    location.hash = next;
+    history.replaceState(null, "", location.pathname + location.search + next);
     hashLock = false;
   }
 
   function clearHash() {
-    if (!location.hash) return;
+    var next = "#literature/eccles";
+    if (location.hash === next) return;
     hashLock = true;
-    history.replaceState(null, "", location.pathname + location.search);
+    history.replaceState(null, "", location.pathname + location.search + next);
     hashLock = false;
   }
 
@@ -446,6 +465,12 @@
     }
     shelf.hidden = true;
     reader.hidden = false;
+    var filter = document.getElementById("book-filter");
+    if (filter) {
+      filter.setAttribute("data-context-id", "eccles:" + book.id);
+      filter.setAttribute("data-context-label", book.title);
+    }
+    document.dispatchEvent(new CustomEvent("ar-works-sync"));
     renderToc();
     setHash(book, part);
     paint();
@@ -548,12 +573,11 @@
   }
 
   function applyHash() {
-    var raw = location.hash.replace(/^#/, "");
-    if (!raw) {
-      if (reading) closeBook();
+    var bits = ecclesBits();
+    if (!bits.length) {
+      if (reading && location.hash.indexOf("#literature/eccles") === 0) closeBook();
       return;
     }
-    var bits = raw.split("/");
     var book = findBook(bits[0]);
     if (!book) return;
     var partId = bits[1] || book.parts[0].id;

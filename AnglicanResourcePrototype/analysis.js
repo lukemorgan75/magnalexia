@@ -1,13 +1,17 @@
 (function () {
-  if (document.body.getAttribute("data-desk") !== "analysis") return;
+  var deskName = document.body.getAttribute("data-desk");
+  if (deskName !== "down" && !document.getElementById("sankey-root") && !document.getElementById("chord-root")) return;
 
   var DATA = null;
   var VERSE = null;
   var markCache = {};
   var chordFocus = null;
   var sankeyFocus = null;
+  var sankeyLatch = null;
   var sankeyDrill = [];
+  var downFocus = null;
   var hoverTimer = 0;
+  var downHoverTimer = 0;
   var grain = "both";
 
   var SHORT = {
@@ -793,8 +797,8 @@
     }
   }
 
-  function layoutBible(bookIds, sectioned) {
-    var width = 1680;
+  function layoutBible(bookIds, sectioned, span) {
+    var width = span || 1680;
     var pad = 28;
     var books = DATA.books;
     var total = 0;
@@ -1019,11 +1023,126 @@
     return "M " + r1(x0) + " " + r1(y0) + " C " + r1(x0) + " " + r1(y0 + dy) + " " + r1(x1) + " " + r1(y1 - dy) + " " + r1(x1) + " " + r1(y1);
   }
 
-  function fittedSection(sec) {
-    if (sec.w > sec.name.length * 7.2) return sec.name;
-    if (sec.id === "major" && sec.w > 42) return "Major";
-    if (sec.id === "minor" && sec.w > 42) return "Minor";
-    return "";
+  var SANS = "system-ui, sans-serif";
+  var SERIF = '"Iowan Old Style", Palatino, Georgia, serif';
+  var BOOK_FORMS = {
+    Genesis: ["Genesis"], Exodus: ["Exodus"], Leviticus: ["Leviticus", "Lev."], Numbers: ["Numbers"],
+    Deuteronomy: ["Deuteronomy", "Deut."], Joshua: ["Joshua", "Josh.", "Josh"], Judges: ["Judges", "Judg.", "Judg"],
+    Ruth: ["Ruth"], "1 Samuel": ["1 Samuel", "1 Sam.", "1 Sam"], "2 Samuel": ["2 Samuel", "2 Sam.", "2 Sam"],
+    "1 Kings": ["1 Kings", "1 Kgs"], "2 Kings": ["2 Kings", "2 Kgs"],
+    "1 Chronicles": ["1 Chronicles", "1 Chron.", "1 Chr."], "2 Chronicles": ["2 Chronicles", "2 Chron.", "2 Chr."],
+    Ezra: ["Ezra"], Nehemiah: ["Nehemiah", "Neh."], Esther: ["Esther", "Esth."],
+    Job: ["Job"], Psalms: ["Psalms"], Proverbs: ["Proverbs", "Prov."], Ecclesiastes: ["Ecclesiastes", "Eccl."],
+    "Song of Solomon": ["Song of Solomon", "Song"],
+    Isaiah: ["Isaiah"], Jeremiah: ["Jeremiah"], Lamentations: ["Lamentations", "Lam."],
+    Ezekiel: ["Ezekiel"], Daniel: ["Daniel", "Dan.", "Dan"],
+    Hosea: ["Hosea", "Hos."], Joel: ["Joel"], Amos: ["Amos"], Obadiah: ["Obadiah", "Obad."],
+    Jonah: ["Jonah"], Micah: ["Micah", "Mic."], Nahum: ["Nahum", "Nah."], Habakkuk: ["Habakkuk", "Hab."],
+    Zephaniah: ["Zephaniah", "Zeph."], Haggai: ["Haggai", "Hag."], Zechariah: ["Zechariah", "Zech."],
+    Malachi: ["Malachi", "Mal."], Matthew: ["Matthew", "Matt."], Mark: ["Mark", "Mk"], Luke: ["Luke"],
+    John: ["John", "Jn"], Acts: ["Acts"], Romans: ["Romans", "Rom."],
+    "1 Corinthians": ["1 Corinthians", "1 Cor."], "2 Corinthians": ["2 Corinthians", "2 Cor."],
+    Galatians: ["Galatians", "Gal."], Ephesians: ["Ephesians", "Eph."], Philippians: ["Philippians", "Phil."],
+    Colossians: ["Colossians", "Col."], "1 Thessalonians": ["1 Thessalonians", "1 Thess.", "1 Th."],
+    "2 Thessalonians": ["2 Thessalonians", "2 Thess.", "2 Th."], "1 Timothy": ["1 Timothy", "1 Tim."],
+    "2 Timothy": ["2 Timothy", "2 Tim."], Titus: ["Titus", "Tit."], Philemon: ["Philemon", "Phlm."],
+    Hebrews: ["Hebrews", "Heb."], James: ["James", "Jas."], "1 Peter": ["1 Peter", "1 Pet."],
+    "2 Peter": ["2 Peter", "2 Pet."], "1 John": ["1 John", "1 Jn"], "2 John": ["2 John", "2 Jn"],
+    "3 John": ["3 John", "3 Jn"], Jude: ["Jude"], Revelation: ["Revelation", "Rev."]
+  };
+  var SECTION_FORMS = {
+    law: [["Law"]],
+    history: [["History"]],
+    wisdom: [["Wisdom"]],
+    major: [["Major Prophets"]],
+    minor: [["Minor Prophets"], ["Min. Proph."]],
+    gospels: [["Gospels"]],
+    acts: [["Church History"], ["Church", "History"], ["Ch. Hist."]],
+    paul: [["Pauline letters"], ["Pauline Epist."]],
+    general: [["General letters"], ["Gen. Epistles"], ["Gen. Ep."]],
+    revelation: [["Prophecy"], ["Proph."], ["Pr."]]
+  };
+
+  function glyphWidth(ch, size) {
+    if (ch === " ") return size * 0.34;
+    if (ch === "." || ch === "," || ch === "'" || ch === "’") return size * 0.28;
+    if ("ilIj1!".indexOf(ch) !== -1) return size * 0.32;
+    if (ch === "m" || ch === "w") return size * 0.86;
+    if (ch === "M" || ch === "W") return size * 0.92;
+    if (ch >= "A" && ch <= "Z") return size * 0.7;
+    if (ch >= "0" && ch <= "9") return size * 0.58;
+    return size * 0.56;
+  }
+  function textWidth(text, size) {
+    var w = 0;
+    for (var i = 0; i < text.length; i++) w += glyphWidth(text.charAt(i), size);
+    return w;
+  }
+  function bookLabel(name, width, height) {
+    var forms = BOOK_FORMS[name] || [name];
+    var sizes = [12, 11, 10];
+    var limit = width - 2;
+    var s, i, size, form;
+    for (s = 0; s < sizes.length; s++) {
+      size = sizes[s];
+      if (size > height - 8) continue;
+      for (i = 0; i < forms.length; i++) {
+        form = forms[i];
+        if (textWidth(form, size) <= limit) return { text: form, size: size, vertical: false };
+      }
+    }
+    var shortForm = forms[forms.length - 1];
+    var vSize = Math.min(11, width - 1);
+    if (vSize < 6) return null;
+    var need = textWidth(shortForm, vSize);
+    var limitH = height - 4;
+    if (need > limitH) vSize = vSize * limitH / need;
+    if (vSize < 6) return null;
+    return { text: shortForm, size: Math.round(vSize * 10) / 10, vertical: true };
+  }
+  function sectionLabel(sec, width, height) {
+    var options = SECTION_FORMS[sec.id] || [[sec.name]];
+    var sizes = [16, 15, 14, 13, 12, 11, 10];
+    var limit = Math.max(0, width - 2);
+    var s, o, lines, size, n, fit;
+    for (s = 0; s < sizes.length; s++) {
+      size = sizes[s];
+      for (o = 0; o < options.length; o++) {
+        lines = options[o];
+        if (lines.length * size * 1.15 > height - 4) continue;
+        fit = true;
+        for (n = 0; n < lines.length; n++) {
+          if (textWidth(lines[n], size) > limit) fit = false;
+        }
+        if (fit) return { lines: lines, size: size };
+      }
+    }
+    return null;
+  }
+  function sectionText(sec, x, y, w, h, tip) {
+    var fit = sectionLabel(sec, w, h);
+    if (!fit) return "";
+    var cx = r1(x + w / 2);
+    var cy = r1(y + h / 2);
+    var attrs = ' class="sk-label" data-kind="section" data-id="' + esc(sec.id) + '" data-tip="' + esc(tip) + '" text-anchor="middle" fill="' + sourceBar().ink + '" font-size="' + fit.size + '" font-style="italic" font-family="' + SERIF + '" pointer-events="none"';
+    if (fit.lines.length === 1) {
+      return '<text' + attrs + ' x="' + cx + '" y="' + cy + '" dominant-baseline="middle">' + esc(fit.lines[0]) + "</text>";
+    }
+    var lineH = fit.size * 1.12;
+    var y0 = r1(cy - lineH * (fit.lines.length - 1) / 2);
+    var out = '<text' + attrs + ' x="' + cx + '" y="' + y0 + '" dominant-baseline="middle">';
+    fit.lines.forEach(function (line, idx) {
+      out += '<tspan x="' + cx + '"' + (idx ? ' dy="' + r1(lineH) + '"' : "") + ">" + esc(line) + "</tspan>";
+    });
+    return out + "</text>";
+  }
+  function bookText(book, bi, box, y, h, tip) {
+    var fit = bookLabel(book.name, box.w, h);
+    if (!fit) return "";
+    var cx = r1(box.x + box.w / 2);
+    var cy = r1(y + h / 2);
+    var turn = fit.vertical ? ' transform="rotate(-90 ' + cx + " " + cy + ')"' : "";
+    return '<text class="sk-label" data-kind="book" data-id="' + bi + '" data-section="' + esc(book.section) + '" data-tip="' + esc(tip) + '" text-anchor="middle" dominant-baseline="middle" fill="' + sourceBar().ink + '" font-size="' + fit.size + '" font-family="' + SANS + '" pointer-events="none"' + turn + ' x="' + cx + '" y="' + cy + '">' + esc(fit.text) + "</text>";
   }
 
   function drawSankey() {
@@ -1068,11 +1187,11 @@
     if (depth && depth.kind === "section" && barMode === "canon") bibleParent = "section";
     else if (depth && depth.kind === "book" && barMode === "chapters") bibleParent = "book";
     else if (depth && depth.kind === "chapter" && (barMode === "verses" || barMode === "canon")) bibleParent = "chapter";
-    var ySec = 28;
-    var hSec = 22;
-    var hParent = 22;
-    var yBook = (showSection || bibleParent) ? 58 : 28;
-    var hBook = 32;
+    var ySec = 12;
+    var hSec = 30;
+    var hParent = 30;
+    var yBook = (showSection || bibleParent) ? 48 : 14;
+    var hBook = 36;
     var barBottom = (barMode !== "canon" || showBook) ? (yBook + hBook) : (ySec + hSec);
     var y0 = barBottom + 8;
     var y1 = 608;
@@ -1120,11 +1239,8 @@
         var words = 0;
         DATA.books.forEach(function (b) { if (b.section === sec.id) words += b.words; });
         var tip = sec.name + " · " + num(words) + " words";
-        var label = fittedSection(sec);
         parts.push('<rect class="sk-node" data-kind="section" data-id="' + esc(sec.id) + '" data-tip="' + esc(tip) + '" x="' + r1(sec.x) + '" y="' + ySec + '" width="' + r1(sec.w) + '" height="' + hSec + '" fill="' + bar.fill + '"/>');
-        if (label) {
-          parts.push('<text class="sk-label" data-kind="section" data-id="' + esc(sec.id) + '" data-tip="' + esc(tip) + '" x="' + r1(sec.x + sec.w / 2) + '" y="' + (ySec - 6) + '" text-anchor="middle" fill="' + ink() + '" font-size="12" font-family="system-ui, sans-serif">' + esc(label) + "</text>");
-        }
+        parts.push(sectionText(sec, sec.x, ySec, sec.w, hSec, tip));
       });
     }
     if (showBook) {
@@ -1135,9 +1251,7 @@
         var tip = book.name + " · " + num(book.words) + " words";
         var bookParent = depth && depth.kind === "book" && barMode === "canon" && String(depth.id) === String(bi) ? ' data-parent="1"' : "";
         parts.push('<rect class="sk-node" data-kind="book" data-id="' + bi + '" data-section="' + esc(book.section) + '" data-tip="' + esc(tip) + '"' + bookParent + ' x="' + r1(box.x) + '" y="' + yBook + '" width="' + r1(Math.max(box.w, 0.4)) + '" height="' + hBook + '" fill="' + bar.fill + '"/>');
-        if (box.w > book.name.length * 6.6 + 8) {
-          parts.push('<text class="sk-label" data-kind="book" data-id="' + bi + '" data-section="' + esc(book.section) + '" data-tip="' + esc(tip) + '" x="' + r1(box.x + box.w / 2) + '" y="' + (yBook + hBook / 2 + 1) + '" text-anchor="middle" dominant-baseline="middle" fill="' + bar.ink + '" font-size="11" font-family="system-ui, sans-serif" pointer-events="none">' + esc(book.name) + "</text>");
-        }
+        parts.push(bookText(book, bi, box, yBook, hBook, tip));
       });
     }
     if (units) drawUnits(parts, units, yBook, hBook);
@@ -1227,9 +1341,221 @@
         fill: dayTone.fill, ink: dayTone.ink, label: leaf.name || "Day"
       });
     }
-    var rest = "Hover a category or a band. Click a category to open it. Click it again to return.";
-    root.innerHTML = '<div class="viz-head"><div><h2>Search the Lectionary by the Bible</h2>' + crumbBar(sankeyDrill, sankeyStepLabel, "Canon") + '</div></div><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><svg viewBox="0 0 1680 690" role="img" aria-label="Search the Lectionary by the Bible">' + parts.join("") + "</svg>";
+    var rest = "Hover a category or a band. Click a band to hold it. Click a category to open it. Click it again to return.";
+    root.innerHTML = '<div class="viz-head"><div><h2>Search the Lectionary by the Bible</h2>' + crumbBar(sankeyDrill, sankeyStepLabel, "Canon") + '</div></div><div class="viz-read-row"><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><button type="button" class="context-add" id="sankey-context" hidden>Add filter</button></div><svg viewBox="0 0 1680 690" role="img" aria-label="Search the Lectionary by the Bible">' + parts.join("") + "</svg>";
     applySankeyFocus();
+    if (sankeyLatch) {
+      var held = root.querySelector('.sk-ribbon[data-id="' + sankeyLatch.id + '"]');
+      if (!held) {
+        sankeyLatch = null;
+        if (sankeyFocus && sankeyFocus.kind === "ribbon") sankeyFocus = null;
+        applySankeyFocus();
+      } else {
+        var heldRead = root.querySelector(".viz-read");
+        if (heldRead) heldRead.textContent = held.getAttribute("data-tip") || heldRead.getAttribute("data-rest");
+      }
+    }
+    syncSankeyContext();
+    drawDownSankey();
+  }
+
+  function bandAcross(x0, y0, x1, y1, h) {
+    var dx = (x1 - x0) * 0.46;
+    return "M " + r1(x0) + " " + r1(y0)
+      + " C " + r1(x0 + dx) + " " + r1(y0) + " " + r1(x1 - dx) + " " + r1(y1) + " " + r1(x1) + " " + r1(y1)
+      + " L " + r1(x1) + " " + r1(y1 + h)
+      + " C " + r1(x1 - dx) + " " + r1(y1 + h) + " " + r1(x0 + dx) + " " + r1(y0 + h) + " " + r1(x0) + " " + r1(y0 + h) + " Z";
+  }
+
+  function lineAcross(x0, y0, x1, y1) {
+    var dx = (x1 - x0) * 0.46;
+    return "M " + r1(x0) + " " + r1(y0) + " C " + r1(x0 + dx) + " " + r1(y0) + " " + r1(x1 - dx) + " " + r1(y1) + " " + r1(x1) + " " + r1(y1);
+  }
+
+  function drawDownSankey() {
+    var root = document.getElementById("sankey-down-root");
+    if (!root || !DATA) return;
+    var kept = 0;
+    var scroller = root.querySelector(".sk-scroll");
+    if (scroller) kept = scroller.scrollTop;
+    var ids = [];
+    for (var bi = 0; bi < DATA.books.length; bi++) ids.push(bi);
+    var items = [];
+    (DATA.passages || []).forEach(function (p, idx) {
+      if (DATA.books[p.b]) items.push({ p: p, idx: idx });
+    });
+    var span = 5400;
+    var geo = layoutBible(ids, true, span);
+    var lect = layoutLect(geo.px, geo.pad, geo.right, items);
+    var sectionX = 168;
+    var sectionW = 22;
+    var bookX = 198;
+    var bookW = 34;
+    var flowX = bookX + bookW;
+    var seasonX = 900;
+    var seasonW = 112;
+    var yearX = 1022;
+    var yearW = 20;
+    var viewW = 1240;
+    var plotEnd = geo.right || span;
+    lect.cycles.forEach(function (cycle) {
+      var end = cycle.x + cycle.w;
+      if (end > plotEnd) plotEnd = end;
+    });
+    var viewH = Math.ceil(plotEnd + 28);
+    var parts = [];
+    var bar = sourceBar();
+    geo.secGeom.forEach(function (sec) {
+      var words = 0;
+      DATA.books.forEach(function (b) { if (b.section === sec.id) words += b.words; });
+      var tip = sec.name + " · " + num(words) + " words";
+      var attrs = ' data-kind="section" data-id="' + esc(sec.id) + '" data-tip="' + esc(tip) + '"';
+      parts.push('<rect class="sk-node"' + attrs + ' x="' + sectionX + '" y="' + r1(sec.x) + '" width="' + sectionW + '" height="' + r1(Math.max(sec.w, 0.4)) + '" fill="' + bar.fill + '"/>');
+      if (sec.w > sec.name.length * 6.4) {
+        var cy = sec.x + sec.w / 2;
+        var cx = sectionX + sectionW / 2;
+        parts.push('<text class="sk-label"' + attrs + ' x="' + r1(cx) + '" y="' + r1(cy) + '" text-anchor="middle" dominant-baseline="middle" fill="' + bar.ink + '" font-size="11" font-family="system-ui, sans-serif" transform="rotate(-90 ' + r1(cx) + " " + r1(cy) + ')">' + esc(sec.name) + "</text>");
+      }
+    });
+    ids.forEach(function (id) {
+      var book = DATA.books[id];
+      var box = geo.bookGeom[id];
+      if (!book || !box || box.w < 0.25) return;
+      var tip = book.name + " · " + num(book.words) + " words";
+      var attrs = ' data-kind="book" data-id="' + id + '" data-section="' + esc(book.section) + '" data-tip="' + esc(tip) + '"';
+      parts.push('<rect class="sk-node"' + attrs + ' x="' + bookX + '" y="' + r1(box.x) + '" width="' + bookW + '" height="' + r1(Math.max(box.w, 0.4)) + '" fill="' + bar.fill + '"/>');
+      if (box.w >= 13) {
+        parts.push('<text class="sk-label"' + attrs + ' x="' + (sectionX - 8) + '" y="' + r1(box.x + box.w / 2) + '" text-anchor="end" dominant-baseline="middle" fill="' + ink() + '" font-size="11" font-family="system-ui, sans-serif">' + esc(book.name) + "</text>");
+      }
+    });
+    lect.placed.forEach(function (item) {
+      var p = item.p;
+      var book = DATA.books[p.b];
+      var box = geo.bookGeom[p.b];
+      if (!book || !box) return;
+      var sw = item.sw != null ? item.sw : Math.max(p.w * geo.px, 0);
+      var sy = item.sx != null ? item.sx : box.x + (book.words ? (p.o / book.words) * box.w : 0);
+      var color = seasonColor(p.s);
+      var tip = citation(p) + " · Year " + p.y + " · " + p.n + " · " + seasonName(p.s) + ". " + nextKept(p);
+      parts.push('<g class="sk-ribbon" data-kind="ribbon" data-idx="' + item.idx + '" data-id="' + item.idx + '" data-book="' + p.b + '" data-section="' + esc(book.section) + '" data-year="' + esc(p.y) + '" data-season="' + esc(p.s) + '" data-day="' + esc(p.i) + '" data-tip="' + esc(tip) + '">'
+        + '<path fill="' + color.fill + '" style="pointer-events:none" d="' + bandAcross(flowX, sy, seasonX, item.x, sw) + '"/>'
+        + '<path class="sk-hit" stroke-width="' + r1(Math.max(sw, 7)) + '" d="' + lineAcross(flowX, sy + sw / 2, seasonX, item.x + sw / 2) + '"/>'
+        + "</g>");
+    });
+    lect.cycles.forEach(function (cycle) {
+      cycle.seasons.forEach(function (season) {
+        if (season.w <= 0) return;
+        var color = seasonColor(season.s);
+        var tip = "Year " + season.y + " · " + seasonName(season.s);
+        var attrs = ' data-kind="season" data-id="' + esc(season.s) + '" data-year="' + esc(season.y) + '" data-tip="' + esc(tip) + '"';
+        parts.push('<rect class="sk-node"' + attrs + ' x="' + seasonX + '" y="' + r1(season.x) + '" width="' + seasonW + '" height="' + r1(season.w) + '" fill="' + color.fill + '"/>');
+        var label = season.w > 16 ? (seasonW > seasonName(season.s).length * 6.4 ? seasonName(season.s) : (SHORT[season.s] || "")) : "";
+        if (label) {
+          parts.push('<text class="sk-label"' + attrs + ' x="' + (seasonX + 8) + '" y="' + r1(season.x + Math.min(14, season.w / 2)) + '" text-anchor="start" dominant-baseline="middle" fill="' + color.ink + '" font-size="11" font-family="system-ui, sans-serif">' + esc(label) + "</text>");
+        }
+      });
+      var name = "Year " + cycle.y;
+      var yearTip = "Revised Common Lectionary · " + name;
+      var yearAttrs = ' data-kind="cycle" data-id="' + esc(cycle.y) + '" data-tip="' + esc(yearTip) + '"';
+      parts.push('<rect class="sk-node"' + yearAttrs + ' x="' + yearX + '" y="' + r1(cycle.x) + '" width="' + yearW + '" height="' + r1(Math.max(cycle.w, 0.4)) + '" fill="' + bar.fill + '"/>');
+      if (cycle.w > 18) {
+        parts.push('<text class="sk-label"' + yearAttrs + ' x="' + (yearX + yearW + 8) + '" y="' + r1(cycle.x + 14) + '" text-anchor="start" dominant-baseline="middle" fill="' + ink() + '" font-size="13" font-weight="650" font-family="system-ui, sans-serif">' + esc(name) + "</text>");
+      }
+    });
+    var rest = "The Bible runs down the left, from Genesis. The lectionary runs down the right, from Year A through Year C. Scroll to move later in the year. Hover a category or a band.";
+    root.innerHTML = '<div class="viz-head"><div><h2>The Bible beside the year</h2></div></div><p class="viz-read" data-rest="' + esc(rest) + '">' + esc(rest) + '</p><div class="sk-scroll"><svg class="sk-down" width="' + viewW + '" height="' + viewH + '" data-vw="' + viewW + '" data-vh="' + viewH + '" viewBox="0 0 ' + viewW + " " + viewH + '" preserveAspectRatio="xMinYMin meet" role="img" aria-label="The Bible on the left and the lectionary running downward">' + parts.join("") + "</svg></div>";
+    var nextScroll = root.querySelector(".sk-scroll");
+    if (nextScroll) nextScroll.scrollTop = kept;
+    sizeDownChart();
+    applyDownZoom();
+    applyDownFocus();
+  }
+
+  function applyDownZoom() {
+    var svg = document.querySelector("#sankey-down-root svg.sk-down");
+    if (!svg) return;
+    var z = 1;
+    if (document.body.getAttribute("data-zoom-live") === "1") {
+      z = parseFloat(sessionStorage.getItem("ar-zoom") || "1");
+      if (!z || z < 1) z = 1;
+    }
+    svg.style.zoom = z === 1 ? "" : String(z);
+  }
+
+  function sizeDownChart(tries) {
+    var svg = document.querySelector("#sankey-down-root svg");
+    var box = document.querySelector("#sankey-down-root .sk-scroll");
+    if (!svg || !box) return;
+    var vw = Number(svg.getAttribute("data-vw")) || 1240;
+    var vh = Number(svg.getAttribute("data-vh")) || 5400;
+    var w = box.clientWidth || Math.round(box.getBoundingClientRect().width);
+    if (!w || !vw) {
+      if ((tries || 0) < 8) requestAnimationFrame(function () { sizeDownChart((tries || 0) + 1); });
+      return;
+    }
+    svg.style.width = "100%";
+    svg.style.height = Math.round(w * vh / vw) + "px";
+    svg.style.maxHeight = "none";
+    svg.style.minHeight = "0";
+  }
+
+  function applyDownFocus() {
+    var root = document.getElementById("sankey-down-root");
+    if (!root || !DATA) return;
+    var pick = downFocus;
+    var activeBooks = {};
+    var activeSections = {};
+    var activeSeasons = {};
+    var activeYears = {};
+    root.querySelectorAll(".sk-ribbon").forEach(function (el) {
+      var on = pick ? flowOn(el, pick) : false;
+      el.classList.toggle("is-on", !!pick && on);
+      el.classList.toggle("is-off", !!pick && !on);
+      if (on) {
+        activeBooks[el.getAttribute("data-book")] = true;
+        activeSections[el.getAttribute("data-section")] = true;
+        activeSeasons[el.getAttribute("data-year") + "|" + el.getAttribute("data-season")] = true;
+        activeYears[el.getAttribute("data-year")] = true;
+      }
+    });
+    var seasonAnchor = root.querySelector('.sk-node[data-kind="season"]');
+    if (seasonAnchor) {
+      root.querySelectorAll(".sk-ribbon.is-on").forEach(function (el) { seasonAnchor.before(el); });
+    }
+    root.querySelectorAll(".sk-node, .sk-label").forEach(function (el) {
+      if (!pick) {
+        el.classList.remove("is-on", "is-off", "is-touch");
+        return;
+      }
+      var kind = el.getAttribute("data-kind");
+      var id = el.getAttribute("data-id");
+      var state = "off";
+      if (kind === "book") {
+        if (pick.kind === "book" && String(pick.id) === id) state = "on";
+        else if (pick.kind === "section" && el.getAttribute("data-section") === pick.id) state = "on";
+        else if (activeBooks[id]) state = "touch";
+      } else if (kind === "section") {
+        if (pick.kind === "section" && pick.id === id) state = "on";
+        else if (pick.kind === "book" && DATA.books[pick.id] && DATA.books[pick.id].section === id) state = "on";
+        else if (activeSections[id]) state = "touch";
+      } else if (kind === "cycle") {
+        if (pick.kind === "cycle" && pick.id === id) state = "on";
+        else if (sourcePick(pick.kind) && activeYears[id]) state = "touch";
+        else if ((pick.kind === "season" || pick.kind === "ribbon") && id === pick.year) state = "touch";
+      } else if (kind === "season") {
+        var seasonKey = el.getAttribute("data-year") + "|" + id;
+        if (pick.kind === "season" && pick.id === id && pick.year === el.getAttribute("data-year")) state = "on";
+        else if (sourcePick(pick.kind) && activeSeasons[seasonKey]) state = "on";
+        else if (pick.kind === "cycle" && el.getAttribute("data-year") === pick.id) state = "touch";
+        else if (pick.kind === "ribbon") {
+          var flow = root.querySelector('.sk-ribbon[data-idx="' + pick.id + '"]');
+          if (flow && flow.getAttribute("data-year") === el.getAttribute("data-year") && flow.getAttribute("data-season") === id) state = "on";
+        }
+      }
+      el.classList.toggle("is-on", state === "on");
+      el.classList.toggle("is-touch", state === "touch");
+      el.classList.toggle("is-off", state === "off");
+    });
   }
 
   function flowOn(el, pick) {
@@ -1277,6 +1603,8 @@
       var on = pick ? flowOn(el, pick) : false;
       el.classList.toggle("is-on", !!pick && on);
       el.classList.toggle("is-off", !!pick && !on);
+      var fill = el.querySelector("path");
+      if (fill) fill.style.pointerEvents = sankeyLatch && on ? "auto" : "none";
       if (on) {
         activeBooks[el.getAttribute("data-book")] = true;
         activeSections[el.getAttribute("data-section")] = true;
@@ -1406,6 +1734,7 @@
 
   function drillDown() {
     if (!canSankeyDrill()) return;
+    sankeyLatch = null;
     sankeyDrill.push(stepFrom(sankeyFocus));
     sankeyFocus = null;
     drawSankey();
@@ -1417,6 +1746,7 @@
       if (samePick(sankeyDrill[i], pick)) { idx = i; break; }
     }
     if (idx < 0) return;
+    sankeyLatch = null;
     var step = sankeyDrill.splice(idx, 1)[0];
     sankeyFocus = step;
     drawSankey();
@@ -1442,6 +1772,7 @@
     var leaf = bibleLeaf();
     var already = leaf && leaf.kind === "chapter" && String(leaf.book) === String(bi) && String(leaf.id) === String(chapter);
     if (!already) {
+      sankeyLatch = null;
       sankeyDrill.push(stepFrom(pick));
       sankeyFocus = null;
       drawSankey();
@@ -1471,7 +1802,43 @@
     clearTimeout(hoverTimer);
     hoverTimer = 0;
   }
+  function sankeyRead(panel, text) {
+    var read = panel ? panel.querySelector(".viz-read") : document.querySelector("#sankey-root .viz-read");
+    if (!read) return;
+    read.textContent = text || read.getAttribute("data-rest");
+  }
+  function syncSankeyContext() {
+    var btn = document.getElementById("sankey-context");
+    if (!btn) return;
+    var ribbon = sankeyLatch && document.querySelector('#sankey-root .sk-ribbon[data-id="' + sankeyLatch.id + '"]');
+    var season = ribbon ? ribbon.getAttribute("data-season") : "";
+    if (!ribbon || !season) {
+      btn.hidden = true;
+      return;
+    }
+    var label = seasonName(season);
+    var on = false;
+    try {
+      var raw = JSON.parse(sessionStorage.getItem("ar-context") || "null");
+      on = !!(raw && raw.season === season);
+    } catch (e) {}
+    btn.hidden = false;
+    btn.setAttribute("data-context-add", "season");
+    btn.setAttribute("data-context-id", season);
+    btn.setAttribute("data-context-label", label);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", (on ? "Remove " : "Add ") + label + " as a filter");
+    btn.textContent = on ? "In filters" : "Add filter";
+  }
+  function releaseSankeyLatch(panel) {
+    sankeyLatch = null;
+    sankeyFocus = null;
+    applySankeyFocus();
+    sankeyRead(panel, "");
+    syncSankeyContext();
+  }
   function settleSankeyHover(panel, target) {
+    if (sankeyLatch) return;
     var read = panel.querySelector(".viz-read");
     var node = target && target.isConnected && target.closest ? target.closest("[data-kind]") : null;
     if (node && node.isConnected && panel.contains(node)) {
@@ -1495,15 +1862,36 @@
       if (which === "sankey") {
         cancelSankeyHover();
         var crumb = event.target.closest("[data-crumb]");
+        if (event.target.closest("[data-context-add]")) return;
         if (crumb && panel.contains(crumb)) {
+          sankeyLatch = null;
           sankeyDrill = sankeyDrill.slice(0, Number(crumb.getAttribute("data-crumb")));
           sankeyFocus = null;
           drawSankey();
           return;
         }
         var el = event.target.closest("[data-kind]");
-        if (!el || !panel.contains(el)) return;
+        if (!el || !panel.contains(el)) {
+          if (sankeyLatch) releaseSankeyLatch(panel);
+          return;
+        }
         var next = pickFrom(el);
+        if (next.kind === "ribbon") {
+          if (sankeyLatch && samePick(sankeyLatch, next)) {
+            releaseSankeyLatch(panel);
+            return;
+          }
+          sankeyLatch = next;
+          sankeyFocus = next;
+          applySankeyFocus();
+          sankeyRead(panel, el.getAttribute("data-tip"));
+          syncSankeyContext();
+          return;
+        }
+        if (sankeyLatch) {
+          sankeyLatch = null;
+          syncSankeyContext();
+        }
         if (el.getAttribute("data-parent") === "1") {
           drillUpFrom(next);
           return;
@@ -1543,6 +1931,10 @@
         read.textContent = tip && panel.contains(tip) ? tip.getAttribute("data-tip") : read.getAttribute("data-rest");
         return;
       }
+      if (sankeyLatch) {
+        cancelSankeyHover();
+        return;
+      }
       var target = event.target;
       if (hoverTimer) clearTimeout(hoverTimer);
       hoverTimer = setTimeout(function () {
@@ -1553,6 +1945,7 @@
     if (which === "sankey") {
       panel.addEventListener("mouseleave", function () {
         cancelSankeyHover();
+        if (sankeyLatch) return;
         if (!sankeyFocus) {
           var idle = panel.querySelector(".viz-read");
           if (idle) idle.textContent = idle.getAttribute("data-rest");
@@ -1566,23 +1959,96 @@
     }
   }
 
+  function cancelDownHover() {
+    if (!downHoverTimer) return;
+    clearTimeout(downHoverTimer);
+    downHoverTimer = 0;
+  }
+  function settleDownHover(panel, target) {
+    var read = panel.querySelector(".viz-read");
+    var node = target && target.isConnected && target.closest ? target.closest("[data-kind]") : null;
+    if (node && node.isConnected && panel.contains(node)) {
+      var next = pickFrom(node);
+      if (!samePick(downFocus, next)) {
+        downFocus = next;
+        applyDownFocus();
+      }
+      if (read) read.textContent = node.getAttribute("data-tip") || read.getAttribute("data-rest");
+      return;
+    }
+    if (downFocus) {
+      downFocus = null;
+      applyDownFocus();
+    }
+    if (read) read.textContent = read.getAttribute("data-rest");
+  }
+  function wireDown(panel) {
+    if (!panel) return;
+    panel.addEventListener("click", function (event) {
+      cancelDownHover();
+      var el = event.target.closest("[data-kind]");
+      var read = panel.querySelector(".viz-read");
+      if (!el || !panel.contains(el)) {
+        downFocus = null;
+        applyDownFocus();
+        if (read) read.textContent = read.getAttribute("data-rest");
+        return;
+      }
+      downFocus = pickFrom(el);
+      applyDownFocus();
+      if (read) read.textContent = el.getAttribute("data-tip") || read.getAttribute("data-rest");
+    });
+    panel.addEventListener("mousemove", function (event) {
+      var target = event.target;
+      if (downHoverTimer) clearTimeout(downHoverTimer);
+      downHoverTimer = setTimeout(function () {
+        downHoverTimer = 0;
+        settleDownHover(panel, target);
+      }, 120);
+    });
+    panel.addEventListener("mouseleave", function () {
+      cancelDownHover();
+      if (downFocus) {
+        downFocus = null;
+        applyDownFocus();
+      }
+      var read = panel.querySelector(".viz-read");
+      if (read) read.textContent = read.getAttribute("data-rest");
+    });
+  }
+
+  document.addEventListener("ar-context", syncSankeyContext);
+
   wire(document.getElementById("chord-panel"), "chord");
   wire(document.getElementById("sankey-panel"), "sankey");
+  wireDown(document.getElementById("sankey-down"));
+  window.addEventListener("resize", sizeDownChart);
 
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
     var tag = event.target && event.target.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA") return;
     cancelSankeyHover();
-    if (!chordFocus && !sankeyFocus) return;
+    cancelDownHover();
+    if (!chordFocus && !sankeyFocus && !sankeyLatch && !downFocus) return;
     chordFocus = null;
+    sankeyLatch = null;
     sankeyFocus = null;
+    downFocus = null;
     applyChordFocus();
     applySankeyFocus();
+    applyDownFocus();
+    var sankeyIdle = document.querySelector("#sankey-root .viz-read");
+    if (sankeyIdle) sankeyIdle.textContent = sankeyIdle.getAttribute("data-rest");
+    syncSankeyContext();
   });
 
   new MutationObserver(function () {
     if (!DATA) return;
+    if (deskName === "down") {
+      drawDownSankey();
+      return;
+    }
     drawChord();
     drawSankey();
   }).observe(document.body, { attributes: true, attributeFilter: ["data-wheel"] });
@@ -1594,12 +2060,19 @@
     .then(function (pair) {
       DATA = pair[0];
       VERSE = pair[1];
+      if (deskName === "down") {
+        drawDownSankey();
+        return;
+      }
       drawChord();
       drawSankey();
     })
     .catch(function (err) {
       console.error(err);
+      var note = '<p class="viz-note">The lectionary figure could not be loaded.</p>';
       var chord = document.getElementById("chord-root");
-      if (chord) chord.innerHTML = '<p class="viz-note">The lectionary figure could not be loaded.</p>';
+      if (chord) chord.innerHTML = note;
+      var down = document.getElementById("sankey-down-root");
+      if (down) down.innerHTML = '<div class="viz-head"><div><h2>The Bible beside the year</h2></div></div>' + note;
     });
 })();

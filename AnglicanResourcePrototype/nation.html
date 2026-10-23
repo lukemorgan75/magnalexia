@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Anglican Resource</title>
+  <script>
+    (function () {
+      var raw = location.hash.replace(/^#/, "");
+      var next = "app.html#literature/national";
+      if (raw && raw.indexOf("literature/") !== 0) next = "app.html#literature/national/" + raw;
+      else if (raw) next = "app.html#" + raw;
+      location.replace(next);
+    })();
+  </script>
+</head>
+<body></body>
+</html>

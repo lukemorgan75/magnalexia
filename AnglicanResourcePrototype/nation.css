@@ -1,0 +1,249 @@
+body[data-desk="nation"] .nation-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+body[data-desk="nation"] #viz-zoom {
+  min-height: 100%;
+}
+
+.nation-reader {
+  display: flex;
+  height: calc(100vh - 84px);
+  min-height: calc(100vh - 84px);
+}
+
+.nation-reader .toc {
+  width: min(300px, 34vw);
+  flex: none;
+  overflow: auto;
+  padding: 18px 10px 28px;
+  border-right: 1px solid var(--line);
+  background: var(--sheet);
+}
+
+.toc-nation {
+  margin: 0;
+  padding: 4px 10px 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.toc-note {
+  margin: 6px 0 8px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.toc-group h3 {
+  margin: 14px 0 4px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.nation-reader .toc button {
+  display: block;
+  width: 100%;
+  margin: 0 0 2px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nation-reader .toc button:hover,
+.nation-reader .toc button:focus-visible,
+.nation-reader .toc button[aria-current="true"] {
+  background: var(--wash);
+  outline: none;
+}
+
+.toc-doc {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nation-reader .toc .toc-doc > [data-doc] {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+.nation-reader .toc .toc-doc .context-add {
+  width: auto;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.doc-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  background: var(--paper);
+}
+
+.doc {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 36px 28px 80px;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+.doc h2 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.doc-edition {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.doc p {
+  margin: 0 0 1em;
+}
+
+.doc-head {
+  margin: 0 0 0.2em;
+  text-align: center;
+  font-size: 17px;
+}
+
+.doc-congress {
+  margin: 0 0 1em;
+  font-size: 1.2em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.decl-charges {
+  margin: 0 0 1em;
+  padding-left: 1.6em;
+}
+
+.decl-signers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 18px;
+  margin-top: 0.2em;
+}
+
+.decl-signers h3 {
+  margin: 1.05em 0 0.15em;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.decl-signers h3:first-child { margin-top: 0; }
+
+.decl-signers p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.doc-rule {
+  margin: 1.4em 0 1.1em;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.doc .sign-line {
+  margin-top: 1.4em;
+}
+
+.signers {
+  margin-top: 1.6em;
+}
+
+.signers h3 {
+  margin: 1.1em 0 0.2em;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.signers p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+.doc-note {
+  margin-top: 1.8em;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+#doc-empty {
+  max-width: 40rem;
+  margin: 0;
+  padding: 36px 28px;
+  color: var(--muted);
+}
+
+.doc[hidden],
+.toc-group[hidden],
+.nation-reader .toc button[hidden],
+#doc-empty[hidden] {
+  display: none;
+}
+
+body[data-need-app="1"][data-wheel="fog"] .toc-nation,
+body[data-need-app="1"][data-wheel="fog"] .doc h2 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .decl-signers { grid-template-columns: 1fr 1fr; }
+
+  .nation-reader {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 84px);
+  }
+
+  .nation-reader .toc {
+    width: auto;
+    max-height: 34vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .doc-scroll {
+    min-height: 70vh;
+  }
+}

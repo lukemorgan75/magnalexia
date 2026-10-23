@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="open">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,23 +8,9 @@
   <link rel="icon" href="../assets/logo.png" type="image/png" />
   <link rel="preload" as="image" href="hero.png" />
   <link rel="stylesheet" href="ar.css" />
-  <script>if (sessionStorage.getItem("ar-main") === "1") document.documentElement.classList.add("open");</script>
 </head>
 <body>
-  <section id="gate" class="gate">
-    <form id="gate-form" class="panel">
-      <img class="mark" src="mark.png" alt="">
-      <h1>Sign in</h1>
-      <label for="gate-user">User</label>
-      <input id="gate-user" name="user" autocomplete="username" required />
-      <label for="gate-pass">Password</label>
-      <input id="gate-pass" name="pass" type="password" autocomplete="current-password" required />
-      <button class="signup" type="submit">Sign in</button>
-      <p id="gate-notice" class="notice" role="status"></p>
-    </form>
-  </section>
-
-  <div id="site" inert>
+  <div id="site">
     <header class="bar">
       <a class="brand" href="./" aria-label="Anglican Resource">
         <img class="mark" src="mark.png" alt="">
@@ -60,14 +46,12 @@
   <section id="login" class="login" hidden>
     <form id="login-form" class="panel">
       <h1>Sign in</h1>
-      <label for="login-user">User</label>
-      <input id="login-user" name="user" autocomplete="username" required />
       <label for="login-pass">Password</label>
       <input id="login-pass" name="pass" type="password" autocomplete="current-password" required />
       <button class="signup" type="submit">Sign in</button>
       <p id="login-notice" class="notice" role="status"></p>
     </form>
   </section>
-  <script src="ar.js"></script>
+  <script src="ar.js?v=pass1"></script>
 </body>
 </html>

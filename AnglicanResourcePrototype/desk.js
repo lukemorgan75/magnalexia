@@ -11,7 +11,46 @@
     { id: "both", label: "Both", description: "Resources equally suited to devotional and educational use." }
   ];
   var FORMATS = ["Sermon", "Commentary", "Curriculum", "Devotional", "Prayer", "Article", "Book", "Youth", "Children"];
+  var TYPES = [
+    { id: "sermon", name: "Sermon", about: "Full sermon manuscripts, audio recordings, or video" },
+    { id: "series", name: "Sermon Series", about: "Multi-week preaching series with outlines, manuscripts, and support materials" },
+    { id: "commentary", name: "Commentary", about: "Exegetical and homiletical commentary on Scripture passages" },
+    { id: "curriculum", name: "Curriculum", about: "Multi-session formation courses with leader guides and participant materials" },
+    { id: "devotional", name: "Devotional", about: "Daily devotions, reflections, prayer guides, and meditations" },
+    { id: "liturgical", name: "Liturgical Resource", about: "Prayers, collects, seasonal liturgies, service orders, and worship aids" },
+    { id: "study", name: "Study Guide", about: "Discussion guides for books, films, or parish topics" },
+    { id: "article", name: "Article / Essay", about: "Theological, pastoral, or cultural essays by Anglican scholars and leaders" },
+    { id: "book", name: "Book", about: "Full-length works available for purchase or free download; also featured reviews" },
+    { id: "video", name: "Video", about: "Lectures, conference talks, teaching series, and documentary content" },
+    { id: "audio", name: "Podcast / Audio", about: "Sermons, interviews, and teaching in audio format" },
+    { id: "prayer", name: "Prayer Guide", about: "Standalone prayer resources: litanies, intercessory guides, daily prayer aids" },
+    { id: "youth", name: "Youth / Children\u2019s Resource", about: "Age-specific materials cross-tagged to other dimensions" },
+    { id: "retreat", name: "Retreat Resource", about: "Day retreat and silent retreat guides for individuals or groups" }
+  ];
+  var FORMAT_TYPE = { Sermon: "sermon", Commentary: "commentary", Curriculum: "curriculum", Devotional: "devotional", Prayer: "prayer", Article: "article", Book: "book", Youth: "youth", Children: "youth" };
+  var CANON_MEDIA = ["Physical Bible", "Physical Torah", "Individual book", "Audiobook", "Podcast", "YouTube audio"];
+  var SHELF_LANDINGS = ["canonical"];
+  var WORKS = [
+    { id: "national:declaration", label: "Declaration of Independence" },
+    { id: "national:washington", label: "Washington\u2019s Thanksgiving Proclamation" },
+    { id: "national:lincoln", label: "Lincoln\u2019s Thanksgiving Proclamation" },
+    { id: "national:hjres", label: "H.J. Res. 41, 1941" },
+    { id: "eccles:apocrypha", label: "The Apocrypha" },
+    { id: "eccles:bcp", label: "The Book of Common Prayer" },
+    { id: "eccles:altar", label: "The Altar Book" },
+    { id: "eccles:articles", label: "The Thirty-Nine Articles of Religion" },
+    { id: "eccles:homilies", label: "The Book of Homilies" },
+    { id: "eccles:polity", label: "Of the Laws of Ecclesiastical Polity" },
+    { id: "eccles:hymnal", label: "The Hymnal 1982" }
+  ];
   var AUDIENCES = ["Children 6–12", "Youth", "Adults", "Clergy", "All ages"];
+  var AUDIENCE_ABOUT = {
+    "Children 6–12": "Elementary-age formation, Sunday school curricula, children’s sermons.",
+    "Youth": "Middle school (11–14): confirmation preparation, small group resources, devotionals. High school (14–18): apologetics, identity formation, leadership development.",
+    "Adults": "The broad adult formation and parish education category.",
+    "Clergy": "Theological and pastoral resources for ordained and lay leaders.",
+    "All ages": "Resources suitable for mixed-age parish use."
+  };
   var SEASONS = [
     { id: "advent", name: "Advent", color: "#3c4f86", weeks: 4, line: "The church keeps a month of waiting, in the dark, for the coming of Christ." },
     { id: "christmas", name: "Christmas", color: "#c6a36a", weeks: 2, line: "The Nativity and the twelve days that follow it." },
@@ -24,16 +63,17 @@
     { id: "feasts", name: "Feasts & Fasts", color: "#c6a36a", weeks: 2, line: "Principal feasts and the named days that punctuate the year." }
   ];
   var TOPICS = [
-    { id: "doctrine", name: "Theology & doctrine", subs: ["Trinity", "Incarnation", "Scripture", "Anglicanism"] },
-    { id: "sacrament", name: "Sacramental life", subs: ["Baptism", "Eucharist", "Marriage", "Orders"] },
-    { id: "prayer", name: "Prayer", subs: ["Daily Office", "Intercession", "Retreats"] },
-    { id: "scripture", name: "Scripture & preaching", subs: ["Interpretation", "Sermon series", "Expository"] },
-    { id: "pastoral", name: "Pastoral ministry", subs: ["Grief", "Healing", "Family", "Conflict"] },
-    { id: "mission", name: "Mission", subs: ["Witness", "Parish renewal"] },
-    { id: "formation", name: "Formation", subs: ["Catechesis", "Adult formation", "Small groups"] },
-    { id: "ethics", name: "Ethics & culture", subs: ["Vocation", "Justice"] },
-    { id: "worship", name: "Church & worship", subs: ["Liturgy", "Music"] },
-    { id: "leadership", name: "Leadership", subs: ["Vestry", "Stewardship", "Clergy wellness"] }
+    { id: "scripture", name: "Scripture & preaching", subs: ["Interpretation", "Sermon series", "Expository"], about: "Reading the Bible, Biblical Interpretation, Sermon Series, Expository Preaching, Lectio Divina, OT/NT Survey" },
+    { id: "prayer", name: "Prayer", subs: ["Daily Office", "Intercession", "Retreats"], about: "Daily Office, Contemplative Prayer, Intercession, Fasting, Spiritual Direction, Retreats, Devotional Life" },
+    { id: "sacrament", name: "Sacramental life", subs: ["Baptism", "Eucharist", "Marriage", "Orders"], about: "Baptism, Eucharist, Confirmation, Marriage, Holy Orders, Unction, Reconciliation" },
+    { id: "pastoral", name: "Pastoral ministry", subs: ["Grief", "Healing", "Family", "Conflict"], about: "Grief & Loss, Illness & Healing, Marriage & Family, Conflict, Mental Health, Crisis Pastoral Care" },
+    { id: "evangelism", name: "Evangelism & the great commission", subs: [], about: "" },
+    { id: "mission", name: "Mission", subs: ["Witness", "Parish renewal"], about: "Church Planting, Personal Witness, Cross-Cultural Mission, Global South, Parish Renewal" },
+    { id: "worship", name: "Church & worship", subs: ["Liturgy", "Music"], about: "Liturgy, Music & Hymnody, Architecture & Space, Preaching, Anglican Tradition" },
+    { id: "ethics", name: "Ethics & culture", subs: ["Vocation", "Justice"], about: "Bioethics, Sexual Ethics, Justice & Poverty, Creation Care, Political Theology, Vocation" },
+    { id: "formation", name: "Formation", subs: ["Catechesis", "Adult formation", "Small groups"], about: "Discipleship, Catechesis, Confirmation, Adult Formation, Small Groups, Mentoring" },
+    { id: "leadership", name: "Leadership", subs: ["Vestry", "Stewardship", "Clergy wellness"], about: "Vestry Development, Stewardship, Strategic Planning, Clergy Wellness, Church Law" },
+    { id: "doctrine", name: "Theology & doctrine", subs: ["Trinity", "Incarnation", "Scripture", "Anglicanism"], about: "Trinity, Incarnation, Atonement, Resurrection, Eschatology, Scripture & Authority, Creeds & Councils, Anglicanism" }
   ];
   var AGES = ["Nursery", "Elementary", "Youth", "Adults", "All ages"];
   var CANON = [
@@ -43,27 +83,27 @@
     { testament: "Old Testament", name: "Major Prophets", books: ["Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel"] },
     { testament: "Old Testament", name: "Minor Prophets", books: ["Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"] },
     { testament: "New Testament", name: "Gospels", books: ["Matthew", "Mark", "Luke", "John"] },
-    { testament: "New Testament", name: "Acts", books: ["Acts"] },
+    { testament: "New Testament", name: "Church History", books: ["Acts"] },
     { testament: "New Testament", name: "Pauline letters", books: ["Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon"] },
     { testament: "New Testament", name: "General letters", books: ["Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude"] },
-    { testament: "New Testament", name: "Revelation", books: ["Revelation"] }
+    { testament: "New Testament", name: "Prophecy", books: ["Revelation"] }
   ];
   var POETRY = { Job: 1, Psalms: 1, Proverbs: 1, "Song of Solomon": 1, Lamentations: 1 };
   var LIBRARY = [
-    { id: "s1", title: "The greatest commandment", summary: "A parish sermon on loving God and neighbor, from Matthew 22.", format: "Sermon", level: "parish", use: "both", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Adults", access: "Free", body: "The question is a test, and Jesus does not dodge it. The whole law hangs on love of God and love of neighbor. A parish can hear that without a lecture, and still leave knowing the two are not rivals." },
-    { id: "s2", title: "Two commandments, for children", summary: "A short children’s moment that stays with the gospel and does not wander off into a mascot.", format: "Children", level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Children 6–12", access: "Free", body: "Ask the children who they love, and who loves them. Then tell them Jesus put love of God first, and love of the person next to them second. Stop there." },
-    { id: "s3", title: "Our dwelling place", summary: "A devotion on Psalm 90 for the week Moses dies on the mountain.", format: "Devotional", level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Lord, you have been our dwelling place. The psalm does not pretend the years are long. It asks for the work of our hands to matter anyway." },
-    { id: "s4", title: "Nebo, and the land he may see", summary: "A close reading of Deuteronomy 34 for someone preparing a lecture or a teaching sermon.", format: "Commentary", level: "academic", use: "educational", season: "ordinary", topic: "scripture", sub: "Interpretation", audience: "Clergy", access: "Premium", body: "The death notice is also a succession text. Joshua receives the spirit of wisdom by the laying on of hands, and the narrator will not let Moses’ uniqueness cancel that succession." },
-    { id: "s5", title: "A great multitude", summary: "An All Saints sermon that stays with Revelation 7 and the Beatitudes together.", format: "Sermon", level: "parish", use: "devotional", season: "ordinary", topic: "worship", sub: "Liturgy", audience: "All ages", access: "Free", body: "The multitude is not a metaphor for our nicest members. It is the church the Lamb has gathered, and the Beatitudes are how that crowd already sounds." },
-    { id: "s6", title: "Blessed are you", summary: "A youth session on the Beatitudes that does not turn them into a personality quiz.", format: "Youth", level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Youth", access: "Free", body: "Read Matthew 5:1–12 aloud once, slowly. Ask which blessing sounds least like the school they attend. Stay with that one." },
-    { id: "s7", title: "Wise and foolish, a parish forum", summary: "A one-session adult forum on Matthew 25, with a leader page and a question sheet.", format: "Curriculum", level: "parish", use: "educational", season: "ordinary", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "The oil is not a trick. The parable is about a community that expected to wait, and some of whom did not prepare for the wait. Let the room argue about what preparation looks like here." },
-    { id: "s8", title: "Watch, therefore", summary: "Preaching notes for clergy on the delay in Matthew 25.", format: "Sermon", level: "ordained", use: "educational", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Clergy", access: "Free", body: "Do not scold the congregation for failing to be bridesmaids. Preach the delay as the time the church has actually been given, and the oil as the practices that survive a long week." },
-    { id: "s9", title: "Four weeks of waiting", summary: "A household devotion for Advent, one page a week.", format: "Devotional", level: "devotional", use: "devotional", season: "advent", topic: "prayer", sub: "Daily Office", audience: "All ages", access: "Free", body: "Light one candle. Read a short gospel sentence. Ask what the household is actually waiting for. Pray the collect, then stop." },
-    { id: "s10", title: "A parish Lent library", summary: "A short stack for a formation hour: one sermon, one prayer, one conversation.", format: "Curriculum", level: "parish", use: "both", season: "lent", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "Keep the stack small enough that a vestry could actually use it. One Sunday sermon, one midweek prayer, one question that a small group can finish." },
-    { id: "s11", title: "Compline for a hard week", summary: "A brief order for the end of the day, in contemporary language.", format: "Prayer", level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Guide us waking, and guard us sleeping, that awake we may watch with Christ, and asleep we may rest in peace." },
-    { id: "s12", title: "The long obedience of a vestry", summary: "An essay for wardens and clergy on staying with a parish through an ordinary year.", format: "Article", level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Vestry", audience: "Clergy", access: "Free", body: "Most of the work is not a crisis. It is the next meeting, the next budget line, and the decision not to invent a new vision every September." },
-    { id: "s13", title: "Five books for a new curate", summary: "A short reading list for the first year of ordained ministry.", format: "Book", level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Clergy wellness", audience: "Clergy", access: "Premium", body: "A prayer book you will actually use, one gospel commentary, one book of pastoral theology, one poet, and one history of the parish you serve." },
-    { id: "s14", title: "A note on the collects", summary: "A short unmarked note, waiting for a primary-use tag.", format: "Article", level: "parish", use: null, season: "ordinary", topic: "worship", sub: "Liturgy", audience: "Adults", access: "Free", body: "The collect already knows the week. A parish can read it before anyone has decided whether the hour is study or prayer." }
+    { id: "s1", title: "The greatest commandment", summary: "A parish sermon on loving God and neighbor, from Matthew 22.", format: "Sermon", types: ["sermon"], level: "parish", use: "both", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Adults", access: "Free", body: "The question is a test, and Jesus does not dodge it. The whole law hangs on love of God and love of neighbor. A parish can hear that without a lecture, and still leave knowing the two are not rivals." },
+    { id: "s2", title: "Two commandments, for children", summary: "A short children’s moment that stays with the gospel and does not wander off into a mascot.", format: "Children", types: ["youth"], level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Children 6–12", access: "Free", body: "Ask the children who they love, and who loves them. Then tell them Jesus put love of God first, and love of the person next to them second. Stop there." },
+    { id: "s3", title: "Our dwelling place", summary: "A devotion on Psalm 90 for the week Moses dies on the mountain.", format: "Devotional", types: ["devotional"], level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Lord, you have been our dwelling place. The psalm does not pretend the years are long. It asks for the work of our hands to matter anyway." },
+    { id: "s4", title: "Nebo, and the land he may see", summary: "A close reading of Deuteronomy 34 for someone preparing a lecture or a teaching sermon.", format: "Commentary", types: ["commentary"], level: "academic", use: "educational", season: "ordinary", topic: "scripture", sub: "Interpretation", audience: "Clergy", access: "Premium", body: "The death notice is also a succession text. Joshua receives the spirit of wisdom by the laying on of hands, and the narrator will not let Moses’ uniqueness cancel that succession." },
+    { id: "s5", title: "A great multitude", summary: "An All Saints sermon that stays with Revelation 7 and the Beatitudes together.", format: "Sermon", types: ["sermon"], level: "parish", use: "devotional", season: "ordinary", topic: "worship", sub: "Liturgy", audience: "All ages", access: "Free", body: "The multitude is not a metaphor for our nicest members. It is the church the Lamb has gathered, and the Beatitudes are how that crowd already sounds." },
+    { id: "s6", title: "Blessed are you", summary: "A youth session on the Beatitudes that does not turn them into a personality quiz.", format: "Youth", types: ["youth"], level: "devotional", use: "devotional", season: "ordinary", topic: "formation", sub: "Catechesis", audience: "Youth", access: "Free", body: "Read Matthew 5:1–12 aloud once, slowly. Ask which blessing sounds least like the school they attend. Stay with that one." },
+    { id: "s7", title: "Wise and foolish, a parish forum", summary: "A one-session adult forum on Matthew 25, with a leader page and a question sheet.", format: "Curriculum", types: ["curriculum"], level: "parish", use: "educational", season: "ordinary", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "The oil is not a trick. The parable is about a community that expected to wait, and some of whom did not prepare for the wait. Let the room argue about what preparation looks like here." },
+    { id: "s8", title: "Watch, therefore", summary: "Preaching notes for clergy on the delay in Matthew 25.", format: "Sermon", types: ["sermon"], level: "ordained", use: "educational", season: "ordinary", topic: "scripture", sub: "Expository", audience: "Clergy", access: "Free", body: "Do not scold the congregation for failing to be bridesmaids. Preach the delay as the time the church has actually been given, and the oil as the practices that survive a long week." },
+    { id: "s9", title: "Four weeks of waiting", summary: "A household devotion for Advent, one page a week.", format: "Devotional", types: ["devotional"], level: "devotional", use: "devotional", season: "advent", topic: "prayer", sub: "Daily Office", audience: "All ages", access: "Free", body: "Light one candle. Read a short gospel sentence. Ask what the household is actually waiting for. Pray the collect, then stop." },
+    { id: "s10", title: "A parish Lent library", summary: "A short stack for a formation hour: one sermon, one prayer, one conversation.", format: "Curriculum", types: ["curriculum"], level: "parish", use: "both", season: "lent", topic: "formation", sub: "Adult formation", audience: "Adults", access: "Free", body: "Keep the stack small enough that a vestry could actually use it. One Sunday sermon, one midweek prayer, one question that a small group can finish." },
+    { id: "s11", title: "Compline for a hard week", summary: "A brief order for the end of the day, in contemporary language.", format: "Prayer", types: ["prayer"], level: "devotional", use: "devotional", season: "ordinary", topic: "prayer", sub: "Daily Office", audience: "Adults", access: "Free", body: "Guide us waking, and guard us sleeping, that awake we may watch with Christ, and asleep we may rest in peace." },
+    { id: "s12", title: "The long obedience of a vestry", summary: "An essay for wardens and clergy on staying with a parish through an ordinary year.", format: "Article", types: ["article"], level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Vestry", audience: "Clergy", access: "Free", body: "Most of the work is not a crisis. It is the next meeting, the next budget line, and the decision not to invent a new vision every September." },
+    { id: "s13", title: "Five books for a new curate", summary: "A short reading list for the first year of ordained ministry.", format: "Book", types: ["book"], level: "ordained", use: "educational", season: "ordinary", topic: "leadership", sub: "Clergy wellness", audience: "Clergy", access: "Premium", body: "A prayer book you will actually use, one gospel commentary, one book of pastoral theology, one poet, and one history of the parish you serve." },
+    { id: "s14", title: "A note on the collects", summary: "A short unmarked note, waiting for a primary-use tag.", format: "Article", types: ["article"], level: "parish", use: null, season: "ordinary", topic: "worship", sub: "Liturgy", audience: "Adults", access: "Free", body: "The collect already knows the week. A parish can read it before anyone has decided whether the hour is study or prayer." }
   ];
   var EVENTS = [
     { date: "Nov 12", name: "Preaching workshop", where: "A midweek gathering for clergy and licensed lay preachers.", kind: "Workshop" },
@@ -73,7 +113,8 @@
 
   var state = {
     role: sessionStorage.getItem("ar-role") || "standard",
-    level: sessionStorage.getItem("ar-level") || "parish",
+    levels: loadLevels(),
+    types: loadTypes(),
     posture: loadPosture(),
     module: "year",
     season: "ordinary",
@@ -87,23 +128,108 @@
     openBody: {},
     depth: "year",
     settle: false,
-    style: sessionStorage.getItem("ar-wheel-style") === "fog" ? "fog" : "incense",
+    style: "incense",
     slice: { kind: "year" },
     day: null,
     card: null,
+    monthFocus: null,
+    church: 0,
     board: false,
-    bible: { open: false, full: false, level: "testament", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false, xrefs: false, xrefHome: null },
+    lit: "canonical",
+    context: loadContext(),
+    bible: { open: false, full: false, level: "section", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false, xrefs: false, xrefHome: null },
     books: {}
   };
+  var canonBlobs = {};
   var legacy = document.body.getAttribute("data-legacy-wheel") === "1";
+  function themeIsDark() {
+    return sessionStorage.getItem("ar-theme") === "dark";
+  }
+  function applyTheme() {
+    var dark = themeIsDark();
+    if (dark) document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    var themeBtn = document.getElementById("theme-toggle");
+    if (themeBtn) {
+      themeBtn.textContent = dark ? "Light theme" : "Dark theme";
+      themeBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+  }
+  applyTheme();
   var numTimer = null;
   var drillLock = false;
 
+  var FEAST_FIXED = [
+    ["st-andrew", "St. Andrew", "11-30"],
+    ["st-thomas", "St. Thomas", "12-21"],
+    ["christmas", "Christmas", "12-25"],
+    ["st-stephen", "St. Stephen", "12-26"],
+    ["st-john", "St. John", "12-27"],
+    ["holy-innocents", "Holy Innocents", "12-28"],
+    ["holy-name", "Holy Name", "01-01"],
+    ["epiphany", "Epiphany", "01-06"],
+    ["conversion-of-st-paul", "Conversion of St. Paul", "01-25"],
+    ["presentation", "Presentation", "02-02"],
+    ["st-matthias", "St. Matthias", "02-24"],
+    ["annunciation", "Annunciation", "03-25"],
+    ["st-mark", "St. Mark", "04-25"],
+    ["st-philip-and-st-james", "St. Philip and St. James", "05-01"],
+    ["st-barnabas", "St. Barnabas", "06-11"],
+    ["nativity-of-st-john", "Nativity of St. John the Baptist", "06-24"],
+    ["st-peter", "St. Peter", "06-29"],
+    ["st-james", "St. James", "07-25"],
+    ["transfiguration", "Transfiguration", "08-06"],
+    ["st-bartholomew", "St. Bartholomew", "08-24"],
+    ["holy-cross", "Holy Cross", "09-14"],
+    ["st-matthew", "St. Matthew", "09-21"],
+    ["st-michael", "St. Michael and All Angels", "09-29"],
+    ["st-luke", "St. Luke", "10-18"],
+    ["st-simon-and-st-jude", "St. Simon and St. Jude", "10-28"],
+    ["all-saints", "All Saints", "11-01"]
+  ];
   function loadAdded() {
     try { return JSON.parse(sessionStorage.getItem("ar-added") || "[]"); }
     catch (e) { return []; }
   }
-  function allResources() { return state.added.concat(LIBRARY); }
+  function emptyContext() {
+    return { season: "", audience: "", topic: "", sub: "", shelf: "", occasions: [], works: [] };
+  }
+  function loadContext() {
+    var ctx = emptyContext();
+    try {
+      var raw = JSON.parse(sessionStorage.getItem("ar-context") || "null");
+      if (!raw) return ctx;
+      if (SEASONS.some(function (s) { return s.id === raw.season; })) ctx.season = raw.season;
+      if (AUDIENCES.indexOf(raw.audience) !== -1) ctx.audience = raw.audience;
+      var topic = TOPICS.filter(function (t) { return t.id === raw.topic; })[0];
+      if (topic) {
+        ctx.topic = topic.id;
+        if (topic.subs.indexOf(raw.sub) !== -1) ctx.sub = raw.sub;
+      }
+      if (SHELF_LANDINGS.indexOf(raw.shelf) !== -1) ctx.shelf = raw.shelf;
+      if (raw.occasions && raw.occasions.forEach) {
+        raw.occasions.forEach(function (o) {
+          if (!o || (o.kind !== "feast" && o.kind !== "holiday" && o.kind !== "national")) return;
+          if (!o.id || String(o.id).indexOf(o.kind + ":") !== 0) return;
+          ctx.occasions.push({ id: String(o.id), kind: o.kind, label: String(o.label || o.id) });
+        });
+      }
+      if (raw.works && raw.works.forEach) {
+        raw.works.forEach(function (w) {
+          if (!w || !knownWork(String(w.id || ""))) return;
+          ctx.works.push({ id: String(w.id), label: workLabel(w.id) || String(w.label || w.id) });
+        });
+      }
+    } catch (e) {}
+    return ctx;
+  }
+  function saveContext() {
+    try { sessionStorage.setItem("ar-context", JSON.stringify(state.context)); } catch (e) {}
+    document.dispatchEvent(new CustomEvent("ar-context"));
+  }
+  function allResources() {
+    return state.added.filter(function (item) { return item.shelf !== "canonical"; }).concat(LIBRARY);
+  }
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
@@ -111,6 +237,52 @@
   }
   function slug(name) {
     return String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+  function loadTypes() {
+    var raw = sessionStorage.getItem("ar-types");
+    var all = TYPES.map(function (t) { return t.id; });
+    if (!raw) return all;
+    try {
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.forEach) return all;
+      var ids = [];
+      parsed.forEach(function (id) {
+        if (all.indexOf(id) !== -1 && ids.indexOf(id) === -1) ids.push(id);
+      });
+      return all.filter(function (id) { return ids.indexOf(id) !== -1; });
+    } catch (e) { return all; }
+  }
+  function saveTypes() {
+    var all = TYPES.map(function (t) { return t.id; });
+    state.types = all.filter(function (id) { return state.types.indexOf(id) !== -1; });
+    try {
+      if (state.types.length === all.length) sessionStorage.removeItem("ar-types");
+      else sessionStorage.setItem("ar-types", JSON.stringify(state.types));
+    } catch (e) {}
+  }
+  function loadLevels() {
+    var raw = sessionStorage.getItem("ar-level");
+    var ids = [];
+    function keep(id) {
+      if (LEVELS.some(function (l) { return l.id === id; }) && ids.indexOf(id) === -1) ids.push(id);
+    }
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.forEach) parsed.forEach(keep);
+        else keep(String(parsed || ""));
+      } catch (e) { keep(raw); }
+    }
+    if (!ids.length) ids.push("parish");
+    return LEVELS.map(function (l) { return l.id; }).filter(function (id) { return ids.indexOf(id) !== -1; });
+  }
+  function saveLevels() {
+    state.levels = LEVELS.map(function (l) { return l.id; }).filter(function (id) { return state.levels.indexOf(id) !== -1; });
+    if (!state.levels.length) state.levels = ["parish"];
+    try { sessionStorage.setItem("ar-level", JSON.stringify(state.levels)); } catch (e) {}
+  }
+  function allLevels() {
+    return LEVELS.every(function (l) { return state.levels.indexOf(l.id) !== -1; });
   }
   function loadPosture() {
     var raw = sessionStorage.getItem("ar-posture");
@@ -128,8 +300,37 @@
     if (item.posture === "both") return "both";
     return null;
   }
+  function itemTypes(item) {
+    var all = TYPES.map(function (t) { return t.id; });
+    var ids = [];
+    function keep(id) {
+      if (all.indexOf(id) !== -1 && ids.indexOf(id) === -1) ids.push(id);
+    }
+    if (item.types && item.types.forEach) item.types.forEach(function (id) { keep(String(id)); });
+    if (!ids.length && item.format) {
+      String(item.format).split(",").forEach(function (part) {
+        var name = part.trim();
+        TYPES.forEach(function (t) { if (t.name === name) keep(t.id); });
+        if (FORMAT_TYPE[name]) keep(FORMAT_TYPE[name]);
+      });
+    }
+    return all.filter(function (id) { return ids.indexOf(id) !== -1; });
+  }
+  function typeNames(ids) {
+    return ids.map(function (id) {
+      var found = "";
+      TYPES.forEach(function (t) { if (t.id === id) found = t.name; });
+      return found || id;
+    });
+  }
+  function matchesType(item) {
+    var types = itemTypes(item);
+    if (!types.length) return false;
+    return types.some(function (id) { return state.types.indexOf(id) !== -1; });
+  }
   function matches(item) {
-    if (state.level && item.level !== state.level) return false;
+    if (!matchesType(item)) return false;
+    if (state.levels.length && item.level && state.levels.indexOf(item.level) === -1) return false;
     if (state.posture) {
       var use = primaryUse(item);
       if (use && use !== state.posture && use !== "both") return false;
@@ -245,14 +446,238 @@
   }
   function sundayCard(day) {
     var lessons = day.lessons.map(function (lesson) {
+      var sep = lesson.join === "part" ? '<span class="part" aria-hidden="true">·</span>' : '<span class="or">or</span>';
       var cites = lesson.cites.map(function (cite) {
         var shown = citeLabel(cite);
         if (!bookName(cite)) return '<span class="plain">' + esc(shown) + "</span>";
         return '<button type="button" data-ref="' + esc(cite) + '">' + esc(shown) + "</button>";
-      }).join('<span class="or">or</span>');
+      }).join(sep);
       return '<p class="lesson"><span>' + esc(lesson.kind) + "</span><span>" + cites + "</span></p>";
     }).join("");
     return '<article class="sunday"><header><h3>' + esc(day.name) + "</h3><time>" + esc(day.date) + "</time></header><div class=\"lessons\">" + lessons + "</div></article>";
+  }
+  var GOSPEL_BOOKS = { Matthew: 1, Mark: 1, Luke: 1, John: 1 };
+  var EPISTLE_BOOKS = {
+    Acts: 1, Romans: 1, "1 Corinthians": 1, "2 Corinthians": 1, Galatians: 1, Ephesians: 1,
+    Philippians: 1, Colossians: 1, "1 Thessalonians": 1, "2 Thessalonians": 1,
+    "1 Timothy": 1, "2 Timothy": 1, Titus: 1, Philemon: 1, Hebrews: 1, James: 1,
+    "1 Peter": 1, "2 Peter": 1, "1 John": 1, "2 John": 1, "3 John": 1, Jude: 1, Revelation: 1
+  };
+  var LECT_ADVENT = { "First Sunday of Advent": 0, "Second Sunday of Advent": 1, "Third Sunday of Advent": 2, "Fourth Sunday of Advent": 3 };
+  var LECT_LENT = { "First Sunday in Lent": 1, "Second Sunday in Lent": 2, "Third Sunday in Lent": 3, "Fourth Sunday in Lent": 4, "Fifth Sunday in Lent": 5 };
+  var LECT_EASTER_SUN = { "Second Sunday of Easter": 2, "Third Sunday of Easter": 3, "Fourth Sunday of Easter": 4, "Fifth Sunday of Easter": 5, "Sixth Sunday of Easter": 6, "Seventh Sunday of Easter": 7 };
+  var LECT_EPI = { "Second Sunday after the Epiphany": 2, "Third Sunday after the Epiphany": 3, "Fourth Sunday after the Epiphany": 4, "Fifth Sunday after the Epiphany": 5, "Sixth Sunday after the Epiphany": 6, "Seventh Sunday after the Epiphany": 7 };
+  var LECT_FROM_EASTER = {
+    "Ash Wednesday": -46, "Liturgy of the Palms": -7, "Liturgy of the Passion": -7,
+    "Monday of Holy Week": -6, "Tuesday of Holy Week": -5, "Wednesday of Holy Week": -4,
+    "Maundy Thursday": -3, "Good Friday": -2, "Holy Saturday": -1, "Easter Vigil": 0,
+    "Resurrection of the Lord": 0, "Easter Evening": 0, "Ascension of the Lord": 39,
+    "Day of Pentecost": 49, "Trinity Sunday": 56
+  };
+  var LECT_TITLES = {
+    "Resurrection of the Lord": "Easter Day",
+    "Day of Pentecost": "The Day of Pentecost",
+    "Reign of Christ - Proper 29 (34)": "Christ the King",
+    "Nativity of the Lord - Proper I": "Christmas Eve",
+    "Nativity of the Lord - Proper II": "Christmas Day",
+    "Nativity of the Lord - Proper III": "Christmas Day",
+    "Holy Name of Jesus": "Holy Name",
+    "Ascension of the Lord": "Ascension",
+    "Epiphany of the Lord": "The Epiphany",
+    "Transfiguration Sunday": "The Transfiguration",
+    "Annunciation of the Lord": "The Annunciation",
+    "Presentation of the Lord": "The Presentation",
+    "Visitation of Mary to Elizabeth": "The Visitation",
+    "All Saints Day": "All Saints"
+  };
+  var lectPack = null;
+  var lectIndex = {};
+  function lectSundayOnOrAfter(dt) { return addDays(dt, (7 - dt.getUTCDay()) % 7); }
+  function lectSundayInWeek(start) {
+    for (var i = 0; i < 7; i++) {
+      var found = addDays(start, i);
+      if (found.getUTCDay() === 0) return found;
+    }
+    return null;
+  }
+  function lectNth(year, month, weekday, n) {
+    var first = utcDate(year, month, 1);
+    var add = (weekday - first.getUTCDay() + 7) % 7;
+    return addDays(first, add + (n - 1) * 7);
+  }
+  function lectOccasionIso(startYear, name) {
+    var easter = easterSunday(startYear + 1);
+    var dt = null;
+    if (Object.prototype.hasOwnProperty.call(LECT_ADVENT, name)) dt = addDays(adventSunday(startYear), LECT_ADVENT[name] * 7);
+    else if (name === "Nativity of the Lord - Proper I") dt = utcDate(startYear, 12, 24);
+    else if (name === "Nativity of the Lord - Proper II" || name === "Nativity of the Lord - Proper III") dt = utcDate(startYear, 12, 25);
+    else if (name === "First Sunday after Christmas Day") {
+      for (var c = 26; c <= 31; c++) {
+        var christmasSunday = utcDate(startYear, 12, c);
+        if (christmasSunday.getUTCDay() === 0) { dt = christmasSunday; break; }
+      }
+    } else if (name === "Second Sunday after Christmas Day") {
+      for (var s = 2; s <= 5; s++) {
+        var second = utcDate(startYear + 1, 1, s);
+        if (second.getUTCDay() === 0) { dt = second; break; }
+      }
+    } else if (name === "Holy Name of Jesus" || name === "New Year's Day") dt = utcDate(startYear + 1, 1, 1);
+    else if (name === "Epiphany of the Lord") dt = utcDate(startYear + 1, 1, 6);
+    else if (name === "Presentation of the Lord") dt = utcDate(startYear + 1, 2, 2);
+    else if (name === "Visitation of Mary to Elizabeth") dt = utcDate(startYear + 1, 5, 31);
+    else if (name === "Holy Cross") dt = utcDate(startYear + 1, 9, 14);
+    else if (name === "All Saints Day") dt = utcDate(startYear + 1, 11, 1);
+    else if (name === "Canadian Thanksgiving Day") dt = lectNth(startYear + 1, 10, 1, 2);
+    else if (name === "Thanksgiving Day") dt = lectNth(startYear + 1, 11, 4, 4);
+    else {
+      var baptism = lectSundayOnOrAfter(utcDate(startYear + 1, 1, 7));
+      var transfiguration = addDays(easter, -49);
+      if (name === "Baptism of the Lord") dt = baptism;
+      else if (name === "Transfiguration Sunday") dt = transfiguration;
+      else if (Object.prototype.hasOwnProperty.call(LECT_EPI, name)) {
+        var epi = addDays(baptism, (LECT_EPI[name] - 1) * 7);
+        dt = epi.getTime() >= transfiguration.getTime() ? null : epi;
+      } else if (name === "Annunciation of the Lord") {
+        var ann = utcDate(startYear + 1, 3, 25);
+        var palm = addDays(easter, -7);
+        var easter2 = addDays(easter, 7);
+        dt = ann.getTime() >= palm.getTime() && ann.getTime() <= easter2.getTime() ? addDays(easter2, 1) : ann;
+      } else if (Object.prototype.hasOwnProperty.call(LECT_FROM_EASTER, name)) dt = addDays(easter, LECT_FROM_EASTER[name]);
+      else if (Object.prototype.hasOwnProperty.call(LECT_LENT, name)) dt = addDays(easter, -7 * (7 - LECT_LENT[name]));
+      else if (Object.prototype.hasOwnProperty.call(LECT_EASTER_SUN, name)) dt = addDays(easter, 7 * (LECT_EASTER_SUN[name] - 1));
+      else {
+        var proper = /Proper\s+(\d+)/.exec(name);
+        if (proper) {
+          var sun = lectSundayInWeek(addDays(utcDate(startYear + 1, 5, 29), (Number(proper[1]) - 4) * 7));
+          dt = !sun || sun.getTime() <= addDays(easter, 56).getTime() ? null : sun;
+        }
+      }
+    }
+    return dt ? isoFromUTC(dt.getTime()) : "";
+  }
+  function lectTitle(name) {
+    if (LECT_TITLES[name]) return LECT_TITLES[name];
+    return String(name).replace(/\s*\(\d+\)\s*$/, "");
+  }
+  function lectMarks(bi) {
+    if (lectPack.marks[bi]) return lectPack.marks[bi];
+    var chapters = lectPack.verse[bi];
+    if (!chapters) return null;
+    var marks = [];
+    var at = 0;
+    for (var c = 0; c < chapters.length; c++) {
+      for (var v = 0; v < chapters[c].length; v++) {
+        marks.push({ c: c + 1, v: v + 1, start: at });
+        at += chapters[c][v];
+      }
+    }
+    lectPack.marks[bi] = marks;
+    return marks;
+  }
+  function lectVerseAt(bi, offset) {
+    var marks = lectMarks(bi);
+    if (!marks || !marks.length) return null;
+    var ans = 0;
+    var lo = 0;
+    var hi = marks.length - 1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (marks[mid].start <= offset) { ans = mid; lo = mid + 1; }
+      else hi = mid - 1;
+    }
+    return marks[ans];
+  }
+  function lectCite(p) {
+    var book = lectPack.data.books[p.b];
+    var name = book ? (book.name === "Psalms" ? "Psalm" : book.name) : "";
+    var start = lectVerseAt(p.b, p.o);
+    var end = lectVerseAt(p.b, p.o + Math.max(p.w, 1) - 1);
+    if (!name || !start || !end) return name;
+    if (start.c === end.c && start.v === end.v) return name + " " + start.c + ":" + start.v;
+    if (start.c === end.c) return name + " " + start.c + ":" + start.v + "-" + end.v;
+    return name + " " + start.c + ":" + start.v + "-" + end.c + ":" + end.v;
+  }
+  function mergeCite(prev, cite) {
+    var a = String(prev).match(/^(.*)\s+(\d+):(.*)$/);
+    var b = String(cite).match(/^(.*)\s+(\d+):(.*)$/);
+    if (!a || !b || a[1] !== b[1] || a[2] !== b[2]) return "";
+    return a[1] + " " + a[2] + ":" + a[3] + ", " + b[3];
+  }
+  function lectKind(book, seenPsalm) {
+    if (book === "Psalms") return "Psalm";
+    if (book === "Song of Solomon" && seenPsalm) return "Psalm";
+    if (GOSPEL_BOOKS[book]) return "Gospel";
+    if (seenPsalm && EPISTLE_BOOKS[book]) return "Epistle";
+    return "First lesson";
+  }
+  function groupLect(passages) {
+    var seenPsalm = false;
+    var items = [];
+    passages.forEach(function (p) {
+      var book = lectPack.data.books[p.b] ? lectPack.data.books[p.b].name : "";
+      var kind = lectKind(book, seenPsalm);
+      var cite = lectCite(p);
+      if (!cite) return;
+      var chapterMatch = cite.match(/\s(\d+):/);
+      var chapter = chapterMatch ? Number(chapterMatch[1]) : 0;
+      var last = items[items.length - 1];
+      if (last && last.kind === kind && last.book === book && last.chapter === chapter) {
+        var merged = mergeCite(last.cites[last.cites.length - 1], cite);
+        if (merged) last.cites[last.cites.length - 1] = merged;
+        else last.cites.push(cite);
+      } else if (last && last.kind === kind) {
+        last.cites.push(cite);
+        if (last.book !== book) last.join = "or";
+        last.book = book;
+        last.chapter = chapter;
+      } else items.push({ kind: kind, book: book, chapter: chapter, cites: [cite], join: "part" });
+      if (book === "Psalms") seenPsalm = true;
+    });
+    return items.map(function (item) {
+      return { kind: item.kind, cites: item.cites, join: item.join === "or" ? "or" : "part" };
+    });
+  }
+  function lectForYear(startYear) {
+    if (!lectPack) return {};
+    if (lectIndex[startYear]) return lectIndex[startYear];
+    var map = {};
+    var letter = letterOf(startYear);
+    var byName = {};
+    lectPack.data.passages.forEach(function (p) {
+      if (p.y !== letter) return;
+      if (!byName[p.n]) byName[p.n] = [];
+      byName[p.n].push(p);
+    });
+    var year = buildYear(startYear);
+    Object.keys(byName).forEach(function (name) {
+      var iso = lectOccasionIso(startYear, name);
+      if (!iso || iso < year.startIso || iso >= year.endExclusive) return;
+      var lessons = groupLect(byName[name]);
+      if (!lessons.length) return;
+      if (!map[iso]) map[iso] = [];
+      map[iso].push({ name: lectTitle(name), date: longDate(iso), lessons: lessons });
+    });
+    lectIndex[startYear] = map;
+    return map;
+  }
+  function dayArticles(day) {
+    if (day.propers.length) return day.propers.map(function (idx) { return sundayCard(PROPERS[idx]); }).join("");
+    var found = lectForYear(shownYear().startYear)[day.iso] || [];
+    return found.map(sundayCard).join("");
+  }
+  function ensureLect() {
+    if (ensureLect.started) return;
+    ensureLect.started = true;
+    Promise.all([
+      fetch("lectionary-viz.json").then(function (res) { if (!res.ok) throw new Error("missing"); return res.json(); }),
+      fetch("verse-index.json").then(function (res) { if (!res.ok) throw new Error("missing"); return res.json(); })
+    ]).then(function (pair) {
+      lectPack = { data: pair[0], verse: pair[1], marks: {} };
+      lectIndex = {};
+      var desk = document.body.getAttribute("data-desk");
+      if (desk === "books" || desk === "down" || desk === "nation") return;
+      if ((desk === "analysis" || state.module === "year") && !state.board) renderStage();
+    }).catch(function () {});
   }
   function drillBoard() {
     var season = SEASONS.filter(function (s) { return s.id === state.season; })[0] || SEASONS[0];
@@ -279,72 +704,58 @@
       }
     }
     var long = days.length > 12;
+    var letter = shownYear().letter;
     var note = season.id === "ordinary"
-      ? "Year B of the Revised Common Lectionary, both Old Testament tracks. A reading opens in the Bible."
-      : "Year B of the Revised Common Lectionary. A reading opens in the Bible.";
+      ? "Year " + letter + " of the Revised Common Lectionary, both Old Testament tracks. A reading opens in the Bible."
+      : "Year " + letter + " of the Revised Common Lectionary. A reading opens in the Bible.";
     var stripe = STRIPE[season.id] || "#6e5430";
     if (!legacy && state.style === "fog" && FOG_COLORS[season.id]) stripe = FOG_COLORS[season.id].fill;
     var back = legacy ? "The year" : "The wheel";
     var body = days.length ? days.map(sundayCard).join("") : '<p class="empty">No readings in this slice.</p>';
-    return '<div class="year drill"><div class="drill-top"><button type="button" class="drill-back" data-year>' + back + '</button><div class="season-copy"><h2>' + esc(title) + "</h2><p>" + esc(line) + '</p></div><span></span></div><p class="lection-note">' + esc(note) + '</p><div class="sundays' + (long ? " is-long" : "") + '" style="--season:' + stripe + '">' + body + "</div>" + (list.length ? cards(list) : "") + "</div>";
+    return '<div class="year drill">' + yearSwitch() + '<div class="drill-top"><button type="button" class="drill-back" data-year>' + back + '</button><div class="season-copy"><h2>' + esc(title) + "</h2><p>" + esc(line) + '</p></div><span></span></div><p class="lection-note">' + esc(note) + '</p><div class="sundays' + (long ? " is-long" : "") + '" style="--season:' + stripe + '">' + body + "</div>" + (list.length ? cards(list) : "") + "</div>";
   }
 
-  var YEAR0 = Date.UTC(2026, 10, 29);
-  var YEAR_COUNT = 364;
   var MONTH_NAME = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   var MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  var SEASON_CUTS = [
-    ["advent", "2026-11-29", "2026-12-25"],
-    ["christmas", "2026-12-25", "2027-01-06"],
-    ["epiphany", "2027-01-06", "2027-02-10"],
-    ["lent", "2027-02-10", "2027-03-21"],
-    ["holyweek", "2027-03-21", "2027-03-28"],
-    ["easter", "2027-03-28", "2027-05-16"],
-    ["pentecost", "2027-05-16", "2027-05-23"],
-    ["ordinary", "2027-05-23", "2027-11-28"]
-  ];
   var SEASON_STORY = {
     advent: [
       "The church year opens here, in the dark. Advent takes its name from the Latin adventus, a coming or arrival, and the four Sundays hold two arrivals in one season: the birth at Bethlehem, and the day when Christ comes to judge and to make all things new. The weeks do not begin with the manger. They begin with the end.",
       "Rome settled on four Sundays. Some other Western churches once kept a longer preparation from St. Martin’s day on November 11, a fast sometimes called St. Martin’s Lent. The English prayer books from 1549 open the Christian year on Advent Sunday, so the first of these Sundays is the church’s New Year. Violet became the usual color. A deep blue is used in some Anglican churches, a sign of hope rather than of Lent’s sorrow.",
-      "The waiting has an order. The first Sundays look toward the day of the Lord and the prophets who asked for the heavens to be torn open. John the Baptist stands in the middle of the season, a voice in the wilderness. Only at the end does the story turn to Mary and the promise of a child. Where a fast is kept, it is lighter than Lent. The note is expectation.",
-      "This year the ring runs from November 29 through December 24. Christmas Day begins the next season. The four weeks are short on purpose. The church practices wanting what it does not yet hold."
+      "The waiting has an order. The first Sundays look toward the day of the Lord and the prophets who asked for the heavens to be torn open. John the Baptist stands in the middle of the season, a voice in the wilderness. Only at the end does the story turn to Mary and the promise of a child. Where a fast is kept, it is lighter than Lent. The note is expectation."
     ],
     christmas: [
       "Christmas Day is the feast of the Nativity, and the season is the twelve days that follow, through the evening of January 5, Twelfth Night. December 25 is an old Roman date. A civil calendar compiled in 354 records that the church in Rome was already keeping the birth of Christ on that day in 336. In the East the older feast was January 6, and it gathered the birth together with the baptism. The December date spread from west to east. January 6 remained as the Epiphany.",
-      "The twelve days are a feast, not a fast. White and gold are the colors. Inside them the church kept other days and refused to postpone them: Stephen, the first martyr, on the 26th; John the evangelist on the 27th; the Holy Innocents, the children of Bethlehem, on the 28th; and on January 1 the naming of Jesus, which older books called the Circumcision. The joy is not thin. Stephen’s day is still inside the feast, and the church tells the truth that the child is born into a world that resists him.",
-      "On this wheel the ring runs from December 25, 2026, through January 5, 2027. January 6 is the Epiphany and starts the next ring. For these twelve days the year stays with one birth: the Word made flesh, in a particular place, visited by shepherds who were told not to be afraid."
+      "The twelve days are a feast, not a fast. White and gold are the colors. Inside them the church kept other days and refused to postpone them: Stephen, the first martyr, on the 26th; John the evangelist on the 27th; the Holy Innocents, the children of Bethlehem, on the 28th; and on January 1 the naming of Jesus, which older books called the Circumcision. The joy is not thin. Stephen’s day is still inside the feast, and the church tells the truth that the child is born into a world that resists him."
     ],
     epiphany: [
       "Epiphany, on January 6, is the feast of the manifestation. The Greek word means a showing. In the West the day came to belong especially to the magi, the nations arriving with gold, frankincense, and myrrh. Medieval worship also gathered two other signs onto this day: Jesus baptized in the Jordan, and the water turned to wine at Cana. One feast, three ways the hidden Christ is made known.",
       "After the day itself the season continues in green. These are the counted weeks before Lent, when the church stays with the light that has been shown and reads the early ministry: the call of the disciples, the first healings, the authority of the teaching. Older English prayer books inserted three pre-Lent Sundays, Septuagesima, Sexagesima, and Quinquagesima, and the American book of 1928 still had them. The calendar this wheel follows lets Epiphany run up to Ash Wednesday, so those three Sundays are not a separate season.",
-      "This year the ring runs from January 6 through February 9. February 2, the Presentation of Christ in the Temple, falls inside it. That day was long kept as the close of the Christmas cycle, when candles were blessed and Christ was hailed as a light to the nations and the glory of Israel. Then the green weeks finish, and Lent begins."
+      "February 2, the Presentation of Christ in the Temple, falls inside this season. That day was long kept as the close of the Christmas cycle, when candles were blessed and Christ was hailed as a light to the nations and the glory of Israel. Then the green weeks finish, and Lent begins."
     ],
     lent: [
       "Lent is the forty-day fast before Easter. The Latin name is Quadragesima, the fortieth. The number is the Lord’s own: forty days in the wilderness, and behind that the forty of Moses on the mountain and of Elijah on the way to Horeb. The church walks into that wilderness before it tries to keep the Passion.",
       "Sundays are in Lent, but they are not fast days, and so they are not counted in the forty. The fast starts on Ash Wednesday and runs through Holy Saturday. Count every day between those two, including both, and then set the six Sundays aside, and forty remain. Ashes on every worshipper, rather than on public penitents only, spread through the Western church in the tenth and eleventh centuries. The English books of the Reformation kept the fast and did not keep the imposition of ashes. Many Anglican churches have since received that sign back. A forty-day Lent is already visible in the fourth century. Before that, the pre-Easter fast was often shorter and differed from city to city.",
-      "On this wheel the violet ring runs from Ash Wednesday, February 10, through March 20, the day before Palm Sunday. The forty days are not cut short. Holy Week is drawn as its own ring, and the fast continues through it to the tomb. The fourth Sunday has long been a slight easing, called Refreshment Sunday, or Laetare, and in England Mothering Sunday. The work of the season is repentance, almsgiving, and prayer, so that the week of the Passion is not a surprise."
+      "The forty days are not cut short. Holy Week is drawn as its own ring, and the fast continues through it to the tomb. The fourth Sunday has long been a slight easing, called Refreshment Sunday, or Laetare, and in England Mothering Sunday. The work of the season is repentance, almsgiving, and prayer, so that the week of the Passion is not a surprise."
     ],
     holyweek: [
       "Holy Week is the last week of Jesus’ life, from the entry into Jerusalem to the Sabbath spent in the tomb. Pilgrims in Jerusalem in the 380s already called it the Great Week and walked the places of the story on the days themselves. The West came to call it Holy Week. It is the heart of the year. Everything else leans toward it or away from it.",
-      "Palm Sunday opens with branches and the shout of the crowds, and the same liturgy turns to the Passion. The reading is long because the church refuses to summarize these hours. Monday, Tuesday, and Wednesday stay with the last teaching and the closing of the plot. Wednesday is sometimes called Spy Wednesday, for the betrayal. Maundy Thursday takes its English name from the Latin mandatum, the new commandment. The church remembers the supper, the bread and the cup, and the washing of feet. Good Friday is the day of the cross. The English name is medieval. Holy Saturday is the day of the tomb, and of the night watch that became the Easter Vigil, the hour when the early church preferred to baptize.",
-      "This year Palm Sunday is March 21, Good Friday is March 26, and Holy Saturday is March 27. Easter Day is March 28. March 25, the Annunciation, falls on Thursday of this week. The date remains the feast’s day. Many modern calendars keep the observance on a day after Easter, so the week is not asked to celebrate two mysteries at once. The ring is short, and it is meant to be walked slowly."
+      "Palm Sunday opens with branches and the shout of the crowds, and the same liturgy turns to the Passion. The reading is long because the church refuses to summarize these hours. Monday, Tuesday, and Wednesday stay with the last teaching and the closing of the plot. Wednesday is sometimes called Spy Wednesday, for the betrayal. Maundy Thursday takes its English name from the Latin mandatum, the new commandment. The church remembers the supper, the bread and the cup, and the washing of feet. Good Friday is the day of the cross. The English name is medieval. Holy Saturday is the day of the tomb, and of the night watch that became the Easter Vigil, the hour when the early church preferred to baptize."
     ],
     easter: [
-      "Easter is the feast of the resurrection. Most of the Christian world calls it Pascha, from the Hebrew pesach, because the Lord’s passover from death was kept at the time of Passover. The English name comes from the old name of the month in which the feast fell. Bede, in the eighth century, says that month was called Eosturmonath. The date is the Sunday after the full moon on or after March 21, the rule that grew out of the fourth-century effort to keep one feast. This year that Sunday is March 28.",
-      "From Easter Day the church keeps fifty days, a week of weeks, and calls the stretch the Great Fifty Days. Fasting was set aside. Alleluia, put away for Lent, comes back. White and gold replace violet. The Sundays belong to the feast itself. Older books counted them as Sundays after Easter. The fiftieth day is Pentecost, drawn on this wheel as its own ring, so the Easter ring runs from March 28 through May 15, the eve of Pentecost.",
-      "Inside those days, the fortieth is the Ascension, always a Thursday. This year it is May 6. The church has kept that day since the fourth century as the moment the risen Christ entrusts his going to the church and promises the Spirit. The stories of the season are the appearances, the breakfast on the shore, the opening of the scriptures, and the charge to go. Easter is not one morning. It is a season long enough to learn what the morning means."
+      "Easter is the feast of the resurrection. Most of the Christian world calls it Pascha, from the Hebrew pesach, because the Lord’s passover from death was kept at the time of Passover. The English name comes from the old name of the month in which the feast fell. Bede, in the eighth century, says that month was called Eosturmonath. The date is the Sunday after the full moon on or after March 21, the rule that grew out of the fourth-century effort to keep one feast.",
+      "From Easter Day the church keeps fifty days, a week of weeks, and calls the stretch the Great Fifty Days. Fasting was set aside. Alleluia, put away for Lent, comes back. White and gold replace violet. The Sundays belong to the feast itself. Older books counted them as Sundays after Easter. The fiftieth day is Pentecost, drawn on this wheel as its own ring.",
+      "Inside those days, the fortieth is the Ascension, always a Thursday. The church has kept that day since the fourth century as the moment the risen Christ entrusts his going to the church and promises the Spirit. The stories of the season are the appearances, the breakfast on the shore, the opening of the scriptures, and the charge to go. Easter is not one morning. It is a season long enough to learn what the morning means."
     ],
     pentecost: [
       "Pentecost is the fiftieth day, and the name is the Greek number. In Jerusalem it was already the Jewish feast of Weeks, fifty days after Passover, when Acts tells of a wind, of fire, and of a crowd that heard the apostles each in its own language. The Christian year treats that day as the gift of the Spirit and the sending of the church. The fifty days of Easter end here. What was promised at the Ascension is given.",
       "The English name is Whitsunday, white Sunday, usually explained by the white robes of those baptized at the feast. Red is the color, for the fire, and it has been a Western color for this day since the medieval schemes of vestments. Older prayer books kept an octave, Whitsun week, and only then Trinity Sunday. From Trinity they numbered the rest of the year after Trinity, not after Pentecost. Trinity Sunday, as a feast of the whole Western church, dates from the fourteenth century, though England kept it earlier.",
-      "On this wheel the red ring is one week, May 16 through May 22. Trinity Sunday, May 23, opens the long green season. The week is a pause between the resurrection and the counted Sundays: the church stands in the story of its own beginning, and then it is sent to live the rest of the year from that day."
+      "On this wheel the red ring is one week, and Trinity Sunday opens the long green season. The week is a pause between the resurrection and the counted Sundays: the church stands in the story of its own beginning, and then it is sent to live the rest of the year from that day."
     ],
     ordinary: [
       "Ordinary Time is the long green season. The word does not mean plain. It means the counted Sundays. The older Anglican prayer books did not use the modern name. They said after Epiphany and after Trinity. The calendar behind these readings took up the newer name, and on this wheel the long count still begins at Trinity rather than the day after Pentecost. That is the older English shape: Trinity first, then the numbered Sundays.",
-      "The season runs from Trinity Sunday, May 23, to November 27, the eve of the next Advent. Green has marked the days outside feast and fast in the West since the medieval writers on vestments. The work of the weeks is the public life of Jesus, read in course: parables, healings, disputes, the sending of the Twelve, the cost of following. In Year B the Gospel is Mark, with John brought in where Mark is brief. These Sundays are not a lesser substitute for Easter. They are the life the resurrection makes possible.",
-      "Certain days break the green without ending it. The Transfiguration falls on August 6, Holy Cross on September 14, All Saints on November 1. The last Sunday, November 21 this year, is Christ the King. That feast was appointed for the Roman church in 1925 and later moved to the end of the year. It is kept here as the Sunday before Advent: a last claim that the counted weeks have a Lord. Then the year turns back to the dark and begins again."
+      "The season runs from Trinity Sunday to the eve of the next Advent. Green has marked the days outside feast and fast in the West since the medieval writers on vestments. The work of the weeks is the public life of Jesus, read in course: parables, healings, disputes, the sending of the Twelve, the cost of following. These Sundays are not a lesser substitute for Easter. They are the life the resurrection makes possible.",
+      "Certain days break the green without ending it. The Transfiguration falls on August 6, Holy Cross on September 14, All Saints on November 1. The last Sunday is Christ the King. That feast was appointed for the Roman church in 1925 and later moved to the end of the year. It is kept here as the Sunday before Advent: a last claim that the counted weeks have a Lord. Then the year turns back to the dark and begins again."
     ]
   };
   var INCENSE_COLORS = {
@@ -367,30 +778,187 @@
     pentecost: { fill: "#60A5FA", ink: "#0b1220" },
     ordinary: { fill: "#15803D", ink: "#f0fdf4" }
   };
-  var FEAST_NAME = {
-    "2026-11-30": "St. Andrew",
-    "2026-12-25": "Christmas",
-    "2027-01-01": "Holy Name",
-    "2027-01-06": "Epiphany",
-    "2027-02-02": "Presentation",
-    "2027-02-10": "Ash Wednesday",
-    "2027-03-21": "Palm Sunday",
-    "2027-03-25": "Annunciation",
-    "2027-03-26": "Good Friday",
-    "2027-03-28": "Easter",
-    "2027-05-06": "Ascension",
-    "2027-05-16": "Pentecost",
-    "2027-05-23": "Trinity",
-    "2027-08-06": "Transfiguration",
-    "2027-09-14": "Holy Cross",
-    "2027-11-01": "All Saints",
-    "2027-11-21": "Christ the King"
-  };
-
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
   function isoFromUTC(t) {
     var d = new Date(t);
     return d.getUTCFullYear() + "-" + pad2(d.getUTCMonth() + 1) + "-" + pad2(d.getUTCDate());
+  }
+  function localTodayIso() {
+    var now = new Date();
+    return now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+  }
+  function utcDate(y, m, d) { return new Date(Date.UTC(y, m - 1, d)); }
+  function nthWeekday(year, month, weekday, n) {
+    var first = utcDate(year, month, 1);
+    var delta = (weekday - first.getUTCDay() + 7) % 7;
+    return isoFromUTC(utcDate(year, month, 1 + delta + (n - 1) * 7).getTime());
+  }
+  function lastWeekday(year, month, weekday) {
+    var last = new Date(Date.UTC(year, month, 0));
+    var back = (last.getUTCDay() - weekday + 7) % 7;
+    return isoFromUTC(last.getTime() - back * 86400000);
+  }
+  function addDays(dt, n) { return new Date(dt.getTime() + n * 86400000); }
+  function easterSunday(year) {
+    var a = year % 19;
+    var b = Math.floor(year / 100);
+    var c = year % 100;
+    var d = Math.floor(b / 4);
+    var e = b % 4;
+    var f = Math.floor((b + 8) / 25);
+    var g = Math.floor((b - f + 1) / 3);
+    var h = (19 * a + b - d - g + 15) % 30;
+    var i = Math.floor(c / 4);
+    var k = c % 4;
+    var l = (32 + 2 * e + 2 * i - h - k) % 7;
+    var m = Math.floor((a + 11 * h + 22 * l) / 451);
+    var month = Math.floor((h + l - 7 * m + 114) / 31);
+    var day = ((h + l - 7 * m + 114) % 31) + 1;
+    return utcDate(year, month, day);
+  }
+  function adventSunday(year) {
+    for (var d = 27; d <= 33; d++) {
+      var dt = utcDate(year, 11, d);
+      if (dt.getUTCDay() === 0) return dt;
+    }
+    return null;
+  }
+  function letterOf(startYear) {
+    var mod = startYear % 3;
+    if (mod === 0) return "A";
+    if (mod === 1) return "B";
+    return "C";
+  }
+  function startYearContaining(iso) {
+    var y = Number(iso.slice(0, 4));
+    var advent = isoFromUTC(adventSunday(y).getTime());
+    return iso >= advent ? y : y - 1;
+  }
+  function buildYear(startYear) {
+    var advent = adventSunday(startYear);
+    var next = adventSunday(startYear + 1);
+    var startIso = isoFromUTC(advent.getTime());
+    var endExclusive = isoFromUTC(next.getTime());
+    var easter = easterSunday(startYear + 1);
+    var easterIso = isoFromUTC(easter.getTime());
+    function off(n) { return isoFromUTC(easter.getTime() + n * 86400000); }
+    var ash = off(-46);
+    var palm = off(-7);
+    var pentecost = off(49);
+    var trinity = off(56);
+    var christmas = startYear + "-12-25";
+    var epiphany = (startYear + 1) + "-01-06";
+    var cuts = [
+      ["advent", startIso, christmas],
+      ["christmas", christmas, epiphany],
+      ["epiphany", epiphany, ash],
+      ["lent", ash, palm],
+      ["holyweek", palm, easterIso],
+      ["easter", easterIso, pentecost],
+      ["pentecost", pentecost, trinity],
+      ["ordinary", trinity, endExclusive]
+    ];
+    var feasts = {};
+    function put(iso, name) {
+      if (iso >= startIso && iso < endExclusive && !feasts[iso]) feasts[iso] = name;
+    }
+    put(startYear + "-11-30", "St. Andrew");
+    put((startYear + 1) + "-11-30", "St. Andrew");
+    put(christmas, "Christmas");
+    put((startYear + 1) + "-01-01", "Holy Name");
+    put(epiphany, "Epiphany");
+    put((startYear + 1) + "-02-02", "Presentation");
+    put((startYear + 1) + "-03-25", "Annunciation");
+    put((startYear + 1) + "-08-06", "Transfiguration");
+    put((startYear + 1) + "-09-14", "Holy Cross");
+    put((startYear + 1) + "-11-01", "All Saints");
+    feasts[ash] = "Ash Wednesday";
+    feasts[palm] = "Palm Sunday";
+    feasts[off(-2)] = "Good Friday";
+    feasts[easterIso] = "Easter";
+    feasts[off(39)] = "Ascension";
+    feasts[pentecost] = "Pentecost";
+    feasts[trinity] = "Trinity";
+    feasts[isoFromUTC(next.getTime() - 7 * 86400000)] = "Christ the King";
+    var letter = letterOf(startYear);
+    return {
+      startYear: startYear,
+      letter: letter,
+      startIso: startIso,
+      endExclusive: endExclusive,
+      count: Math.round((next.getTime() - advent.getTime()) / 86400000),
+      cuts: cuts,
+      feasts: feasts,
+      ash: ash,
+      palm: palm,
+      easterIso: easterIso,
+      goodFriday: off(-2),
+      holySaturday: off(-1),
+      ascension: off(39),
+      pentecost: pentecost,
+      trinity: trinity,
+      christKing: isoFromUTC(next.getTime() - 7 * 86400000)
+    };
+  }
+  function shownYear() {
+    var offset = state.church === -1 || state.church === 1 ? state.church : 0;
+    return buildYear(startYearContaining(localTodayIso()) + offset);
+  }
+  function yearTag(year) {
+    var endYear = String(year.startYear + 1);
+    return year.startYear + "\u2013" + endYear.slice(2);
+  }
+  function isoShift(iso, days) {
+    var bits = iso.split("-");
+    return isoFromUTC(Date.UTC(Number(bits[0]), Number(bits[1]) - 1, Number(bits[2])) + days * 86400000);
+  }
+  function longDate(iso) {
+    var bits = iso.split("-");
+    var dt = new Date(Date.UTC(Number(bits[0]), Number(bits[1]) - 1, Number(bits[2])));
+    return MONTH_NAME[dt.getUTCMonth()] + " " + dt.getUTCDate() + ", " + dt.getUTCFullYear();
+  }
+  function monthDay(iso) {
+    var bits = iso.split("-");
+    var dt = new Date(Date.UTC(Number(bits[0]), Number(bits[1]) - 1, Number(bits[2])));
+    return MONTH_NAME[dt.getUTCMonth()] + " " + dt.getUTCDate();
+  }
+  function weekdayOf(iso) {
+    var bits = iso.split("-");
+    var dt = new Date(Date.UTC(Number(bits[0]), Number(bits[1]) - 1, Number(bits[2])));
+    return WEEKDAY[dt.getUTCDay()];
+  }
+  function yearSwitch() {
+    function btn(offset, label) {
+      var sample = buildYear(startYearContaining(localTodayIso()) + offset);
+      var on = (state.church === -1 || state.church === 1 ? state.church : 0) === offset;
+      return '<button type="button" data-church="' + offset + '" aria-pressed="' + (on ? "true" : "false") + '" title="' + esc("Year " + sample.letter + ", " + yearTag(sample)) + '">' + label + "</button>";
+    }
+    return '<div class="dial-styles year-switch" role="group" aria-label="Church year">' + btn(-1, "Previous") + btn(0, "This year") + btn(1, "Next") + "</div>";
+  }
+  function seasonYearNote(id) {
+    var year = shownYear();
+    var cut = null;
+    year.cuts.forEach(function (row) { if (row[0] === id) cut = row; });
+    if (!cut) return "";
+    var start = monthDay(cut[1]);
+    var end = monthDay(isoShift(cut[2], -1));
+    if (id === "advent") return "This year the ring runs from " + start + " through " + end + ". Christmas Day begins the next season. The four weeks are short on purpose. The church practices wanting what it does not yet hold.";
+    if (id === "christmas") return "On this wheel the ring runs from " + longDate(cut[1]) + ", through " + longDate(isoShift(cut[2], -1)) + ". January 6 is the Epiphany and starts the next ring. For these twelve days the year stays with one birth: the Word made flesh, in a particular place, visited by shepherds who were told not to be afraid.";
+    if (id === "epiphany") return "This year the ring runs from " + start + " through " + end + ".";
+    if (id === "lent") return "On this wheel the violet ring runs from Ash Wednesday, " + longDate(year.ash) + ", through " + longDate(isoShift(year.palm, -1)) + ", the day before Palm Sunday.";
+    if (id === "holyweek") {
+      var note = "This year Palm Sunday is " + longDate(year.palm) + ", Good Friday is " + monthDay(year.goodFriday) + ", and Holy Saturday is " + monthDay(year.holySaturday) + ". Easter Day is " + longDate(year.easterIso) + ".";
+      var ann = (year.startYear + 1) + "-03-25";
+      if (ann >= year.palm && ann <= year.holySaturday) note += " March 25, the Annunciation, falls on " + weekdayOf(ann) + " of this week. The date remains the feast\u2019s day. Many modern calendars keep the observance on a day after Easter, so the week is not asked to celebrate two mysteries at once.";
+      return note + " The ring is short, and it is meant to be walked slowly.";
+    }
+    if (id === "easter") return "This year Easter Day is " + longDate(year.easterIso) + ". The Easter ring runs from " + monthDay(year.easterIso) + " through " + monthDay(isoShift(year.pentecost, -1)) + ", the eve of Pentecost. Ascension Day, always a Thursday, is " + monthDay(year.ascension) + ".";
+    if (id === "pentecost") return "This year the red ring runs from " + monthDay(year.pentecost) + " through " + monthDay(isoShift(year.trinity, -1)) + ". Trinity Sunday, " + monthDay(year.trinity) + ", opens the long green season.";
+    if (id === "ordinary") {
+      var gospel = year.letter === "A" ? "Matthew" : year.letter === "C" ? "Luke" : "Mark, with John brought in where Mark is brief";
+      return "This year the green runs from " + longDate(year.trinity) + " to " + longDate(isoShift(year.endExclusive, -1)) + ", the eve of the next Advent. The Gospel read on the Sundays is " + gospel + ". The last Sunday, " + longDate(year.christKing) + ", is Christ the King.";
+    }
+    return "";
   }
   function properIso(date) {
     var parts = String(date).match(/^([A-Za-z]+)\s+(\d+),\s+(\d+)$/);
@@ -401,15 +969,17 @@
     return parts[3] + "-" + pad2(m) + "-" + pad2(Number(parts[2]));
   }
   function seasonOfIso(iso) {
-    for (var i = 0; i < SEASON_CUTS.length; i++) {
-      if (iso >= SEASON_CUTS[i][1] && iso < SEASON_CUTS[i][2]) return SEASON_CUTS[i][0];
+    var cuts = shownYear().cuts;
+    for (var i = 0; i < cuts.length; i++) {
+      if (iso >= cuts[i][1] && iso < cuts[i][2]) return cuts[i][0];
     }
     return "ordinary";
   }
   function seasonSpan(id) {
+    var cuts = shownYear().cuts;
     var cut = null;
-    for (var i = 0; i < SEASON_CUTS.length; i++) {
-      if (SEASON_CUTS[i][0] === id) cut = SEASON_CUTS[i];
+    for (var i = 0; i < cuts.length; i++) {
+      if (cuts[i][0] === id) cut = cuts[i];
     }
     if (!cut) return "";
     function one(iso, back) {
@@ -422,12 +992,14 @@
     return one(cut[1], false) + " – " + one(cut[2], true);
   }
   function seasonCard(id) {
-    var story = SEASON_STORY[id];
+    var story = SEASON_STORY[id] ? SEASON_STORY[id].slice() : null;
     if (!story) return "";
+    var extra = seasonYearNote(id);
+    if (extra) story.push(extra);
     var fog = state.style === "fog";
     var stripe = fog ? (FOG_COLORS[id] || FOG_COLORS.ordinary).fill : (STRIPE[id] || "#6e5430");
     var paras = story.map(function (paragraph) { return "<p>" + esc(paragraph) + "</p>"; }).join("");
-    return '<aside class="dial-read"><article class="season-essay" style="--season:' + stripe + '"><header><p class="season-kicker">The season</p><h3>' + esc(seasonName(id)) + "</h3><time>" + esc(seasonSpan(id)) + "</time></header>" + paras + "</article></aside>";
+    return '<aside class="dial-read"><article class="season-essay" style="--season:' + stripe + '"><header><p class="season-kicker">The season</p><h3>' + esc(seasonName(id)) + "</h3><time>" + esc(seasonSpan(id)) + "</time>" + contextButton("season", id, seasonName(id)) + "</header>" + paras + "</article></aside>";
   }
   function monthNumber(key) {
     var bits = String(key).split("-");
@@ -451,10 +1023,12 @@
     PROPER_AT[iso].push(i);
   });
   function yearDays() {
-    if (yearDays.cache) return yearDays.cache;
+    var year = shownYear();
+    if (yearDays.cache && yearDays.cacheKey === year.startIso) return yearDays.cache;
     var list = [];
-    for (var i = 0; i < YEAR_COUNT; i++) {
-      var t = YEAR0 + i * 86400000;
+    var origin = Date.parse(year.startIso + "T00:00:00Z");
+    for (var i = 0; i < year.count; i++) {
+      var t = origin + i * 86400000;
       var iso = isoFromUTC(t);
       var dt = new Date(t);
       list.push({
@@ -467,10 +1041,11 @@
         season: seasonOfIso(iso),
         monthKey: iso.slice(0, 7),
         propers: PROPER_AT[iso] || [],
-        feast: FEAST_NAME[iso] || ""
+        feast: year.feasts[iso] || ""
       });
     }
     yearDays.cache = list;
+    yearDays.cacheKey = year.startIso;
     return list;
   }
   function sliceDays() {
@@ -534,11 +1109,47 @@
     for (var j = 0; j < days.length; j++) if (days[j].iso === today) { state.day = today; return; }
     state.day = days[0].iso;
   }
+  function liturgicalNames(day) {
+    var names = [];
+    day.propers.forEach(function (idx) {
+      var properName = PROPERS[idx].name;
+      if (properName.indexOf("Vigil") === -1 && names.indexOf(properName) === -1) names.push(properName);
+    });
+    if (!names.length) {
+      day.propers.forEach(function (idx) {
+        var vigilName = PROPERS[idx].name;
+        if (names.indexOf(vigilName) === -1) names.push(vigilName);
+      });
+    }
+    if (day.feast && names.indexOf(day.feast) === -1) names.push(day.feast);
+    return names;
+  }
+  function holyName(day) {
+    var names = liturgicalNames(day);
+    var holy = WEEKDAY[day.dow];
+    for (var ni = 0; ni < names.length; ni++) {
+      if (!/^Proper \d+$/.test(names[ni])) { holy = names[ni]; break; }
+    }
+    if (holy === WEEKDAY[day.dow] && names.length) holy = names[0];
+    return holy;
+  }
+  function dayCenter(day) {
+    var names = liturgicalNames(day);
+    var holy = holyName(day);
+    var dateLine = MONTH_NAME[day.m - 1] + " " + day.d;
+    var kicker = holy === WEEKDAY[day.dow] ? seasonName(day.season) : WEEKDAY[day.dow];
+    var bits = [dateLine];
+    names.forEach(function (name) { if (name !== holy && bits.indexOf(name) === -1) bits.push(name); });
+    var season = seasonName(day.season);
+    if (kicker !== season && bits.indexOf(season) === -1) bits.push(season);
+    return { holy: holy, kicker: kicker, sub: bits.join(" · "), long: holy.length > 16 };
+  }
   function dial() {
     pinDay();
     var days = sliceDays();
     if (!days.length) days = yearDays();
     var fog = state.style === "fog";
+    var hotInk = fog ? "#f5f5f7" : "#ff6a00";
     var colors = fog ? FOG_COLORS : INCENSE_COLORS;
     var cx = 500, cy = 500;
     var kind = (state.slice && state.slice.kind) || "year";
@@ -706,7 +1317,12 @@
         var label = MONTH_SHORT[p.days[0].m - 1];
         var full = monthLabel(key);
         var box = bands.month;
-        parts.push('<g><path class="slice" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + monthFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, p.a0, p.a1, box[0], box[1], monthInk, "month-name") + "</g>");
+        var monthOn = kind === "year" && state.monthFocus === key;
+        var monthStroke = monthOn
+          ? ' stroke="' + (fog ? "#f5f5f7" : "#1c1612") + '" stroke-width="3.2"'
+          : (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"');
+        var monthFace = monthOn && !fog ? "#fff8e7" : monthFill;
+        parts.push('<g data-cut="month" data-month="' + key + '" role="button" tabindex="0" aria-pressed="' + (monthOn ? "true" : "false") + '" aria-label="' + esc(full) + '"><path class="slice' + (monthOn ? " is-month" : "") + '" d="' + wedgePath(box[0], box[1], p.a0, p.a1) + '" fill="' + monthFace + '"' + monthStroke + '><title>' + esc(full) + "</title></path>" + ringLabel(label, p.a0, p.a1, box[0], box[1], monthInk, "month-name") + "</g>");
       });
     }
     if (bands.week) {
@@ -721,8 +1337,72 @@
         parts.push('<g><path class="slice" d="' + wedgePath(weekBox[0], weekBox[1], a0, a1) + '" fill="' + weekFill + '"' + (fog ? "" : ' stroke="#b08d57" stroke-width="0.8"') + '><title>' + esc(full) + "</title></path>" + ringLabel(label, a0, a1, weekBox[0], weekBox[1], weekInk, "week-name") + "</g>");
       });
     }
+    function monthClusterPaths(cells) {
+      var cols = [];
+      cells.forEach(function (cell) {
+        var key = Math.round(cell.a0 * 10000);
+        var col = null;
+        for (var i = 0; i < cols.length; i++) if (cols[i].key === key) col = cols[i];
+        if (!col) cols.push({ key: key, a0: cell.a0, a1: cell.a1, r0: cell.r0, r1: cell.r1 });
+        else {
+          if (cell.r0 < col.r0) col.r0 = cell.r0;
+          if (cell.r1 > col.r1) col.r1 = cell.r1;
+        }
+      });
+      cols.sort(function (a, b) { return a.a0 - b.a0; });
+      if (!cols.length) return [];
+      var turn = Math.PI * 2;
+      var eps = 0.02;
+      var runs = [[cols[0]]];
+      for (var c = 1; c < cols.length; c++) {
+        var prevCol = cols[c - 1];
+        if (Math.abs(cols[c].a0 - prevCol.a1) < eps) runs[runs.length - 1].push(cols[c]);
+        else runs.push([cols[c]]);
+      }
+      if (runs.length > 1) {
+        var head = runs[0];
+        var tail = runs[runs.length - 1];
+        if (Math.abs(head[0].a0 + turn - tail[tail.length - 1].a1) < eps) {
+          head.forEach(function (col) { col.a0 += turn; col.a1 += turn; });
+          runs[runs.length - 1] = tail.concat(head);
+          runs.shift();
+        }
+      }
+      function arcTo(r, a0, a1, sweep) {
+        var end = polar(r, a1);
+        var large = Math.abs(a1 - a0) > Math.PI ? 1 : 0;
+        return "A " + n(r) + " " + n(r) + " 0 " + large + " " + sweep + " " + n(end[0]) + " " + n(end[1]);
+      }
+      function lineTo(r, a) {
+        var p = polar(r, a);
+        return "L " + n(p[0]) + " " + n(p[1]);
+      }
+      return runs.map(function (run) {
+        var start = polar(run[0].r1, run[0].a0);
+        var d = ["M " + n(start[0]) + " " + n(start[1])];
+        for (var i = 0; i < run.length; i++) {
+          var col = run[i];
+          d.push(arcTo(col.r1, col.a0, col.a1, 1));
+          var next = run[i + 1];
+          if (next) {
+            if (Math.abs(next.r1 - col.r1) > 0.4) d.push(lineTo(next.r1, col.a1));
+          } else d.push(lineTo(col.r0, col.a1));
+        }
+        for (var j = run.length - 1; j >= 0; j--) {
+          var back = run[j];
+          d.push(arcTo(back.r0, back.a1, back.a0, 0));
+          var earlier = run[j - 1];
+          if (earlier) {
+            if (Math.abs(earlier.r0 - back.r0) > 0.4) d.push(lineTo(earlier.r0, back.a0));
+          } else d.push(lineTo(run[0].r1, run[0].a0));
+        }
+        d.push("Z");
+        return d.join(" ");
+      });
+    }
     var hot = null;
     var todayPath = "";
+    var monthCells = [];
     var todayNow = new Date();
     var todayIso = todayNow.getFullYear() + "-" + pad2(todayNow.getMonth() + 1) + "-" + pad2(todayNow.getDate());
     weeks.forEach(function (w, wi) {
@@ -754,10 +1434,13 @@
         var cls = "day-num" + (day.dow === 0 ? " is-sun" : "") + (day.propers.length ? " is-proper" : "") + (day.iso === state.day ? " is-on" : "");
         var stroke = "";
         if (!fog) stroke = ' stroke="#b08d57" stroke-width="0.45"';
-        if (day.iso === state.day) stroke = ' stroke="' + (fog ? "#f5f5f7" : "#6e5430") + '" stroke-width="2.4"';
+        if (day.iso === state.day) stroke = ' stroke="' + hotInk + '" stroke-width="2.8"';
         var path = wedgePath(ring[0], ring[1], a0, a1);
         if (day.iso === state.day) hot = path;
         if (isToday) todayPath = path;
+        if (kind === "year" && state.monthFocus && day.m === state.monthFocus) {
+          monthCells.push({ a0: a0, a1: a1, r0: ring[0], r1: ring[1] });
+        }
         var mark = "";
         if (day.feast || (day.propers.length && total <= 120)) {
           var markA = labelA + (fullRing ? 0.42 : Math.min(0.18, (a1 - a0) * 0.28));
@@ -780,12 +1463,20 @@
       parts.push('<circle cx="500" cy="500" r="486" fill="none" stroke="#b08d57" stroke-width="0.45" pointer-events="none"/>');
     }
     parts.push('<circle cx="500" cy="500" r="104" fill="' + (fog ? "#000" : "#f4f1eb") + '" pointer-events="none"/>');
-    if (hot) parts.push('<path d="' + hot + '" fill="none" stroke="' + (fog ? "#f5f5f7" : "#6e5430") + '" stroke-width="2.6" pointer-events="none"/>');
+    if (monthCells.length) {
+      var clusterInk = fog ? "#f5f5f7" : "#1c1612";
+      var clusterFill = fog ? "rgba(245,245,247,0.2)" : "rgba(255,244,214,0.46)";
+      monthClusterPaths(monthCells).forEach(function (d) {
+        parts.push('<path class="month-cluster" d="' + d + '" fill="' + clusterFill + '" stroke="' + clusterInk + '" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round" pointer-events="none"/>');
+      });
+    }
+    if (hot) parts.push('<path class="day-pick" d="' + hot + '" fill="none" stroke="' + hotInk + '" stroke-width="3.4" pointer-events="none"/>');
     if (todayPath) parts.push('<path class="today-beat" d="' + todayPath + '" fill="' + (fog ? "rgba(245,245,247,0.28)" : "rgba(255,248,231,0.55)") + '" stroke="' + (fog ? "#f5f5f7" : "#fff8e7") + '" stroke-width="3.2" pointer-events="none"/>');
 
-    var title = "The year";
-    var sub = days.length + " days · 2026–27";
-    var kicker = "Year B";
+    var year = shownYear();
+    var title = yearTag(year);
+    var sub = days.length + " days · " + yearTag(year);
+    var kicker = "Year " + year.letter;
     if (kind === "season") {
       title = seasonName(state.slice.id);
       sub = days.length + " days";
@@ -801,17 +1492,19 @@
       for (var pi = 0; pi < days.length; pi++) if (days[pi].iso === state.day) picked = days[pi];
       if (!picked) yearDays().forEach(function (d) { if (d.iso === state.day) picked = d; });
       if (picked) {
-        kicker = title;
-        title = MONTH_NAME[picked.m - 1] + " " + picked.d;
-        var bits = [];
-        picked.propers.forEach(function (idx) { bits.push(PROPERS[idx].name); });
-        if (picked.feast && bits.indexOf(picked.feast) === -1) bits.push(picked.feast);
-        bits.push(WEEKDAY[picked.dow]);
-        bits.push(seasonName(picked.season));
+        var center = dayCenter(picked);
+        title = center.holy;
+        var bits = [MONTH_NAME[picked.m - 1] + " " + picked.d];
+        liturgicalNames(picked).forEach(function (name) {
+          if (name !== center.holy && bits.indexOf(name) === -1) bits.push(name);
+        });
+        if (center.holy !== WEEKDAY[picked.dow]) bits.push(WEEKDAY[picked.dow]);
+        if (bits.indexOf(seasonName(picked.season)) === -1) bits.push(seasonName(picked.season));
+        bits.push(yearTag(year));
         sub = bits.join(" · ");
       }
     }
-    var crumbs = ['<button type="button" data-cut="year"' + (kind === "year" ? ' aria-current="page"' : "") + ">The year</button>"];
+    var crumbs = [];
     var crumbSeason = kind === "season" ? state.slice.id : sid;
     if (!crumbSeason && kind !== "year") {
       var only = "";
@@ -832,10 +1525,8 @@
     if (kind === "week") crumbs.push('<span aria-current="page">' + esc(weekRangeLabel(days)) + "</span>");
     var properCount = 0;
     days.forEach(function (d) { properCount += d.propers.length; });
-    var fullOn = document.body.classList.contains("is-wheel-full");
-    var tools = '<div class="dial-styles" role="group" aria-label="Appearance"><button type="button" data-style="fog" aria-pressed="' + (fog ? "true" : "false") + '">Fog</button><button type="button" data-style="incense" aria-pressed="' + (fog ? "false" : "true") + '">Incense</button></div>';
+    var tools = "";
     if (kind !== "year" && properCount) tools += '<button type="button" class="dial-text" data-board>Readings</button>';
-    tools += '<button type="button" class="dial-text" data-fullwheel aria-pressed="' + (fullOn ? "true" : "false") + '">' + (fullOn ? "Leave full screen" : "Full screen") + "</button>";
     var read = "";
     var chosen = null;
     days.forEach(function (d) { if (d.iso === state.day) chosen = d; });
@@ -843,52 +1534,58 @@
       read = seasonCard(state.card);
     } else if (chosen) {
       var stripe = fog ? (colors[chosen.season] || colors.ordinary).fill : (STRIPE[chosen.season] || "#6e5430");
-      var body = chosen.propers.length
-        ? chosen.propers.map(function (idx) { return sundayCard(PROPERS[idx]); }).join("")
-        : '<article class="sunday"><header><h3>' + esc(chosen.feast || WEEKDAY[chosen.dow]) + "</h3><time>" + esc(MONTH_NAME[chosen.m - 1] + " " + chosen.d + ", " + chosen.y) + "</time></header><p class=\"sunday-note\">" + esc(seasonName(chosen.season)) + "</p></article>";
+      var body = dayArticles(chosen);
+      if (!body) body = '<article class="sunday"><header><h3>' + esc(chosen.feast || WEEKDAY[chosen.dow]) + "</h3><time>" + esc(MONTH_NAME[chosen.m - 1] + " " + chosen.d + ", " + chosen.y) + "</time></header><p class=\"sunday-note\">" + esc(seasonName(chosen.season)) + "</p></article>";
       read = '<aside class="dial-read"><div class="sundays" style="--season:' + stripe + '">' + body + "</div></aside>";
     }
     var library = "";
     if (kind !== "year") {
       var seasonIds = {};
       days.forEach(function (d) { seasonIds[d.season] = true; });
-      var found = allResources().filter(function (item) { return seasonIds[item.season] && matches(item); });
+      var found = allResources().filter(function (item) { return seasonIds[item.season] && matches(item) && matchesContext(item); });
       if (found.length) library = '<div class="dial-library">' + cards(found) + "</div>";
     }
     var arrive = state.settle ? " is-arriving" : "";
-    return '<div class="dial' + arrive + '" data-look="' + state.style + '"><div class="dial-bar"><nav class="crumbs" aria-label="Slice">' + crumbs.join('<span class="crumb-sep" aria-hidden="true">/</span>') + '</nav><div class="dial-tools">' + tools + '</div></div><div class="dial-stage"><div class="dial-frame"><svg class="dial-svg" viewBox="0 0 1000 1000" role="group" aria-label="Liturgical year. Sundays sit on the outer ring, and each week snakes inward to Saturday.">' + parts.join("") + '</svg><div class="dial-hub"><p class="dial-kicker" data-rest="' + esc(kicker) + '">' + esc(kicker) + "</p><h2 data-rest=\"" + esc(title) + "\">" + esc(title) + '</h2><p class="dial-sub" data-rest="' + esc(sub) + '">' + esc(sub) + "</p></div></div>" + read + "</div>" + library + "</div>";
+    var bar = "";
+    if (crumbs.length || tools) bar = '<div class="dial-bar"><nav class="crumbs" aria-label="Slice">' + crumbs.join('<span class="crumb-sep" aria-hidden="true">/</span>') + '</nav><div class="dial-tools">' + tools + '</div></div>';
+    return '<div class="dial' + arrive + '" data-look="' + state.style + '">' + bar + '<div class="dial-stage"><div class="dial-col">' + yearSwitch() + '<div class="dial-frame"><svg class="dial-svg" viewBox="0 0 1000 1000" role="group" aria-label="Liturgical year ' + esc(yearTag(year)) + '. Sundays sit on the outer ring, and each week snakes inward to Saturday.">' + parts.join("") + '</svg><div class="dial-hub"><p class="dial-kicker" data-rest="' + esc(kicker) + '">' + esc(kicker) + "</p><h2" + (title.length > 16 ? ' class="is-long"' : "") + " data-rest=\"" + esc(title) + "\">" + esc(title) + '</h2><p class="dial-sub" data-rest="' + esc(sub) + '">' + esc(sub) + "</p></div></div></div>" + read + "</div>" + library + "</div>";
   }
 
   function topics() {
     var grid = TOPICS.map(function (topic) {
-      return '<button type="button" data-topic="' + topic.id + '" aria-pressed="' + (state.topic === topic.id) + '">' + esc(topic.name) + "</button>";
+      var line = topic.about ? '<span class="choice-line">' + esc(topic.about) + "</span>" : "";
+      return '<button type="button" data-topic="' + topic.id + '" aria-pressed="' + (state.topic === topic.id) + '"><span class="choice-name">' + esc(topic.name) + "</span>" + line + "</button>";
     }).join("");
     var rest = "";
     if (state.topic) {
       var topic = TOPICS.filter(function (t) { return t.id === state.topic; })[0];
-      var chips = topic.subs.map(function (sub) {
+      var chips = topic.subs.length ? '<div class="chips" role="group" aria-label="Subtopics">' + topic.subs.map(function (sub) {
         return '<button type="button" data-sub="' + esc(sub) + '" aria-pressed="' + (state.sub === sub) + '">' + esc(sub) + "</button>";
-      }).join("");
-      var list = allResources().filter(function (item) {
-        return item.topic === topic.id && matches(item) && (!state.sub || item.sub === state.sub);
+      }).join("") + "</div>" : "";
+      var list = state.added.concat(LIBRARY).filter(function (item) {
+        return item.topic === topic.id && matches(item) && matchesContext(item) && (!state.sub || item.sub === state.sub);
       });
-      rest = '<div class="chips" role="group" aria-label="Subtopics">' + chips + "</div>" + cards(list);
+      rest = '<p class="context-row">' + contextButton("topic", topic.id, topic.name) + (state.sub ? contextButton("sub", state.sub, state.sub) : "") + "</p>" + chips + cards(list);
     }
-    return '<div class="topic-grid">' + grid + "</div>" + rest;
+    return '<section class="choice-block"><h2>Topic</h2><div class="topic-grid">' + grid + "</div>" + rest + "</section>";
   }
 
   function audiences() {
     var grid = AUDIENCES.map(function (name) {
-      return '<button type="button" data-audience="' + esc(name) + '" aria-pressed="' + (state.audience === name) + '">' + esc(name) + "</button>";
+      return '<button type="button" data-audience="' + esc(name) + '" aria-pressed="' + (state.audience === name) + '"><span class="choice-name">' + esc(name) + '</span><span class="choice-line">' + esc(AUDIENCE_ABOUT[name] || "") + "</span></button>";
     }).join("");
     var rest = "";
     if (state.audience) {
-      var list = allResources().filter(function (item) {
-        return item.audience === state.audience && matches(item);
+      var list = state.added.concat(LIBRARY).filter(function (item) {
+        return item.audience === state.audience && matches(item) && matchesContext(item);
       });
-      rest = cards(list);
+      rest = '<p class="context-row">' + contextButton("audience", state.audience, state.audience) + "</p>" + cards(list);
     }
-    return '<div class="topic-grid">' + grid + "</div>" + rest;
+    return '<section class="choice-block"><h2>Audience</h2><div class="topic-grid">' + grid + "</div>" + rest + "</section>";
+  }
+
+  function topicAudience() {
+    return '<div class="listed">' + topics() + audiences() + "</div>";
   }
 
   function formation() {
@@ -912,6 +1609,424 @@
     }));
   }
 
+  var LIT_KINDS = [
+    { id: "canonical", name: "Canonical" },
+    { id: "eccles", name: "Ecclesiastical" },
+    { id: "national", name: "National" }
+  ];
+
+  function litKind() {
+    var kind = "canonical";
+    LIT_KINDS.forEach(function (item) { if (item.id === state.lit) kind = item.id; });
+    return kind;
+  }
+
+  function litToggle(kind) {
+    return '<div class="lit-toggle" role="group" aria-label="Literature">' + LIT_KINDS.map(function (item) {
+      return '<button type="button" data-lit="' + item.id + '" aria-pressed="' + (item.id === kind) + '">' + esc(item.name) + "</button>";
+    }).join("") + "</div>";
+  }
+
+  function writeLitHash() {
+    if (state.module !== "literature") {
+      if (location.hash.indexOf("#literature") === 0) history.replaceState(null, "", location.pathname + location.search);
+      return;
+    }
+    var kind = litKind();
+    var raw = location.hash.replace(/^#/, "").split("/");
+    if (raw[0] === "literature" && raw[1] === kind && (kind === "eccles" || kind === "national") && raw[2]) return;
+    var next = "#literature/" + kind;
+    if (location.hash !== next) history.replaceState(null, "", location.pathname + location.search + next);
+  }
+
+  function syncLitHome() {
+    var bar = document.getElementById("lit-bar");
+    var analysis = document.body.getAttribute("data-desk") === "analysis";
+    if (analysis || state.module !== "literature") {
+      document.body.removeAttribute("data-lit");
+      if (bar) { bar.hidden = true; bar.innerHTML = ""; }
+      return;
+    }
+    var kind = litKind();
+    state.lit = kind;
+    document.body.setAttribute("data-lit", kind);
+    if (bar) {
+      bar.hidden = false;
+      bar.innerHTML = litToggle(kind);
+    }
+    writeLitHash();
+  }
+
+  function canonCard(item) {
+    var bits = [];
+    if (item.fileName) bits.push(item.fileName);
+    var links = "";
+    if (item.link) links += '<a href="' + esc(item.link) + '" target="_blank" rel="noopener">Open link</a>';
+    if (canonBlobs[item.id]) links += '<a href="' + esc(canonBlobs[item.id]) + '" target="_blank" rel="noopener">Open file</a>';
+    var filter = contextButton("work", "canonical:" + item.id, item.title);
+    return '<article class="card" data-canon-item="' + esc(item.id) + '"><header><span>' + esc(item.format) + "</span></header><h3>" + esc(item.title) + "</h3>" +
+      (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") +
+      (bits.length ? '<p class="meta">' + esc(bits.join(" · ")) + "</p>" : "") +
+      '<div class="card-actions">' + filter + links + "</div></article>";
+  }
+
+  function knownWork(id) {
+    if (WORKS.some(function (w) { return w.id === id; })) return true;
+    if (String(id).indexOf("canonical:") !== 0) return false;
+    var postId = String(id).slice("canonical:".length);
+    if (!postId) return false;
+    var added = state && state.added ? state.added : loadAdded();
+    return added.some(function (item) { return item.shelf === "canonical" && item.id === postId; });
+  }
+  function workLabel(id) {
+    var found = "";
+    WORKS.forEach(function (w) { if (w.id === id) found = w.label; });
+    if (found) return found;
+    if (String(id).indexOf("canonical:") !== 0) return "";
+    var postId = String(id).slice("canonical:".length);
+    var added = state && state.added ? state.added : loadAdded();
+    var title = "";
+    added.forEach(function (item) { if (item.id === postId) title = item.title; });
+    return title;
+  }
+  function workChoices() {
+    var list = WORKS.map(function (w) { return { id: w.id, label: w.label }; });
+    var added = state && state.added ? state.added : [];
+    added.forEach(function (item) {
+      if (item.shelf !== "canonical") return;
+      list.push({ id: "canonical:" + item.id, label: item.title });
+    });
+    return list;
+  }
+  function itemWorks(item) {
+    var ids = [];
+    (item.works || []).forEach(function (id) {
+      if (ids.indexOf(id) === -1) ids.push(id);
+    });
+    if (item.shelf === "canonical") {
+      var own = "canonical:" + item.id;
+      if (ids.indexOf(own) === -1) ids.push(own);
+    }
+    return ids;
+  }
+  function contextHas(kind, id) {
+    if (kind === "feast" || kind === "holiday" || kind === "national") {
+      return state.context.occasions.some(function (o) { return o.id === id; });
+    }
+    if (kind === "work") return state.context.works.some(function (w) { return w.id === id; });
+    return state.context[kind] === id;
+  }
+  function contextButton(kind, id, label) {
+    var on = contextHas(kind, id);
+    return '<button type="button" class="context-add" data-context-add="' + esc(kind) + '" data-context-id="' + esc(id) + '" data-context-label="' + esc(label) + '" aria-pressed="' + on + '">' + (on ? "In filters" : "Add filter") + "</button>";
+  }
+  function matchesContext(item, opts) {
+    var c = state.context;
+    opts = opts || {};
+    if (c.season && item.season !== c.season) return false;
+    if (c.audience && item.audience !== c.audience) return false;
+    if (c.topic && item.topic !== c.topic) return false;
+    if (c.sub && item.sub !== c.sub) return false;
+    if (!opts.skipShelf && c.shelf && (item.shelf || "") !== c.shelf) return false;
+    if (c.occasions.length) {
+      var tags = item.occasions || [];
+      var hit = false;
+      c.occasions.forEach(function (o) { if (tags.indexOf(o.id) !== -1) hit = true; });
+      if (!hit) return false;
+    }
+    if (c.works.length) {
+      var works = itemWorks(item);
+      var workHit = false;
+      c.works.forEach(function (w) { if (works.indexOf(w.id) !== -1) workHit = true; });
+      if (!workHit) return false;
+    }
+    return true;
+  }
+  function feedItems() {
+    return state.added.concat(LIBRARY).filter(function (item) {
+      return matches(item) && matchesContext(item);
+    });
+  }
+  function shelvedPosts(kind) {
+    return state.added.filter(function (item) {
+      return item.shelf === kind && matches(item) && matchesContext(item, { skipShelf: true });
+    });
+  }
+  function shelfLabel(id) {
+    var found = null;
+    LIT_KINDS.forEach(function (item) { if (item.id === id) found = item; });
+    return found ? found.name : id;
+  }
+  function inShownYear(year, iso) {
+    return iso >= year.startIso && iso < year.endExclusive;
+  }
+  function fixedIso(year, md) {
+    var hits = [];
+    [year.startYear, year.startYear + 1].forEach(function (y) {
+      var iso = y + "-" + md;
+      if (inShownYear(year, iso)) hits.push(iso);
+    });
+    return hits;
+  }
+  function yearOccasions(year) {
+    var feasts = [];
+    var holidays = [];
+    var national = [];
+    function add(list, kind, id, label, iso) {
+      if (!inShownYear(year, iso)) return;
+      list.push({ id: kind + ":" + id, kind: kind, label: label, iso: iso });
+    }
+    FEAST_FIXED.forEach(function (row) {
+      fixedIso(year, row[2]).forEach(function (iso) { add(feasts, "feast", row[0], row[1], iso); });
+    });
+    add(feasts, "feast", "ash-wednesday", "Ash Wednesday", year.ash);
+    add(feasts, "feast", "palm-sunday", "Palm Sunday", year.palm);
+    add(feasts, "feast", "good-friday", "Good Friday", year.goodFriday);
+    add(feasts, "feast", "easter", "Easter", year.easterIso);
+    add(feasts, "feast", "ascension", "Ascension", year.ascension);
+    add(feasts, "feast", "pentecost", "Pentecost", year.pentecost);
+    add(feasts, "feast", "trinity", "Trinity", year.trinity);
+    add(feasts, "feast", "christ-the-king", "Christ the King", year.christKing);
+    [year.startYear, year.startYear + 1].forEach(function (y) {
+      add(holidays, "holiday", "mlk", "Martin Luther King Jr. Day", nthWeekday(y, 1, 1, 3));
+      add(holidays, "holiday", "washington", "Washington's Birthday", nthWeekday(y, 2, 1, 3));
+      add(holidays, "holiday", "memorial", "Memorial Day", lastWeekday(y, 5, 1));
+      add(holidays, "holiday", "juneteenth", "Juneteenth", y + "-06-19");
+      add(holidays, "holiday", "labor", "Labor Day", nthWeekday(y, 9, 1, 1));
+      add(holidays, "holiday", "columbus", "Columbus Day", nthWeekday(y, 10, 1, 2));
+      add(holidays, "holiday", "veterans", "Veterans Day", y + "-11-11");
+      add(national, "national", "independence", "Independence Day", y + "-07-04");
+      add(national, "national", "thanksgiving", "Thanksgiving Day", nthWeekday(y, 11, 4, 4));
+    });
+    function byDate(a, b) { return a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : 0; }
+    feasts.sort(byDate);
+    holidays.sort(byDate);
+    national.sort(byDate);
+    return { feasts: feasts, holidays: holidays, national: national };
+  }
+  function occasionOpen(key) {
+    try {
+      var raw = JSON.parse(sessionStorage.getItem("ar-occasions") || "{}");
+      if (raw && typeof raw[key] === "boolean") return raw[key];
+    } catch (e) {}
+    return true;
+  }
+  function occasionSection(title, key, rows) {
+    if (!rows.length) return "";
+    var open = occasionOpen(key);
+    var items = rows.map(function (row) {
+      return "<li><div><strong>" + esc(row.label) + "</strong><span>" + esc(weekdayOf(row.iso) + ", " + longDate(row.iso)) + "</span></div>" + contextButton(row.kind, row.id, row.label) + "</li>";
+    }).join("");
+    return '<section class="occasion-group' + (open ? "" : " is-collapsed") + '"><h2><button type="button" class="occasion-toggle" data-occasion-toggle="' + key + '" aria-expanded="' + (open ? "true" : "false") + '">' + esc(title) + '</button></h2><ul class="occasion-list">' + items + "</ul></section>";
+  }
+  function occasionBoard() {
+    var groups = yearOccasions(shownYear());
+    return '<div class="occasion-board">' + occasionSection("Feast days", "feast", groups.feasts) + occasionSection("Major annual holidays", "holiday", groups.holidays) + occasionSection("National holidays", "national", groups.national) + "</div>";
+  }
+  function kindName(kind) {
+    if (kind === "feast") return "Feast";
+    if (kind === "holiday") return "Holiday";
+    if (kind === "national") return "National";
+    if (kind === "season") return "Season";
+    if (kind === "topic") return "Topic";
+    if (kind === "sub") return "Subtopic";
+    if (kind === "audience") return "Audience";
+    if (kind === "shelf") return "Shelf";
+    if (kind === "work") return "Literature";
+    return "Context";
+  }
+  function fixedPill(kind, label) {
+    return '<span class="context-pill is-fixed" title="Change this in the menu"><span>' + esc(kind) + "</span>" + esc(label) + "</span>";
+  }
+  function contextPills() {
+    var pills = [];
+    if (allLevels()) pills.push(fixedPill("Scholarship", "All"));
+    else state.levels.forEach(function (id) {
+      var label = id;
+      LEVELS.forEach(function (l) { if (l.id === id) label = l.label; });
+      pills.push(fixedPill("Scholarship", label));
+    });
+    var postureLabel = "Any";
+    POSTURES.forEach(function (p) { if (p.id === state.posture) postureLabel = p.label; });
+    pills.push(fixedPill("Posture", postureLabel));
+    function one(kind, id, label) {
+      if (!id) return;
+      pills.push('<button type="button" class="context-pill" data-context-remove="' + esc(kind) + '" data-context-id="' + esc(id) + '" aria-label="Remove ' + esc(label) + '"><span>' + kindName(kind) + "</span>" + esc(label) + " ×</button>");
+    }
+    one("season", state.context.season, seasonName(state.context.season));
+    one("topic", state.context.topic, (TOPICS.filter(function (t) { return t.id === state.context.topic; })[0] || { name: state.context.topic }).name);
+    one("sub", state.context.sub, state.context.sub);
+    one("audience", state.context.audience, state.context.audience);
+    one("shelf", state.context.shelf, shelfLabel(state.context.shelf));
+    state.context.occasions.forEach(function (o) { one(o.kind, o.id, o.label); });
+    state.context.works.forEach(function (w) { one("work", w.id, w.label); });
+    return '<div class="context-pills">' + pills.join("") + "</div>";
+  }
+  function contextFeedHtml() {
+    var list = feedItems();
+    if (!list.length) return '<p class="empty">Nothing matches these filters.</p>';
+    return '<ul>' + list.map(function (item) {
+      var label = typeNames(itemTypes(item)).join(", ") || item.format || "Note";
+      return "<li><span>" + esc(label) + "</span><strong>" + esc(item.title) + "</strong></li>";
+    }).join("") + "</ul>";
+  }
+  function filtersCollapsed() {
+    try { return sessionStorage.getItem("ar-filters-collapsed") === "1"; } catch (e) { return false; }
+  }
+  function renderContextPane() {
+    var pane = document.getElementById("context-pane");
+    if (!pane) return;
+    var scroll = pane.scrollTop;
+    var collapsed = filtersCollapsed();
+    pane.classList.toggle("is-collapsed", collapsed);
+    var toggle = '<button type="button" class="context-collapse" data-filters-toggle aria-expanded="' + (collapsed ? "false" : "true") + '" aria-label="' + (collapsed ? "Expand filters" : "Collapse filters") + '">' + (collapsed ? "Filters" : "Collapse") + "</button>";
+    pane.innerHTML = '<div class="context-sticky"><div class="context-bar"><h2>Filters</h2>' + toggle + '</div><div class="context-body"><p class="context-note">Scholarship and posture are context filters. Change them in their menu. Feast days, holidays, national days, and literature items can be combined. Season, topic, audience, and shelf each take one. Remove a pill to drop that filter.</p>' + contextPills() + "</div></div>";
+    pane.scrollTop = scroll;
+    syncWorkButtons();
+    renderContentFeed();
+  }
+  function syncWorkButtons() {
+    document.querySelectorAll("[data-context-add='work']").forEach(function (btn) {
+      var id = btn.getAttribute("data-context-id");
+      if (!id) return;
+      var on = contextHas("work", id);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.textContent = on ? "In filters" : "Add filter";
+    });
+  }
+  function renderTypeFilters() {
+    var row = document.getElementById("type-filters");
+    if (!row) return;
+    row.innerHTML = TYPES.map(function (t) {
+      var on = state.types.indexOf(t.id) !== -1;
+      return '<button type="button" data-type="' + t.id + '" aria-pressed="' + (on ? "true" : "false") + '" title="' + esc(t.about) + '">' + esc(t.name) + "</button>";
+    }).join("");
+  }
+  function renderContentFeed() {
+    renderTypeFilters();
+    var body = document.getElementById("content-feed-list");
+    var scroller = document.getElementById("content-feed-body");
+    var count = document.getElementById("content-dock-count");
+    if (!body) return;
+    var scroll = scroller ? scroller.scrollTop : 0;
+    var list = feedItems();
+    if (count) count.textContent = String(list.length);
+    body.innerHTML = contextFeedHtml();
+    if (scroller) scroller.scrollTop = scroll;
+    bindContentDock();
+  }
+  function bindContentDock() {
+    var dock = document.getElementById("content-dock");
+    var edge = document.getElementById("content-dock-edge");
+    var toggle = document.getElementById("content-dock-toggle");
+    if (!dock || !edge || !toggle || dock.getAttribute("data-bound") === "1") return;
+    dock.setAttribute("data-bound", "1");
+    var openHeight = "";
+    function limits() {
+      return { min: 140, max: Math.max(200, Math.round(window.innerHeight * 0.7)) };
+    }
+    function setHeight(next) {
+      var bound = limits();
+      if (next < bound.min) next = bound.min;
+      if (next > bound.max) next = bound.max;
+      dock.style.height = Math.round(next) + "px";
+      edge.setAttribute("aria-valuemin", String(bound.min));
+      edge.setAttribute("aria-valuemax", String(bound.max));
+      edge.setAttribute("aria-valuenow", String(Math.round(next)));
+    }
+    function setCollapsed(collapsed) {
+      dock.classList.toggle("is-collapsed", collapsed);
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      toggle.textContent = collapsed ? "Expand" : "Collapse";
+      edge.tabIndex = collapsed ? -1 : 0;
+    }
+    toggle.addEventListener("click", function () {
+      var collapsed = !dock.classList.contains("is-collapsed");
+      if (collapsed) openHeight = dock.style.height;
+      setCollapsed(collapsed);
+      if (!collapsed && openHeight) dock.style.height = openHeight;
+    });
+    function dragTo(clientY, originY, originH) {
+      setHeight(originH + (originY - clientY));
+    }
+    edge.addEventListener("pointerdown", function (event) {
+      if (event.button !== 0 || dock.classList.contains("is-collapsed")) return;
+      event.preventDefault();
+      var originY = event.clientY;
+      var originH = dock.getBoundingClientRect().height;
+      edge.setPointerCapture(event.pointerId);
+      function move(e) { dragTo(e.clientY, originY, originH); }
+      function up() {
+        edge.removeEventListener("pointermove", move);
+        edge.removeEventListener("pointerup", up);
+        edge.removeEventListener("pointercancel", up);
+      }
+      edge.addEventListener("pointermove", move);
+      edge.addEventListener("pointerup", up);
+      edge.addEventListener("pointercancel", up);
+    });
+    edge.addEventListener("keydown", function (event) {
+      if (dock.classList.contains("is-collapsed")) return;
+      var step = event.shiftKey ? 48 : 16;
+      var current = dock.getBoundingClientRect().height;
+      if (event.key === "ArrowUp") { setHeight(current + step); event.preventDefault(); }
+      else if (event.key === "ArrowDown") { setHeight(current - step); event.preventDefault(); }
+    });
+    var measured = dock.getBoundingClientRect().height;
+    setHeight(measured > 80 ? measured : Math.round(window.innerHeight * 0.28));
+  }
+  function toggleContext(kind, id, label) {
+    if (!kind || !id) return;
+    if (kind === "feast" || kind === "holiday" || kind === "national") {
+      var kept = state.context.occasions.filter(function (o) { return o.id !== id; });
+      if (kept.length === state.context.occasions.length) kept.push({ id: id, kind: kind, label: label || id });
+      state.context.occasions = kept;
+    } else if (kind === "work") {
+      if (!knownWork(id)) return;
+      var worksKept = state.context.works.filter(function (w) { return w.id !== id; });
+      if (worksKept.length === state.context.works.length) worksKept.push({ id: id, label: workLabel(id) || label || id });
+      state.context.works = worksKept;
+    } else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf") {
+      if (kind === "shelf" && SHELF_LANDINGS.indexOf(id) === -1) return;
+      if (kind === "season" && !SEASONS.some(function (s) { return s.id === id; })) return;
+      state.context[kind] = state.context[kind] === id ? "" : id;
+      if (kind === "topic") state.context.sub = "";
+      if (kind === "sub" && state.context.sub && state.topic) state.context.topic = state.topic;
+    } else return;
+    saveContext();
+    renderStage();
+  }
+  function removeContext(kind, id) {
+    if (kind === "feast" || kind === "holiday" || kind === "national") {
+      state.context.occasions = state.context.occasions.filter(function (o) { return o.id !== id; });
+    } else if (kind === "work") {
+      state.context.works = state.context.works.filter(function (w) { return w.id !== id; });
+    } else if (kind === "season" || kind === "topic" || kind === "sub" || kind === "audience" || kind === "shelf") {
+      state.context[kind] = "";
+      if (kind === "topic") state.context.sub = "";
+    }
+    saveContext();
+    renderStage();
+  }
+
+  function literatureBody(kind) {
+    if (kind === "eccles" || kind === "national") return "";
+    if (kind === "canonical") {
+      var posts = shelvedPosts("canonical");
+      var anyCanon = state.added.some(function (item) { return item.shelf === "canonical"; });
+      if (!posts.length) return '<p class="empty">' + (anyCanon ? "Nothing matches these filters." : "Nothing is on this shelf yet.") + "</p>";
+      return '<div class="cards">' + posts.map(canonCard).join("") + "</div>";
+    }
+    return '<p class="empty">Nothing is on this shelf yet.</p>';
+  }
+
+  function literature() {
+    var kind = litKind();
+    if (kind === "eccles" || kind === "national") return "";
+    var landing = SHELF_LANDINGS.indexOf(kind) === -1 ? "" : '<p class="context-row">' + contextButton("shelf", kind, shelfLabel(kind)) + "</p>";
+    return '<div class="literature">' + landing + literatureBody(kind) + "</div>";
+  }
+
   function events() {
     return '<div class="events">' + EVENTS.map(function (event) {
       return '<article class="event"><time>' + esc(event.date) + '</time><div><h3>' + esc(event.name) + '</h3><p>' + esc(event.kind) + " · " + esc(event.where) + "</p></div></article>";
@@ -922,21 +2037,58 @@
     return '<option value="' + esc(value) + '"' + (selected ? " selected" : "") + ">" + esc(label) + "</option>";
   }
 
+  function landingShelf() {
+    if (SHELF_LANDINGS.indexOf(state.context.shelf) !== -1) return state.context.shelf;
+    if (state.module === "literature" && SHELF_LANDINGS.indexOf(litKind()) !== -1) return litKind();
+    return "";
+  }
+
+  function landingSentence() {
+    var shelf = landingShelf();
+    var where = shelf ? "This post will be filed under " + shelfLabel(shelf) + "." : "This post will be filed in the library, with no shelf.";
+    return "The fields follow the filters. Feasts, holidays, and literature items selected on the left are included. " + where;
+  }
+  function landingNote() {
+    return '<p class="composer-note" data-landing-note>' + esc(landingSentence()) + "</p>";
+  }
+  function refreshLandingNote(form) {
+    if (!form) return;
+    var note = form.querySelector("[data-landing-note]");
+    if (note) note.textContent = landingSentence();
+  }
+
+  function subOptions(topicId, selected) {
+    var chosen = TOPICS.filter(function (t) { return t.id === topicId; })[0];
+    var sub = selected && chosen && chosen.subs.indexOf(selected) !== -1 ? selected : "";
+    var html = option("", "Not set", !sub);
+    if (chosen) html += chosen.subs.map(function (name) { return option(name, name, name === sub); }).join("");
+    return html;
+  }
+
+  function workPick(selected) {
+    if (!selected) selected = state.context.works.map(function (w) { return w.id; });
+    var boxes = workChoices().map(function (w) {
+      var on = selected.indexOf(w.id) !== -1;
+      return '<label><input type="checkbox" name="works" value="' + esc(w.id) + '"' + (on ? " checked" : "") + "> " + esc(w.label) + "</label>";
+    }).join("");
+    return '<fieldset class="type-pick work-pick"><legend>Literature</legend><div class="type-pick-grid">' + boxes + "</div></fieldset>";
+  }
   function composer() {
-    if (state.role !== "curator") return "";
-    if (!state.compose) {
-      return '<div class="composer-launch"><button type="button" class="signup" data-compose>Add to the library</button></div>';
+    if (state.role !== "curator" || !state.compose) return "";
+    if (landingShelf() === "canonical") {
+      var media = '<option value="" selected disabled>Choose</option>' + CANON_MEDIA.map(function (name) {
+        return option(name, name, false);
+      }).join("");
+      return '<section class="composer"><h2>Add to the library <button type="button" data-compose>Close</button></h2><form id="add-form" data-shelf="canonical" autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label>' + workPick() + '<label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>Select at least one type above.</p><button class="signup" type="submit">Add</button></form></section>';
     }
-    var topicId = state.topic || TOPICS[0].id;
-    var topic = TOPICS.filter(function (t) { return t.id === topicId; })[0];
-    var formats = FORMATS.map(function (f) { return option(f, f, false); }).join("");
-    var levels = LEVELS.map(function (l) { return option(l.id, l.label, l.id === state.level); }).join("");
+    var ctx = state.context;
+    var levels = LEVELS.map(function (l) { return option(l.id, l.label, l.id === state.levels[0]); }).join("");
     var postures = '<option value="">Not tagged</option>' + POSTURES.map(function (p) { return option(p.id, p.label, false); }).join("");
-    var seasons = SEASONS.map(function (s) { return option(s.id, s.name, s.id === state.season); }).join("");
-    var audiences = AUDIENCES.map(function (a) { return option(a, a, false); }).join("");
-    var topics = TOPICS.map(function (t) { return option(t.id, t.name, t.id === topic.id); }).join("");
-    var subs = topic.subs.map(function (sub) { return option(sub, sub, sub === state.sub); }).join("");
-    return '<section class="composer"><h2>Add to the library <button type="button" data-compose>Close</button></h2><form id="add-form"><label>Title<input name="title" required></label><label>Format<select name="format">' + formats + '</select></label><label class="wide">Summary<input name="summary" required></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label>Experience<select name="level">' + levels + '</select></label><label>Primary use<select name="posture">' + postures + '</select></label><label>Season<select name="season">' + seasons + '</select></label><label>Audience<select name="audience">' + audiences + '</select></label><label>Topic<select name="topic">' + topics + '</select></label><label>Subtopic<select name="sub">' + subs + '</select></label><button class="signup" type="submit">Add</button></form></section>';
+    var seasons = option("", "Not set", !ctx.season) + SEASONS.map(function (s) { return option(s.id, s.name, s.id === ctx.season); }).join("");
+    var audiences = option("", "Not set", !ctx.audience) + AUDIENCES.map(function (a) { return option(a, a, a === ctx.audience); }).join("");
+    var topics = option("", "Not set", !ctx.topic) + TOPICS.map(function (t) { return option(t.id, t.name, t.id === ctx.topic); }).join("");
+    var subs = subOptions(ctx.topic, ctx.sub);
+    return '<section class="composer"><h2>Add to the library <button type="button" data-compose>Close</button></h2><form id="add-form" autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label>' + workPick() + '<label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label>Experience<select name="level">' + levels + '</select></label><label>Primary use<select name="posture">' + postures + '</select></label><label>Season<select name="season">' + seasons + '</select></label><label>Audience<select name="audience">' + audiences + '</select></label><label>Topic<select name="topic">' + topics + '</select></label><label>Subtopic<select name="sub">' + subs + '</select></label>' + landingNote() + '<p class="type-pick-error" data-type-error hidden>Select at least one type above.</p><button class="signup" type="submit">Add</button></form></section>';
   }
 
   function lensBar() {
@@ -947,73 +2099,292 @@
     return '<div class="lens" role="radiogroup" aria-label="View">' + lensBtn("time", "Liturgical Time") + lensBtn("topic", "Topic") + lensBtn("audience", "Audience") + "</div>";
   }
 
+  var formSyncing = false;
+  function captureDraft(form) {
+    if (!form) return null;
+    var data = new FormData(form);
+    var draft = {};
+    ["title", "summary", "body", "format", "level", "posture", "medium", "link"].forEach(function (name) {
+      if (form.querySelector("[name=" + name + "]")) draft[name] = String(data.get(name) || "");
+    });
+    draft.works = [];
+    form.querySelectorAll("[name=works]:checked").forEach(function (el) { draft.works.push(el.value); });
+    return draft;
+  }
+  function restoreDraft(form, draft) {
+    if (!form || !draft) return;
+    ["title", "summary", "body", "format", "level", "posture", "medium", "link"].forEach(function (name) {
+      var el = form.querySelector("[name=" + name + "]");
+      if (el && draft[name]) el.value = draft[name];
+    });
+    if (draft.works) {
+      form.querySelectorAll("[name=works]").forEach(function (el) {
+        el.checked = draft.works.indexOf(el.value) !== -1;
+      });
+    }
+  }
+  function applyWorksToForm(form) {
+    if (!form) return;
+    var selected = state.context.works.map(function (w) { return w.id; });
+    form.querySelectorAll("[name=works]").forEach(function (el) {
+      if (selected.indexOf(el.value) !== -1) el.checked = true;
+    });
+  }
+  function applyContextToForm(form) {
+    if (!form || form.getAttribute("data-shelf") === "canonical") return;
+    formSyncing = true;
+    function set(name, value) {
+      var el = form.querySelector("[name=" + name + "]");
+      if (el) el.value = value || "";
+    }
+    set("season", state.context.season);
+    set("audience", state.context.audience);
+    set("topic", state.context.topic);
+    applyWorksToForm(form);
+    var subSelect = form.querySelector("[name=sub]");
+    if (subSelect) subSelect.innerHTML = subOptions(state.context.topic, state.context.sub);
+    formSyncing = false;
+  }
+  function pullContextFromForm(form) {
+    if (formSyncing || !form || form.getAttribute("data-shelf") === "canonical") return;
+    var season = form.season ? form.season.value : "";
+    var audience = form.audience ? form.audience.value : "";
+    var topic = form.topic ? form.topic.value : "";
+    var sub = form.sub ? form.sub.value : "";
+    if (!SEASONS.some(function (s) { return s.id === season; })) season = "";
+    if (AUDIENCES.indexOf(audience) === -1) audience = "";
+    var topicRow = TOPICS.filter(function (t) { return t.id === topic; })[0];
+    if (!topicRow) { topic = ""; sub = ""; }
+    else if (topicRow.subs.indexOf(sub) === -1) sub = "";
+    if (state.context.season === season && state.context.audience === audience && state.context.topic === topic && state.context.sub === sub) return;
+    state.context.season = season;
+    state.context.audience = audience;
+    state.context.topic = topic;
+    state.context.sub = sub;
+    saveContext();
+    formSyncing = true;
+    renderStage();
+    formSyncing = false;
+  }
+  function bindForm(form) {
+    if (!form || form.getAttribute("data-bound") === "1") return;
+    form.setAttribute("data-bound", "1");
+    form.addEventListener("submit", onAdd);
+    form.addEventListener("dragover", function (event) {
+      if (!form.querySelector("[name=file]") || !event.dataTransfer) return;
+      event.preventDefault();
+    });
+    form.addEventListener("drop", function (event) {
+      var fileInput = form.querySelector("[name=file]");
+      if (!fileInput || !event.dataTransfer || !event.dataTransfer.files || !event.dataTransfer.files.length) return;
+      event.preventDefault();
+      try { fileInput.files = event.dataTransfer.files; } catch (err) {}
+    });
+    ["season", "audience", "topic", "sub"].forEach(function (name) {
+      var el = form.querySelector("[name=" + name + "]");
+      if (el) el.addEventListener("change", function () { pullContextFromForm(form); });
+    });
+  }
+
+  function renderLibrary() {
+    var launch = document.getElementById("library-launch");
+    var host = document.getElementById("library-composer");
+    if (!launch || !host) return;
+    if (state.role !== "curator") {
+      launch.innerHTML = "";
+      host.innerHTML = "";
+      return;
+    }
+    if (!state.compose) {
+      launch.innerHTML = '<button type="button" class="signup" data-compose>Add to the library</button>';
+      host.innerHTML = "";
+      return;
+    }
+    launch.innerHTML = "";
+    var form = host.querySelector("#add-form");
+    var wantCanon = landingShelf() === "canonical";
+    var keepForm = !!(form && ((form.getAttribute("data-shelf") === "canonical") === wantCanon));
+    var draft = (!keepForm && form) ? captureDraft(form) : null;
+    if (keepForm) {
+      applyContextToForm(form);
+      applyWorksToForm(form);
+      refreshLandingNote(form);
+      if (state.types.length) showTypeError(form, false);
+      return;
+    }
+    host.innerHTML = composer();
+    var openedForm = host.querySelector("#add-form");
+    if (draft) restoreDraft(openedForm, draft);
+    bindForm(openedForm);
+    var scroller = document.getElementById("content-feed-body");
+    if (scroller) scroller.scrollTop = 0;
+    if (!formSyncing) {
+      var titleField = openedForm && openedForm.querySelector("[name=title]");
+      if (titleField) {
+        setTimeout(function () {
+          if (document.body.contains(titleField)) titleField.focus({ preventScroll: true });
+        }, 0);
+      }
+    }
+  }
+
   function renderStage() {
-    if (document.body.getAttribute("data-desk") === "books") {
+    var desk = document.body.getAttribute("data-desk");
+    if (desk === "books" || desk === "down" || desk === "nation") {
       document.body.setAttribute("data-wheel", state.style);
       return;
     }
     var analysis = document.body.getAttribute("data-desk") === "analysis";
+    document.body.setAttribute("data-module", analysis ? "year" : state.module);
     var body = "";
     if (analysis || state.module === "year") {
       body = state.board ? drillBoard() : dial();
-    } else if (state.module === "topics") body = topics();
-    else if (state.module === "audience") body = audiences();
+      if (!analysis && state.module === "year" && !state.board) body += occasionBoard();
+    } else if (state.module === "lectionary") body = "";
+    else if (state.module === "literature") body = literature();
+    else if (state.module === "browse" || state.module === "topics" || state.module === "audience") body = topicAudience();
     else if (state.module === "formation") body = formation();
     else if (state.module === "preaching") body = byFormats(["Sermon", "Commentary"]);
     else if (state.module === "prayer") body = byFormats(["Devotional", "Prayer"]);
     else body = events();
     var stage = document.getElementById("stage");
+    var keptScroll = stage.scrollTop;
     stage.classList.toggle("is-year", analysis || state.module === "year");
+    stage.classList.toggle("is-composing", !analysis && state.compose && state.role === "curator");
     if (legacy) document.body.removeAttribute("data-wheel");
     else document.body.setAttribute("data-wheel", state.style);
-    var lens = !analysis && !legacy && (state.module === "year" || state.module === "topics" || state.module === "audience") ? lensBar() : "";
-    stage.innerHTML = (analysis ? "" : composer()) + lens + body;
+    stage.innerHTML = body;
+    stage.scrollTop = keptScroll;
+    syncLitHome();
+    renderLibrary();
+    renderContextPane();
     state.settle = false;
-    var form = document.getElementById("add-form");
-    if (form) {
-      form.addEventListener("submit", onAdd);
-      var topicSelect = form.querySelector("[name=topic]");
-      var subSelect = form.querySelector("[name=sub]");
-      topicSelect.addEventListener("change", function () {
-        var chosen = TOPICS.filter(function (t) { return t.id === topicSelect.value; })[0];
-        subSelect.innerHTML = chosen.subs.map(function (sub) { return option(sub, sub, false); }).join("");
-      });
+  }
+
+  function copyContextOnto(item) {
+    if (state.context.season) item.season = state.context.season;
+    else delete item.season;
+    if (state.context.audience) item.audience = state.context.audience;
+    else delete item.audience;
+    if (state.context.topic) item.topic = state.context.topic;
+    else delete item.topic;
+    if (state.context.sub) item.sub = state.context.sub;
+    else delete item.sub;
+    var occ = state.context.occasions.map(function (o) { return o.id; });
+    if (occ.length) item.occasions = occ;
+    if (item.shelf !== "canonical") {
+      var shelf = landingShelf();
+      if (shelf) item.shelf = shelf;
     }
+  }
+  function storeAdded() {
+    try { sessionStorage.setItem("ar-added", JSON.stringify(state.added)); } catch (e) {}
+  }
+  function finishAdd(item) {
+    state.added.unshift(item);
+    storeAdded();
+    state.compose = false;
+    if (item.level && LEVELS.some(function (l) { return l.id === item.level; }) && state.levels.indexOf(item.level) === -1) {
+      state.levels.push(item.level);
+      saveLevels();
+    }
+    if (item.shelf && SHELF_LANDINGS.indexOf(item.shelf) !== -1) {
+      state.module = "literature";
+      state.lit = item.shelf;
+    }
+    syncPressed();
+    writeLitHash();
+    renderStage();
+  }
+  function chosenTypes() {
+    return TYPES.map(function (t) { return t.id; }).filter(function (id) {
+      return state.types.indexOf(id) !== -1;
+    });
+  }
+  function showTypeError(form, show) {
+    var error = form && form.querySelector("[data-type-error]");
+    var row = document.getElementById("type-filters");
+    if (error) error.hidden = !show;
+    if (row) {
+      if (show) row.setAttribute("aria-invalid", "true");
+      else row.removeAttribute("aria-invalid");
+    }
+    if (show && row) {
+      var first = row.querySelector("button");
+      if (first) first.focus();
+    }
+  }
+  function addCanonical(form, types) {
+    var data = new FormData(form);
+    var title = String(data.get("title") || "").trim();
+    var medium = String(data.get("medium") || "").trim();
+    if (!title || !medium || CANON_MEDIA.indexOf(medium) === -1 || !types.length) return;
+    var link = String(data.get("link") || "").trim();
+    var fileInput = form.querySelector("[name=file]");
+    var chosen = fileInput && fileInput.files && fileInput.files[0];
+    var item = {
+      id: "canon-" + Date.now(),
+      shelf: "canonical",
+      title: title,
+      summary: String(data.get("summary") || "").trim(),
+      format: medium,
+      types: types,
+      access: "Free"
+    };
+    if (/^https?:\/\//i.test(link)) item.link = link;
+    if (chosen) {
+      item.fileName = chosen.name;
+      canonBlobs[item.id] = URL.createObjectURL(chosen);
+    }
+    copyContextOnto(item);
+    item.shelf = "canonical";
+    assignWorks(item, form);
+    finishAdd(item);
+  }
+  function chosenWorks(form) {
+    var ids = [];
+    form.querySelectorAll("[name=works]:checked").forEach(function (el) {
+      if (knownWork(el.value) && ids.indexOf(el.value) === -1) ids.push(el.value);
+    });
+    return ids;
+  }
+  function assignWorks(item, form) {
+    var works = chosenWorks(form);
+    if (works.length) item.works = works;
+    else delete item.works;
   }
 
   function onAdd(event) {
     event.preventDefault();
-    var data = new FormData(event.target);
+    var form = event.target;
+    var types = chosenTypes();
+    if (!types.length) {
+      showTypeError(form, true);
+      return;
+    }
+    showTypeError(form, false);
+    if (form.getAttribute("data-shelf") === "canonical") {
+      addCanonical(form, types);
+      return;
+    }
+    var data = new FormData(form);
     var body = String(data.get("body") || "").trim();
     var item = {
       id: "new-" + Date.now(),
       title: String(data.get("title") || "").trim(),
       summary: String(data.get("summary") || "").trim(),
-      format: String(data.get("format")),
+      format: typeNames(types).join(", "),
+      types: types,
       level: String(data.get("level")),
       use: String(data.get("posture") || "") || null,
-      season: String(data.get("season")),
-      audience: String(data.get("audience")),
-      topic: String(data.get("topic")),
-      sub: String(data.get("sub") || ""),
       access: "Free"
     };
     if (/^https?:\/\//i.test(body)) item.link = body;
     else if (body) item.body = body;
-    state.added.unshift(item);
-    sessionStorage.setItem("ar-added", JSON.stringify(state.added));
-    state.compose = false;
-    state.level = item.level;
-    sessionStorage.setItem("ar-level", state.level);
-    state.module = "year";
-    state.season = item.season;
-    if (!legacy) {
-      state.slice = { kind: "year" };
-      state.board = false;
-      state.depth = "year";
-    }
-    syncPressed();
-    renderStage();
+    pullContextFromForm(event.target);
+    copyContextOnto(item);
+    assignWorks(item, form);
+    finishAdd(item);
   }
 
   function bookName(cite) {
@@ -1066,6 +2437,16 @@
       '<button type="button" data-bible-close aria-label="Close">Close</button></div></div>';
   }
 
+  function canonGroups() {
+    return ["Old Testament", "New Testament"].map(function (name) {
+      var id = name === "Old Testament" ? "ot-label" : "nt-label";
+      var items = CANON.filter(function (section) { return section.testament === name; }).map(function (section) {
+        return '<li><button type="button" data-section="' + esc(section.name) + '">' + esc(section.name) + "</button></li>";
+      }).join("");
+      return '<section class="canon-group"><h3 id="' + id + '">' + esc(name) + '</h3><div class="canon-row"><div class="canon-side" aria-hidden="true"></div><ul class="nav-list" aria-labelledby="' + id + '">' + items + "</ul></div></section>";
+    }).join("");
+  }
+
   function renderBible() {
     var pane = document.getElementById("bible");
     var opener = document.getElementById("bible-open");
@@ -1075,16 +2456,11 @@
     opener.setAttribute("aria-pressed", state.bible.open ? "true" : "false");
     if (!state.bible.open) { pane.innerHTML = ""; return; }
     var html = "";
-    if (state.bible.level === "testament") {
-      html = bibleHeader("Bible", "") + '<div class="bible-body"><p class="lede">King James Version. Choose a testament.</p><ul class="nav-list"><li><button type="button" data-testament="Old Testament">Old Testament</button></li><li><button type="button" data-testament="New Testament">New Testament</button></li></ul></div>';
-    } else if (state.bible.level === "section") {
-      var sections = CANON.filter(function (s) { return s.testament === state.bible.testament; });
-      html = bibleHeader(state.bible.testament, "Testaments") + '<div class="bible-body"><ul class="nav-list">' + sections.map(function (s) {
-        return '<li><button type="button" data-section="' + esc(s.name) + '">' + esc(s.name) + "</button></li>";
-      }).join("") + "</ul></div>";
+    if (state.bible.level === "testament" || state.bible.level === "section") {
+      html = bibleHeader("Bible", "") + '<div class="bible-body"><p class="lede">King James Version.</p>' + canonGroups() + "</div>";
     } else if (state.bible.level === "books") {
       var section = CANON.filter(function (s) { return s.name === state.bible.section; })[0];
-      html = bibleHeader(section.name, "Sections") + '<div class="bible-body"><ul class="nav-list">' + section.books.map(function (book) {
+      html = bibleHeader(section.name, "Bible") + '<div class="bible-body"><ul class="nav-list">' + section.books.map(function (book) {
         return '<li><button type="button" data-book="' + esc(book) + '">' + esc(book) + "</button></li>";
       }).join("") + "</ul></div>";
     } else {
@@ -1209,7 +2585,7 @@
     var parsed = ref ? parseRef(ref) : null;
     state.bible.open = true;
     if (!parsed) {
-      state.bible.level = "testament";
+      state.bible.level = "section";
       state.bible.testament = null;
       state.bible.section = null;
       state.bible.book = null;
@@ -1248,21 +2624,34 @@
       btn.setAttribute("aria-pressed", btn.getAttribute("data-role") === state.role ? "true" : "false");
     });
     document.querySelectorAll("[data-level]").forEach(function (btn) {
-      btn.setAttribute("aria-pressed", btn.getAttribute("data-level") === state.level ? "true" : "false");
+      var levelId = btn.getAttribute("data-level");
+      var on = levelId === "all" ? allLevels() : state.levels.indexOf(levelId) !== -1;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
     document.querySelectorAll("[data-posture]").forEach(function (btn) {
       btn.setAttribute("aria-pressed", btn.getAttribute("data-posture") === state.posture ? "true" : "false");
     });
     document.querySelectorAll("[data-module]").forEach(function (btn) {
+      if (btn === document.body) return;
       btn.setAttribute("aria-pressed", btn.getAttribute("data-module") === state.module ? "true" : "false");
+    });
+    document.querySelectorAll("[data-lens]").forEach(function (btn) {
+      var id = btn.getAttribute("data-lens");
+      var on = false;
+      if (id === "browse" || id === "topic" || id === "audience") on = state.module === "browse" || state.module === "topics" || state.module === "audience";
+      else if (id === "lectionary") on = state.module === "lectionary";
+      else if (id === "literature") on = state.module === "literature";
+      else on = state.module !== "browse" && state.module !== "topics" && state.module !== "audience" && state.module !== "lectionary" && state.module !== "literature";
+      btn.setAttribute("aria-selected", on ? "true" : "false");
     });
     var person = document.querySelector(".person-btn");
     if (person) {
-      var levelObj = null;
+      var levelNames = [];
+      if (allLevels()) levelNames.push("All");
+      else LEVELS.forEach(function (l) { if (state.levels.indexOf(l.id) !== -1) levelNames.push(l.label); });
       var postureObj = null;
-      LEVELS.forEach(function (l) { if (l.id === state.level) levelObj = l; });
       POSTURES.forEach(function (p) { if (p.id === state.posture) postureObj = p; });
-      person.setAttribute("aria-label", "Experience, " + (levelObj ? levelObj.label : "scholarship") + (postureObj ? ", " + postureObj.label : ", no posture filter"));
+      person.setAttribute("aria-label", "Experience, " + (levelNames.join(", ") || "scholarship") + (postureObj ? ", " + postureObj.label : ", no posture filter"));
     }
   }
 
@@ -1287,6 +2676,50 @@
       zoomMenu.setAttribute("hidden", "");
       var zoomOpener = document.getElementById("zoom-btn");
       if (zoomOpener) zoomOpener.setAttribute("aria-expanded", "false");
+    }
+    var composing = event.target.closest && event.target.closest(".composer");
+    if (composing && !event.target.closest("[data-compose]")) return;
+    var typeBtn = event.target.closest && event.target.closest("[data-type]");
+    if (typeBtn && typeBtn.closest("#type-filters")) {
+      var typeId = typeBtn.getAttribute("data-type");
+      if (!TYPES.some(function (t) { return t.id === typeId; })) return;
+      var typeAt = state.types.indexOf(typeId);
+      if (typeAt === -1) state.types.push(typeId);
+      else state.types.splice(typeAt, 1);
+      saveTypes();
+      renderStage();
+      return;
+    }
+    var occasionToggle = event.target.closest && event.target.closest("[data-occasion-toggle]");
+    if (occasionToggle) {
+      var group = occasionToggle.closest(".occasion-group");
+      var key = occasionToggle.getAttribute("data-occasion-toggle");
+      var willOpen = !!(group && group.classList.contains("is-collapsed"));
+      if (group) group.classList.toggle("is-collapsed", !willOpen);
+      occasionToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      var stored = {};
+      try { stored = JSON.parse(sessionStorage.getItem("ar-occasions") || "{}") || {}; } catch (e) {}
+      stored[key] = willOpen;
+      try { sessionStorage.setItem("ar-occasions", JSON.stringify(stored)); } catch (e2) {}
+      return;
+    }
+    if (event.target.closest && event.target.closest("[data-filters-toggle]")) {
+      try {
+        if (filtersCollapsed()) sessionStorage.removeItem("ar-filters-collapsed");
+        else sessionStorage.setItem("ar-filters-collapsed", "1");
+      } catch (e) {}
+      renderContextPane();
+      return;
+    }
+    var addCtx = event.target.closest("[data-context-add]");
+    if (addCtx) {
+      toggleContext(addCtx.getAttribute("data-context-add"), addCtx.getAttribute("data-context-id"), addCtx.getAttribute("data-context-label"));
+      return;
+    }
+    var dropCtx = event.target.closest("[data-context-remove]");
+    if (dropCtx) {
+      removeContext(dropCtx.getAttribute("data-context-remove"), dropCtx.getAttribute("data-context-id"));
+      return;
     }
     if (event.target.closest("#app-full")) {
       toggleAppFull();
@@ -1333,6 +2766,20 @@
     }
     if (event.target.closest("[data-compose]")) {
       state.compose = !state.compose;
+      if (state.compose) {
+        var dock = document.getElementById("content-dock");
+        var dockToggle = document.getElementById("content-dock-toggle");
+        if (dock) {
+          dock.classList.remove("is-collapsed");
+          if (dock.getBoundingClientRect().height < 420) dock.style.height = "420px";
+        }
+        if (dockToggle) {
+          dockToggle.setAttribute("aria-expanded", "true");
+          dockToggle.textContent = "Collapse";
+        }
+        var dockEdge = document.getElementById("content-dock-edge");
+        if (dockEdge) dockEdge.tabIndex = 0;
+      }
       renderStage();
       return;
     }
@@ -1346,8 +2793,14 @@
     }
     var level = event.target.closest("[data-level]");
     if (level) {
-      state.level = level.getAttribute("data-level");
-      sessionStorage.setItem("ar-level", state.level);
+      var levelId = level.getAttribute("data-level");
+      if (levelId === "all") state.levels = LEVELS.map(function (l) { return l.id; });
+      else {
+        var levelAt = state.levels.indexOf(levelId);
+        if (levelAt === -1) state.levels.push(levelId);
+        else if (state.levels.length > 1) state.levels.splice(levelAt, 1);
+      }
+      saveLevels();
       syncPressed();
       renderStage();
       return;
@@ -1364,19 +2817,32 @@
     var lensBtn = event.target.closest("[data-lens]");
     if (lensBtn && !legacy) {
       var lensId = lensBtn.getAttribute("data-lens");
-      if (lensId === "topic") state.module = "topics";
-      else if (lensId === "audience") state.module = "audience";
+      if (lensId === "browse" || lensId === "topic" || lensId === "audience") state.module = "browse";
+      else if (lensId === "lectionary") state.module = "lectionary";
+      else if (lensId === "literature") state.module = "literature";
       else {
         state.module = "year";
         state.board = false;
         state.depth = "year";
       }
       syncPressed();
+      writeLitHash();
+      renderStage();
+      return;
+    }
+    var litBtn = event.target.closest("[data-lit]");
+    if (litBtn && litBtn !== document.body) {
+      var nextLit = litBtn.getAttribute("data-lit") || "canonical";
+      if (!LIT_KINDS.some(function (item) { return item.id === nextLit; })) return;
+      state.lit = nextLit;
+      state.module = "literature";
+      syncPressed();
+      writeLitHash();
       renderStage();
       return;
     }
     var moduleBtn = event.target.closest("[data-module]");
-    if (moduleBtn) {
+    if (moduleBtn && moduleBtn !== document.body) {
       var nextModule = moduleBtn.getAttribute("data-module");
       if (nextModule === "year") {
         if (legacy) {
@@ -1416,11 +2882,29 @@
       renderStage();
       return;
     }
-    var styleBtn = event.target.closest("button[data-style]");
-    if (styleBtn && !legacy) {
-      state.style = styleBtn.getAttribute("data-style") === "fog" ? "fog" : "incense";
-      sessionStorage.setItem("ar-wheel-style", state.style);
+    var churchBtn = event.target.closest("[data-church]");
+    if (churchBtn && !legacy) {
+      var offset = Number(churchBtn.getAttribute("data-church"));
+      if (offset !== -1 && offset !== 0 && offset !== 1) return;
+      if (offset !== state.church) {
+        state.church = offset;
+        state.slice = { kind: "year" };
+        state.day = null;
+        state.card = null;
+        state.board = false;
+        state.depth = "year";
+        state.settle = true;
+        yearDays.cache = null;
+        yearDays.cacheKey = "";
+      }
       renderStage();
+      return;
+    }
+    var themeBtn = event.target.closest("#theme-toggle");
+    if (themeBtn) {
+      if (themeIsDark()) sessionStorage.removeItem("ar-theme");
+      else sessionStorage.setItem("ar-theme", "dark");
+      applyTheme();
       return;
     }
     if (event.target.closest("[data-board]")) {
@@ -1442,15 +2926,23 @@
       if (cutKind === "year") {
         state.slice = { kind: "year" };
         state.card = null;
+        state.monthFocus = null;
       } else if (cutKind === "season") {
         var seasonId = cut.getAttribute("data-id");
         if (!seasonId || !SEASON_STORY[seasonId] || state.slice.kind !== "year") return;
-        state.card = seasonId;
+        state.card = state.card === seasonId ? null : seasonId;
         state.board = false;
         state.depth = "year";
         renderStage();
         return;
-      } else if (cutKind === "month" || cutKind === "week") {
+      } else if (cutKind === "month") {
+        if (state.slice.kind !== "year") return;
+        var monthNum = Number(cut.getAttribute("data-month"));
+        if (!monthNum) return;
+        state.monthFocus = state.monthFocus === monthNum ? null : monthNum;
+        renderStage();
+        return;
+      } else if (cutKind === "week") {
         return;
       } else if (cutKind === "day") {
         var iso = cut.getAttribute("data-iso");
@@ -1551,14 +3043,12 @@
       renderBible();
       return;
     }
-    if (event.target.closest("[data-testament]")) {
-      state.bible.testament = event.target.closest("[data-testament]").getAttribute("data-testament");
-      state.bible.level = "section";
-      renderBible();
-      return;
-    }
     if (event.target.closest("[data-section]")) {
-      state.bible.section = event.target.closest("[data-section]").getAttribute("data-section");
+      var sectionName = event.target.closest("[data-section]").getAttribute("data-section");
+      state.bible.section = sectionName;
+      CANON.forEach(function (section) {
+        if (section.name === sectionName) state.bible.testament = section.testament;
+      });
       state.bible.level = "books";
       renderBible();
       return;
@@ -1592,8 +3082,7 @@
       state.bible.xrefs = false;
       state.bible.xrefHome = null;
       if (state.bible.level === "read") state.bible.level = "books";
-      else if (state.bible.level === "books") state.bible.level = "section";
-      else state.bible.level = "testament";
+      else state.bible.level = "section";
       renderBible();
     }
   });
@@ -1604,10 +3093,6 @@
     var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
     btn.setAttribute("aria-label", on ? "Leave full screen" : "Full screen");
-    var enter = btn.querySelector(".full-enter");
-    var leave = btn.querySelector(".full-leave");
-    if (enter) enter.hidden = on;
-    if (leave) leave.hidden = !on;
   }
   function toggleAppFull() {
     var exit = document.exitFullscreen || document.webkitExitFullscreen;
@@ -1667,20 +3152,35 @@
     event.preventDefault();
     fromSvg.click();
   });
-  document.addEventListener("mouseover", function (event) {
+  var hoverIso = "";
+  function dayUnderPointer(event) {
+    var node = event.target;
+    if (node && node.closest) {
+      var direct = node.closest("[data-cut='day']");
+      if (direct) return direct;
+    }
+    var path = event.composedPath ? event.composedPath() : [];
+    for (var i = 0; i < path.length; i++) {
+      if (path[i].getAttribute && path[i].getAttribute("data-cut") === "day") return path[i];
+    }
+    return null;
+  }
+  function syncDayHub(event) {
     if (legacy || state.module !== "year" || state.board) return;
     var hub = document.querySelector(".dial-hub");
     if (!hub) return;
-    var dayEl = event.target.closest && event.target.closest("[data-cut='day']");
     var title = hub.querySelector("h2");
     var sub = hub.querySelector(".dial-sub");
     var kicker = hub.querySelector(".dial-kicker");
     if (!title || !sub || !kicker) return;
+    var dayEl = dayUnderPointer(event);
     if (!dayEl) {
-      if (hub.getAttribute("data-hover") === "1") {
+      if (hoverIso) {
+        hoverIso = "";
         hub.setAttribute("data-hover", "0");
         kicker.textContent = kicker.getAttribute("data-rest") || "";
         title.textContent = title.getAttribute("data-rest") || "";
+        title.classList.toggle("is-long", (title.getAttribute("data-rest") || "").length > 16);
         sub.textContent = sub.getAttribute("data-rest") || "";
         var hot = document.querySelector(".dial-svg .slice.is-hot");
         if (hot) hot.classList.remove("is-hot");
@@ -1688,29 +3188,47 @@
       return;
     }
     var iso = dayEl.getAttribute("data-iso");
+    if (iso === hoverIso) return;
     var day = null;
     yearDays().forEach(function (d) { if (d.iso === iso) day = d; });
     if (!day) return;
+    hoverIso = iso;
+    var center = dayCenter(day);
     hub.setAttribute("data-hover", "1");
-    kicker.textContent = WEEKDAY[day.dow];
-    title.textContent = MONTH_NAME[day.m - 1] + " " + day.d;
-    var bits = [];
-    day.propers.forEach(function (idx) { bits.push(PROPERS[idx].name); });
-    if (day.feast && bits.indexOf(day.feast) === -1) bits.push(day.feast);
-    bits.push(seasonName(day.season));
-    sub.textContent = bits.join(" · ");
+    kicker.textContent = center.kicker;
+    title.textContent = center.holy;
+    title.classList.toggle("is-long", center.long);
+    sub.textContent = center.sub;
     var prev = document.querySelector(".dial-svg .slice.is-hot");
     if (prev) prev.classList.remove("is-hot");
     var slice = dayEl.querySelector(".slice");
     if (slice) slice.classList.add("is-hot");
+  }
+  document.addEventListener("pointermove", syncDayHub);
+  document.addEventListener("mouseover", syncDayHub);
+  document.addEventListener("ar-works-sync", syncWorkButtons);
+
+  var bookSearch = document.getElementById("book-search");
+  if (bookSearch) bookSearch.addEventListener("input", function () {
+    document.dispatchEvent(new CustomEvent("ar-shelf-search"));
+  });
+  var nationSearch = document.getElementById("nation-search");
+  if (nationSearch) nationSearch.addEventListener("input", function () {
+    document.dispatchEvent(new CustomEvent("ar-nation-search"));
   });
 
-  document.getElementById("search").addEventListener("input", function (event) {
+  var searchBox = document.getElementById("search");
+  if (searchBox) searchBox.addEventListener("input", function (event) {
     state.query = event.target.value.trim();
     if (document.body.getAttribute("data-desk") === "books") {
       document.dispatchEvent(new CustomEvent("ar-shelf-search"));
       return;
     }
+    if (document.body.getAttribute("data-desk") === "nation") {
+      document.dispatchEvent(new CustomEvent("ar-nation-search"));
+      return;
+    }
+    if (document.body.getAttribute("data-desk") === "down") return;
     renderStage();
   });
 
@@ -1720,14 +3238,14 @@
     var heart = '<svg class="exp-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19.2s-6.5-4.1-6.5-7.8C5.5 8.6 7.2 7 9.3 7c1.2 0 2.2.6 2.7 1.5.5-.9 1.5-1.5 2.7-1.5 2.1 0 3.8 1.6 3.8 4.4 0 3.7-6.5 7.8-6.5 7.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
     var mind = '<svg class="exp-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 18.5v-1.2c-1.8-.5-3.2-2-3.2-4 0-1.3.6-2.3 1.3-3.1-.2-.5-.3-1-.1-1.6.3-.8 1.1-1.4 2-1.5.4-1.1 1.4-1.8 2.6-1.8 1.3 0 2.4.8 2.8 2 .8-.2 1.7 0 2.3.6.6.6.8 1.5.5 2.3.8.7 1.4 1.6 1.4 2.8 0 2.2-1.7 4-3.8 4.3V18.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8.2v8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
     var icons = { devotional: heart, educational: mind, both: heart + mind };
-    var levels = LEVELS.map(function (l) {
+    var levels = '<button type="button" class="exp-option" data-level="all" aria-pressed="false"><span class="exp-name">All</span><span class="exp-desc">Every scholarship level.</span></button>' + LEVELS.map(function (l) {
       return '<button type="button" class="exp-option" data-level="' + l.id + '" aria-pressed="false"><span class="exp-name">' + esc(l.label) + '</span><span class="exp-desc">' + esc(l.description) + '</span></button>';
     }).join("");
     var postures = '<button type="button" class="exp-option" data-posture="" aria-pressed="false"><span class="exp-name">Any</span><span class="exp-desc">Shows every resource, including those with no primary-use tag.</span></button>' +
       POSTURES.map(function (p) {
         return '<button type="button" class="exp-option" data-posture="' + p.id + '" aria-pressed="false"><span class="exp-name">' + icons[p.id] + esc(p.label) + '</span><span class="exp-desc">' + esc(p.description) + '</span></button>';
       }).join("");
-    menu.innerHTML = '<p class="exp-kicker">Scholarship</p><div class="exp-list" role="group" aria-label="Scholarship">' + levels + '</div><p class="exp-kicker">Posture <span>optional</span></p><div class="exp-list" role="group" aria-label="Posture">' + postures + "</div>";
+    menu.innerHTML = '<p class="exp-kicker">Scholarship <span>All, or one or more</span></p><div class="exp-list" role="group" aria-label="Scholarship">' + levels + '</div><p class="exp-kicker">Posture <span>optional</span></p><div class="exp-list" role="group" aria-label="Posture">' + postures + "</div>";
     menu.setAttribute("data-ready", "1");
   }
 
@@ -1736,17 +3254,28 @@
     var z = parseFloat(sessionStorage.getItem("ar-zoom") || "1");
     return z && z >= 1 ? z : 1;
   }
+  function zoomLevel() {
+    var down = document.body.getAttribute("data-desk") === "down";
+    if (down && document.body.getAttribute("data-zoom-live") !== "1") return 1;
+    return currentZoom();
+  }
   function applyZoom() {
+    var down = document.body.getAttribute("data-desk") === "down";
+    var z = zoomLevel();
     var box = document.getElementById("viz-zoom") || document.getElementById("stage");
-    var z = currentZoom();
-    if (box) box.style.zoom = z === 1 ? "" : String(z);
+    if (box) box.style.zoom = down || z === 1 ? "" : String(z);
+    if (down) {
+      var chart = document.querySelector("#sankey-down-root svg.sk-down");
+      if (chart) chart.style.zoom = z === 1 ? "" : String(z);
+    }
     var label = document.getElementById("zoom-label");
     if (label) label.textContent = z === 1 ? "Fit" : Math.round(z * 100) + "%";
     var zoomBtn = document.getElementById("zoom-btn");
     if (zoomBtn) zoomBtn.setAttribute("aria-pressed", z === 1 ? "false" : "true");
   }
   function stepZoom(dir) {
-    var z = currentZoom();
+    var down = document.body.getAttribute("data-desk") === "down";
+    var z = zoomLevel();
     var next = z;
     if (dir === "fit") next = 1;
     else if (dir === "in") {
@@ -1756,6 +3285,7 @@
       next = ZOOM_STEPS[0];
       for (var j = ZOOM_STEPS.length - 1; j >= 0; j--) if (ZOOM_STEPS[j] < z - 0.01) { next = ZOOM_STEPS[j]; break; }
     }
+    if (down) document.body.setAttribute("data-zoom-live", "1");
     sessionStorage.setItem("ar-zoom", String(next));
     applyZoom();
   }
@@ -1763,5 +3293,12 @@
   mountExperience();
   syncPressed();
   applyZoom();
+  (function readLitHash() {
+    var bits = location.hash.replace(/^#/, "").split("/");
+    if (bits[0] !== "literature") return;
+    state.module = "literature";
+    state.lit = bits[1] || "canonical";
+  })();
+  ensureLect();
   renderStage();
 })();

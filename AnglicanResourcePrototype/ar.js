@@ -1,39 +1,21 @@
 (function () {
-  var USER = "lion";
   var PASS = "lamb";
-  var MAIN = "ar-main";
   var APP = "ar-app";
 
-  function accepted(user, pass) {
-    return user === USER && pass === PASS;
+  function accepted(pass) {
+    return pass === PASS;
   }
 
   function wire(form, notice, onOk) {
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       var data = new FormData(form);
-      if (accepted(String(data.get("user") || ""), String(data.get("pass") || ""))) {
+      if (accepted(String(data.get("pass") || ""))) {
         notice.textContent = "";
         onOk();
         return;
       }
       notice.textContent = "That sign-in was not accepted.";
-    });
-  }
-
-  var gate = document.getElementById("gate");
-  var site = document.getElementById("site");
-  function reveal() {
-    document.documentElement.classList.add("open");
-    gate.hidden = true;
-    site.inert = false;
-  }
-
-  if (gate && site) {
-    if (sessionStorage.getItem(MAIN) === "1") reveal();
-    wire(document.getElementById("gate-form"), document.getElementById("gate-notice"), function () {
-      sessionStorage.setItem(MAIN, "1");
-      reveal();
     });
   }
 
@@ -43,7 +25,7 @@
       button.addEventListener("click", function () {
         login.hidden = false;
         document.documentElement.classList.add("signing");
-        var field = login.querySelector("input[name=user]");
+        var field = login.querySelector("input[name=pass]");
         if (field) field.focus();
       });
     });

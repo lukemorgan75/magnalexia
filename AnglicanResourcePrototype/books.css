@@ -18,6 +18,14 @@ body[data-desk="books"] #viz-zoom {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 28px 18px;
 }
+.book-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.book-tile .book-card { width: 100%; }
 
 .book-card {
   display: flex;

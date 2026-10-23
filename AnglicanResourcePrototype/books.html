@@ -2,112 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ecclesiastical Books</title>
-  <link rel="icon" href="../assets/logo.png" type="image/png" />
-  <link rel="stylesheet" href="ar.css" />
-  <link rel="stylesheet" href="desk.css" />
-  <link rel="stylesheet" href="books.css" />
+  <title>Anglican Resource</title>
+  <script>
+    (function () {
+      var raw = location.hash.replace(/^#/, "");
+      var next = "app.html#literature/eccles";
+      if (raw && raw.indexOf("literature/") !== 0) next = "app.html#literature/eccles/" + raw;
+      else if (raw) next = "app.html#" + raw;
+      location.replace(next);
+    })();
+  </script>
 </head>
-<body data-need-app="1" data-desk="books">
-  <header class="bar">
-    <div class="bar-left">
-      <a class="brand" href="index.html" aria-label="Anglican Resource">
-        <img class="mark mark-ink" src="mark-ink.png" alt="">
-        <img class="mark mark-fog" src="mark.png" alt="">
-      </a>
-      <div class="app-nav">
-        <button type="button" class="icon-btn" id="app-menu-btn" aria-expanded="false" aria-controls="app-menu" aria-label="Menu">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <nav id="app-menu" class="app-menu" hidden>
-          <a href="app.html">Browser</a>
-          <a href="analysis.html">Liturgical and lectionary analysis</a>
-          <a href="books.html" aria-current="page">Ecclesiastical Books</a>
-        </nav>
-      </div>
-    </div>
-    <div class="experience">
-      <button type="button" class="icon-btn person-btn" aria-expanded="false" aria-controls="experience-menu" aria-label="Experience">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5.6 19.2c1.1-3.1 3.4-4.6 6.4-4.6s5.3 1.5 6.4 4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div id="experience-menu" class="experience-menu" hidden></div>
-    </div>
-    <div class="bar-right">
-      <div class="magnifier">
-        <button type="button" class="icon-btn" id="zoom-btn" aria-expanded="false" aria-controls="zoom-menu" aria-label="Magnifier">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
-            <path d="M14.6 14.6 19 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <div id="zoom-menu" class="zoom-menu" hidden>
-          <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
-          <span id="zoom-label">Fit</span>
-          <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
-          <button type="button" data-zoom="fit">Fit</button>
-        </div>
-      </div>
-      <label class="search">
-        <span class="sr">Search these books</span>
-        <input id="search" type="search" placeholder="Search these books" />
-      </label>
-      <a class="about" href="about.html">About</a>
-      <button type="button" class="icon-btn" id="app-full" aria-pressed="false" aria-label="Full screen">
-        <svg class="full-enter" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg class="full-leave" viewBox="0 0 24 24" aria-hidden="true" hidden>
-          <path d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <div class="app">
-    <div class="workspace">
-      <div class="books-scroll">
-        <div id="viz-zoom">
-          <div id="shelf" class="shelf">
-            <p class="lede">Open a book to read its pages. A table of contents sits at the side.</p>
-            <div id="shelf-grid" class="shelf-grid"></div>
-            <p id="shelf-empty" class="lede" hidden>Nothing matches.</p>
-          </div>
-          <div id="reader" class="reader" hidden>
-            <nav id="toc" class="toc" aria-label="Contents"></nav>
-            <div class="leaf">
-              <div class="leaf-bar">
-                <button type="button" id="reader-close">Close</button>
-                <div class="leaf-heading">
-                  <h2 id="reader-title"></h2>
-                  <p id="reader-edition"></p>
-                </div>
-                <div class="pager">
-                  <button type="button" id="page-prev">Previous</button>
-                  <span id="page-label"></span>
-                  <button type="button" id="page-next">Next</button>
-                </div>
-              </div>
-              <div id="leaf-frame" class="leaf-frame">
-                <canvas id="leaf-canvas" hidden></canvas>
-                <img id="leaf-img" alt="" hidden>
-                <p id="leaf-note" class="notice-page" hidden></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="vendor/pdf.min.js"></script>
-  <script src="ar.js"></script>
-  <script src="desk.js"></script>
-  <script src="books.js"></script>
-</body>
+<body></body>
 </html>
