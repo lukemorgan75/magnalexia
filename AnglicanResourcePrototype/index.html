@@ -7,7 +7,7 @@
   <meta name="description" content="The right resource for every ministry moment." />
   <link rel="icon" href="../assets/logo.png" type="image/png" />
   <link rel="preload" as="image" href="hero.jpg" fetchpriority="high" />
-  <link rel="stylesheet" href="ar.css?v=hero1" />
+  <link rel="stylesheet" href="ar.css?v=live1" />
 </head>
 <body>
   <div id="site">
@@ -23,7 +23,10 @@
     </header>
 
     <section class="hero">
-      <div class="hero-bg" role="img" aria-label="An open book on a lectern in a stone church, with light through stained glass."></div>
+      <div class="hero-bg" role="img" aria-label="An open book on a lectern in a stone church, with light through stained glass.">
+        <video class="hero-video" muted playsinline autoplay preload="auto" src="hero.mp4" aria-hidden="true"></video>
+        <video class="hero-video" muted playsinline preload="auto" src="hero.mp4" aria-hidden="true"></video>
+      </div>
       <div class="hero-shade"></div>
       <div class="hero-copy">
         <h1>The right resource for every ministry moment</h1>
@@ -52,6 +55,73 @@
       <p id="login-notice" class="notice" role="status"></p>
     </form>
   </section>
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var clips = document.querySelectorAll(".hero-video");
+      if (reduce || clips.length < 2) return;
+      var fade = 7;
+      var front = 0;
+      var fading = false;
+      function other(index) { return index ? 0 : 1; }
+      function reveal() {
+        if (front === 0 && !fading) clips[0].classList.add("is-on");
+      }
+      clips[0].addEventListener("playing", reveal);
+      clips.forEach(function (video, index) {
+        video.muted = true;
+        var play = video.play();
+        if (!play || !play.then) return;
+        play.then(function () {
+          if (index === 0) reveal();
+          else if (!fading) {
+            video.pause();
+            try { video.currentTime = 0; } catch (err) {}
+          }
+        }).catch(function () {});
+      });
+      function beginFade(from) {
+        if (fading || from !== clips[front]) return;
+        var to = clips[other(front)];
+        if (to.readyState < 2) return;
+        fading = true;
+        try { to.currentTime = 0; } catch (err) {}
+        to.classList.add("is-on");
+        to.style.transition = "none";
+        to.style.opacity = "0";
+        var play = to.play();
+        var go = function () {
+          to.offsetWidth;
+          to.style.transition = "opacity " + fade + "s linear";
+          from.style.transition = "opacity " + fade + "s linear";
+          to.style.opacity = "1";
+          from.style.opacity = "0";
+        };
+        var fail = function () { fading = false; };
+        if (play && play.then) play.then(go).catch(fail);
+        else go();
+        var done = function (event) {
+          if (event.propertyName !== "opacity") return;
+          from.removeEventListener("transitionend", done);
+          from.pause();
+          from.classList.remove("is-on");
+          from.style.transition = "";
+          from.style.opacity = "";
+          to.style.transition = "";
+          to.style.opacity = "";
+          front = other(front);
+          fading = false;
+        };
+        from.addEventListener("transitionend", done);
+      }
+      clips.forEach(function (video) {
+        video.addEventListener("timeupdate", function () {
+          if (!video.duration || video !== clips[front] || fading) return;
+          if (video.duration - video.currentTime <= fade) beginFade(video);
+        });
+      });
+    })();
+  </script>
   <script src="ar.js?v=fit1"></script>
 </body>
 </html>
