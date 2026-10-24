@@ -193,6 +193,11 @@
     church: 0,
     board: false,
     lit: "canonical",
+    canonView: (function () {
+      try { return sessionStorage.getItem("ar-canon-view") === "radial" ? "radial" : "list"; } catch (e) { return "list"; }
+    })(),
+    canonCard: null,
+    canonDrill: [],
     context: loadContext(),
     latch: sessionStorage.getItem("ar-latch") === "1",
     bible: { open: false, full: false, level: "section", testament: null, section: null, book: null, chapter: null, verses: [], showNums: false, large: false, toEnd: false, xrefs: false, xrefHome: null },
@@ -248,8 +253,16 @@
     ["all-saints", "All Saints", "11-01"]
   ];
   function loadAdded() {
-    try { return JSON.parse(sessionStorage.getItem("ar-added") || "[]"); }
-    catch (e) { return []; }
+    try {
+      var raw = localStorage.getItem("ar-added");
+      if (raw == null) raw = sessionStorage.getItem("ar-added");
+      var parsed = JSON.parse(raw || "[]");
+      if (!Array.isArray(parsed)) return [];
+      if (localStorage.getItem("ar-added") == null && raw) {
+        try { localStorage.setItem("ar-added", raw); } catch (err) {}
+      }
+      return parsed;
+    } catch (e) { return []; }
   }
   function emptyContext() {
     return { season: "", lectYear: "", lectDay: null, audience: "", topic: "", sub: "", shelf: "", testament: "", section: "", book: "", occasions: [], works: [] };
@@ -2291,6 +2304,7 @@
     }
     item.fileName = chosen.name;
     canonBlobs[item.id] = nextUrl;
+    keepFile(item.id, "file", chosen);
   }
   function attachPreview(item, form) {
     if (!item || !form) return;
@@ -2303,6 +2317,70 @@
     }
     item.previewName = chosen.name;
     previewBlobs[item.id] = nextUrl;
+    keepFile(item.id, "preview", chosen);
+  }
+  function fileStore(mode, done) {
+    if (!window.indexedDB) return;
+    var open;
+    try { open = indexedDB.open("ar-files", 1); } catch (e) { return; }
+    open.onupgradeneeded = function () {
+      var db = open.result;
+      if (!db.objectStoreNames.contains("files")) db.createObjectStore("files");
+    };
+    open.onerror = function () {};
+    open.onsuccess = function () {
+      var db = open.result;
+      if (!db.objectStoreNames.contains("files")) return;
+      done(db, db.transaction("files", mode).objectStore("files"));
+    };
+  }
+  function keepFile(id, kind, blob) {
+    if (!id || !blob) return;
+    fileStore("readwrite", function (db, store) {
+      store.put(blob, id + ":" + kind);
+    });
+  }
+  function forgetKeptFiles(id) {
+    if (!id) return;
+    fileStore("readwrite", function (db, store) {
+      store.delete(id + ":file");
+      store.delete(id + ":preview");
+    });
+  }
+  function restoreKeptFiles() {
+    fileStore("readonly", function (db, store) {
+      var req = store.openCursor();
+      var changed = false;
+      req.onsuccess = function () {
+        var cursor = req.result;
+        if (!cursor) {
+          if (changed) {
+            renderContentFeed();
+            if (state.module === "literature") renderStage();
+          }
+          return;
+        }
+        var key = String(cursor.key);
+        var cut = key.lastIndexOf(":");
+        var id = cut === -1 ? "" : key.slice(0, cut);
+        var kind = cut === -1 ? "" : key.slice(cut + 1);
+        var blob = cursor.value;
+        if (id && blob && typeof blob === "object") {
+          var url = "";
+          try { url = URL.createObjectURL(blob); } catch (e) { url = ""; }
+          if (url && kind === "preview" && !previewBlobs[id]) {
+            previewBlobs[id] = url;
+            changed = true;
+          } else if (url && kind === "file" && !canonBlobs[id]) {
+            canonBlobs[id] = url;
+            changed = true;
+          } else if (url) {
+            try { URL.revokeObjectURL(url); } catch (e) {}
+          }
+        }
+        cursor.continue();
+      };
+    });
   }
   function plainKind(kind) {
     return kind === "link" || kind === "book" || kind === "file" || kind === "audio" || kind === "text" || kind === "note";
@@ -2314,6 +2392,15 @@
     var src = plainKind(source && source.kind) ? previewSrc(item) : "";
     if (!src) return "";
     return '<img class="post-preview" src="' + esc(src) + '" alt="">';
+  }
+  function feedRead(item) {
+    var summary = item && item.summary ? "<p>" + esc(String(item.summary)) + "</p>" : "";
+    var text = itemText(item);
+    var link = itemLink(item);
+    if (link && text.indexOf(link) !== -1) text = text.replace(link, " ").replace(/\s+/g, " ").trim();
+    var body = text ? '<div class="post-body">' + esc(text) + "</div>" : "";
+    if (!summary && !body) return "";
+    return '<div class="feed-view-read">' + summary + body + "</div>";
   }
   function writeLibraryBody(item, raw) {
     var body = String(raw || "").trim();
@@ -2479,7 +2566,7 @@
     else if (source.kind === "audio") view = previewView(item, source) + '<audio controls autoplay src="' + esc(source.play) + '"></audio>';
     else if (source.kind === "image") view = '<img src="' + esc(source.play) + '" alt="' + esc(item.title) + '">';
     else if (source.kind === "pdf") view = '<iframe class="feed-view-doc" src="' + esc(source.play) + '" title="' + esc(item.title) + '"></iframe>';
-    else if (source.kind === "link" || source.kind === "file" || source.kind === "book") view = previewView(item, source) + '<p class="feed-view-url">' + esc(source.kind === "link" ? source.open : source.label) + "</p>";
+    else if (source.kind === "link" || source.kind === "file" || source.kind === "book") view = previewView(item, source) + feedRead(item) + '<p class="feed-view-url">' + esc(source.kind === "link" ? source.open : source.label) + "</p>";
     else view = previewView(item, source) + '<div class="feed-view-read">' + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "") + (source.text ? '<div class="post-body">' + esc(source.text) + "</div>" : "") + "</div>";
     var go = source.open ? '<a href="' + esc(source.open) + '" target="_blank" rel="noopener">' + (source.kind === "link" || source.kind === "youtube" || source.kind === "vimeo" ? "Open link" : "Open file") + "</a>" : "";
     return '<div id="feed-viewer" class="feed-view"><div class="feed-view-backdrop" data-feed-act="close-view"></div><div class="feed-view-panel" role="dialog" aria-modal="true" aria-label="' + esc(item.title) + '"><header><h2>' + esc(item.title) + '</h2><div class="post-actions">' + entryActions(item) + go + '<button type="button" data-feed-act="close-view">Close</button></div></header>' + view + "</div></div>";
@@ -2865,18 +2952,274 @@
         });
       });
     });
-    html += '</div><p class="canon-credit">Book notes are the text BibleProject places under its overview videos. A book told in more than one video joins those notes with a pipe.</p>';
+    html += "</div>";
     return html;
+  }
+  function canonViewMode() {
+    return state.canonView === "radial" ? "radial" : "list";
+  }
+  function canonSwitch() {
+    var mode = canonViewMode();
+    return '<div class="canon-switch" role="group" aria-label="Canonical layout"><button type="button" data-canon-view="list" aria-pressed="' + (mode === "list" ? "true" : "false") + '">List</button><button type="button" data-canon-view="radial" aria-pressed="' + (mode === "radial" ? "true" : "false") + '">Radial</button></div>';
+  }
+  function canonPressed(kind, id) {
+    if (kind === "book" || kind === "section" || kind === "testament") return scalarList(kind).indexOf(id) !== -1;
+    return false;
+  }
+  function canonNote(kind, id) {
+    if (kind === "book") {
+      var place = canonPlace(id);
+      if (!place) return null;
+      return { kicker: "Book", title: id, place: place.section.name + " · " + place.section.testament, blurb: BOOK_BLURBS[id] || "No note is listed for this book." };
+    }
+    if (kind === "section") {
+      var section = canonSectionNamed(id);
+      if (!section) return null;
+      return { kicker: "Section", title: id, place: section.testament, blurb: section.books.join(", ") };
+    }
+    if (kind === "testament" && (id === "Old Testament" || id === "New Testament")) {
+      var names = CANON.filter(function (item) { return item.testament === id; }).map(function (item) { return item.name; });
+      return { kicker: "Testament", title: id, place: names.length + " sections", blurb: names.join(", ") };
+    }
+    return null;
+  }
+  function canonCardHtml(kind, id) {
+    var note = canonNote(kind, id);
+    if (!note) return '<p class="canon-card-empty">Select a book to read its note.</p>';
+    return '<p class="canon-card-kicker">' + esc(note.kicker) + "</p><h3>" + esc(note.title) + '</h3><p class="canon-card-place">' + esc(note.place) + '</p><p class="canon-card-blurb">' + esc(note.blurb) + "</p>";
+  }
+  function canonCardFocus() {
+    if (state.canonCard && canonNote(state.canonCard.kind, state.canonCard.id)) return state.canonCard;
+    var book = scalarList("book")[0];
+    if (book) return { kind: "book", id: book };
+    var section = scalarList("section")[0];
+    if (section) return { kind: "section", id: section };
+    var testament = scalarList("testament")[0];
+    if (testament) return { kind: "testament", id: testament };
+    return null;
+  }
+  function paintCanonCard(kind, id) {
+    var card = document.getElementById("canon-card");
+    if (!card) return;
+    card.innerHTML = canonCardHtml(kind, id);
+  }
+  function canonDrillPath() {
+    var path = state.canonDrill || [];
+    if (!path.length) return [];
+    if (path[0] !== "Old Testament" && path[0] !== "New Testament") return [];
+    if (path.length === 1) return [path[0]];
+    var section = canonSectionNamed(path[1]);
+    if (!section || section.testament !== path[0]) return [path[0]];
+    return [path[0], path[1]];
+  }
+  function canonDrillTo(kind, id) {
+    if (kind === "testament" && (id === "Old Testament" || id === "New Testament")) {
+      state.canonDrill = [id];
+      return;
+    }
+    if (kind === "section") {
+      var section = canonSectionNamed(id);
+      if (!section) return;
+      state.canonDrill = [section.testament, section.name];
+    }
+  }
+  function canonChildStillSelected(kind, id) {
+    if (kind === "section") {
+      var section = canonSectionNamed(id);
+      if (!section) return false;
+      return scalarList("book").some(function (book) { return section.books.indexOf(book) !== -1; });
+    }
+    if (kind === "testament") {
+      if (scalarList("section").some(function (name) {
+        var held = canonSectionNamed(name);
+        return held && held.testament === id;
+      })) return true;
+      return scalarList("book").some(function (book) {
+        var place = canonPlace(book);
+        return place && place.section.testament === id;
+      });
+    }
+    return false;
+  }
+  function canonUnwind(kind, id) {
+    if (latchOn()) return;
+    if (canonChildStillSelected(kind, id)) return;
+    var values = scalarList(kind);
+    if (values.length === 1 && values[0] === id) putScalar(kind, []);
+  }
+  function canonDrillFocusCard(path) {
+    if (!path.length) {
+      state.canonCard = null;
+      return;
+    }
+    state.canonCard = { kind: path.length > 1 ? "section" : "testament", id: path[path.length - 1] };
+  }
+  function canonDrillUp() {
+    var path = canonDrillPath();
+    if (!path.length) return;
+    var kind = path.length > 1 ? "section" : "testament";
+    var id = path[path.length - 1];
+    path = path.slice(0, -1);
+    state.canonDrill = path;
+    canonUnwind(kind, id);
+    canonDrillFocusCard(path);
+    canonHoverKey = "";
+    saveContext();
+    renderStage();
+  }
+  function canonDrillJump(depth) {
+    depth = Number(depth);
+    if (depth !== 0 && depth !== 1 && depth !== 2) return;
+    var path = canonDrillPath();
+    if (depth >= path.length) return;
+    var dropped = path.slice(depth);
+    path = path.slice(0, depth);
+    state.canonDrill = path;
+    for (var i = dropped.length - 1; i >= 0; i--) {
+      canonUnwind(depth + i === 0 ? "testament" : "section", dropped[i]);
+    }
+    canonDrillFocusCard(path);
+    canonHoverKey = "";
+    saveContext();
+    renderStage();
+  }
+  function canonRadial() {
+    var cx = 500;
+    var cy = 500;
+    var rings = [
+      { inner: 132, outer: 248 },
+      { inner: 254, outer: 368 },
+      { inner: 374, outer: 486 }
+    ];
+    function point(r, angle) {
+      return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+    }
+    function num(value) { return value.toFixed(2); }
+    function donut(r0, r1, a0, a1) {
+      var span = a1 - a0;
+      var pad = Math.min(0.012, span * 0.12);
+      var b0 = a0 + pad;
+      var b1 = a1 - pad;
+      if (b1 - b0 < 0.02) { b0 = a0; b1 = a1; }
+      r0 += 1.5;
+      r1 -= 1.5;
+      var large = b1 - b0 > Math.PI ? 1 : 0;
+      var outerStart = point(r1, b0);
+      var outerEnd = point(r1, b1);
+      var innerEnd = point(r0, b1);
+      var innerStart = point(r0, b0);
+      return "M" + num(outerStart[0]) + " " + num(outerStart[1]) +
+        " A" + num(r1) + " " + num(r1) + " 0 " + large + " 1 " + num(outerEnd[0]) + " " + num(outerEnd[1]) +
+        " L" + num(innerEnd[0]) + " " + num(innerEnd[1]) +
+        " A" + num(r0) + " " + num(r0) + " 0 " + large + " 0 " + num(innerStart[0]) + " " + num(innerStart[1]) + " Z";
+    }
+    function radialText(label, r, angle, size) {
+      var deg = angle * 180 / Math.PI;
+      var at = point(r, angle);
+      var flip = Math.cos(angle) < 0;
+      var rot = flip ? deg + 180 : deg;
+      return '<text class="canon-label" font-size="' + size + '" x="' + num(at[0]) + '" y="' + num(at[1]) + '" transform="rotate(' + num(rot) + " " + num(at[0]) + " " + num(at[1]) + ')" text-anchor="' + (flip ? "end" : "start") + '" dominant-baseline="middle">' + esc(label) + "</text>";
+    }
+    function wedge(kind, id, a0, a1, ring, tone, depth, label, labelMode) {
+      var pressed = canonPressed(kind, id);
+      var mid = (a0 + a1) / 2;
+      var text = "";
+      if (labelMode === "flat") {
+        var at = point((ring.inner + ring.outer) / 2, mid);
+        text = '<text class="canon-label canon-label-flat" x="' + num(at[0]) + '" y="' + num(at[1]) + '" text-anchor="middle" dominant-baseline="middle">' + esc(label) + "</text>";
+      } else {
+        var span = a1 - a0;
+        var size = depth === "is-depth-2" ? (span > 0.45 ? 18 : 12) : (span > 0.7 ? 16 : 14);
+        var inset = depth === "is-depth-2" ? (span > 0.45 ? 28 : 16) : 18;
+        text = radialText(label, ring.inner + inset, mid, size);
+      }
+      return '<g class="canon-slice">' +
+        '<path class="canon-wedge ' + tone + " " + depth + '" d="' + donut(ring.inner, ring.outer, a0, a1) + '" data-canon="' + kind + '" data-canon-id="' + esc(id) + '" role="button" tabindex="0" aria-pressed="' + (pressed ? "true" : "false") + '" aria-label="' + esc(label) + '"></path>' +
+        text + "</g>";
+    }
+    // Books inside a group share one angle. Length is not used.
+    // The overview keeps the New Testament on the right, Matthew to Revelation, clockwise.
+    // A drilled group fills the circle, still clockwise from the top.
+    var ntStart = -Math.PI / 2;
+    var rings2 = [
+      { inner: 168, outer: 310 },
+      { inner: 322, outer: 486 }
+    ];
+    var rings1 = [{ inner: 188, outer: 486 }];
+    var marks = [];
+    function paintBooks(sections, start, span, tone, sectionRing, bookRing) {
+      var count = 0;
+      sections.forEach(function (section) { count += section.books.length; });
+      if (!count) return;
+      var bookSpan = span / count;
+      var cursor = start;
+      sections.forEach(function (section) {
+        var sectionSpan = bookSpan * section.books.length;
+        if (sectionRing) marks.push(wedge("section", section.name, cursor, cursor + sectionSpan, sectionRing, tone, "is-depth-1", section.name, "radial"));
+        section.books.forEach(function (book) {
+          marks.push(wedge("book", book, cursor, cursor + bookSpan, bookRing, tone, "is-depth-2", book, "radial"));
+          cursor += bookSpan;
+        });
+      });
+    }
+    var path = canonDrillPath();
+    var aria = "Canonical books in a circle. The New Testament is the right half, from Matthew to Revelation, clockwise.";
+    var holeText = '<text class="canon-hole-label" x="500" y="494" text-anchor="middle">Canonical</text>' +
+      '<text class="canon-hole-sub" x="500" y="518" text-anchor="middle">66 books</text>';
+    if (!path.length) {
+      [
+        { name: "New Testament", start: ntStart, cls: "is-nt" },
+        { name: "Old Testament", start: ntStart + Math.PI, cls: "is-ot" }
+      ].forEach(function (half) {
+        var sections = CANON.filter(function (section) { return section.testament === half.name; });
+        var count = 0;
+        sections.forEach(function (section) { count += section.books.length; });
+        if (!count) return;
+        marks.push(wedge("testament", half.name, half.start, half.start + Math.PI, rings[0], half.cls, "is-depth-0", half.name, "flat"));
+        paintBooks(sections, half.start, Math.PI, half.cls, rings[1], rings[2]);
+      });
+    } else if (path.length === 1) {
+      var tone = path[0] === "New Testament" ? "is-nt" : "is-ot";
+      var group = CANON.filter(function (section) { return section.testament === path[0]; });
+      paintBooks(group, ntStart, Math.PI * 2, tone, rings2[0], rings2[1]);
+      aria = path[0] + ", filling the circle. Books run clockwise from the top.";
+      holeText = "";
+    } else {
+      var drilled = canonSectionNamed(path[1]);
+      var drilledTone = path[0] === "New Testament" ? "is-nt" : "is-ot";
+      if (drilled) paintBooks([drilled], ntStart, Math.PI * 2, drilledTone, null, rings1[0]);
+      aria = path[1] + " in the " + path[0] + ". Books run clockwise from the top.";
+      holeText = "";
+    }
+    function crumbs() {
+      if (!path.length) return "";
+      var items = [{ depth: 0, label: "Canonical" }, { depth: 1, label: path[0] }];
+      if (path[1]) items.push({ depth: 2, label: path[1] });
+      return '<nav class="canon-crumbs" aria-label="Canonical location">' + items.map(function (item, index) {
+        var current = item.depth === path.length;
+        var sep = index ? '<span class="canon-crumb-sep" aria-hidden="true">/</span>' : "";
+        return sep + '<button type="button" data-canon-jump="' + item.depth + '"' + (current ? ' aria-current="page"' : "") + ">" + esc(item.label) + "</button>";
+      }).join("") + "</nav>";
+    }
+    function core() {
+      if (!path.length) return "";
+      var title = path[path.length - 1];
+      var backTo = path.length > 1 ? path[0] : "Canonical";
+      return '<button type="button" class="canon-core" data-canon-back aria-label="Back to ' + esc(backTo) + '"><span class="canon-core-title">' + esc(title) + '</span><span class="canon-core-sub">Back</span></button>';
+    }
+    var focus = canonCardFocus();
+    return '<div class="canon-radial"><div class="canon-chart">' + crumbs() +
+      '<div class="canon-sun-wrap"><svg class="canon-sun" viewBox="0 0 1000 1000" role="group" aria-label="' + esc(aria) + '">' +
+      marks.join("") +
+      '<circle class="canon-hole" cx="500" cy="500" r="118"></circle>' +
+      holeText + "</svg>" + core() + "</div></div>" +
+      '<aside class="canon-card" id="canon-card">' + canonCardHtml(focus && focus.kind, focus && focus.id) + "</aside></div>";
   }
   function literatureBody(kind) {
     if (kind === "eccles" || kind === "national") return "";
     if (kind === "canonical") {
-      var posts = shelvedPosts("canonical");
-      var anyCanon = state.added.some(function (item) { return item.shelf === "canonical"; });
-      var list = posts.length
-        ? '<div class="cards">' + posts.map(canonCard).join("") + "</div>"
-        : (anyCanon ? '<p class="empty">Nothing matches these filters.</p>' : "");
-      return canonTree() + list;
+      var layout = canonViewMode() === "radial" ? canonRadial() : canonTree();
+      return canonSwitch() + layout + '<p class="canon-credit">Book notes are the text BibleProject places under its overview videos. A book told in more than one video joins those notes with a pipe.</p>';
     }
     return '<p class="empty">Nothing is on this shelf yet.</p>';
   }
@@ -3239,7 +3582,7 @@
     var current = editing && editing.previewName
       ? '<p class="composer-note">Current preview: ' + esc(editing.previewName) + ". Choose another photo to replace it.</p>"
       : "";
-    return '<label class="wide file-drop">Preview photo<input name="preview" type="file" accept="image/*"></label>' + current + '<p class="composer-note">A preview photo shows when the post has no picture of its own. It stays in this browser for this visit.</p>';
+    return '<label class="wide file-drop">Preview photo<input name="preview" type="file" accept="image/*"></label>' + current + '<p class="composer-note">A preview photo shows when the post has no picture of its own. It stays in this browser, including after a site update.</p>';
   }
   function composer() {
     if (state.role !== "curator" || !state.compose) return "";
@@ -3258,12 +3601,12 @@
       var fileNote = editing && editing.fileName
         ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
         : "";
-      return head + '<form id="add-form" data-shelf="canonical"' + editAttr + ' autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + fileNote + previewField(editing) + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser for this visit. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
+      return head + '<form id="add-form" data-shelf="canonical"' + editAttr + ' autocomplete="off"><label>Kind<select name="medium" required>' + media + '</select></label><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Description<textarea name="summary" placeholder="What this reading is. A short introduction is allowed."></textarea></label><label class="wide">Link<input name="link" type="url" inputmode="url" placeholder="https://" autocomplete="off"></label><label class="wide file-drop">File<input name="file" type="file"></label>' + fileNote + previewField(editing) + filters + landingNote() + '<p class="composer-note">A chosen file stays in this browser, including after a site update. Nothing is sent to a server.</p><p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
     }
     var libraryFile = editing && editing.fileName
       ? '<p class="composer-note">Current file: ' + esc(editing.fileName) + ". Choose another file to replace it.</p>"
       : "";
-    return head + '<form id="add-form"' + editAttr + ' autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label class="wide file-drop">File<input name="file" type="file"></label>' + libraryFile + previewField(editing) + '<p class="composer-note">A video, book, or other file shows on the post. It stays in this browser for this visit. Nothing is sent to a server.</p>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
+    return head + '<form id="add-form"' + editAttr + ' autocomplete="off"><label>Title<input name="title" required autocomplete="off"></label><label class="wide">Summary<input name="summary" required autocomplete="off"></label><label class="wide">Link or a few sentences<textarea name="body" placeholder="A URL, or the text itself"></textarea></label><label class="wide file-drop">File<input name="file" type="file"></label>' + libraryFile + previewField(editing) + '<p class="composer-note">A video, book, or other file shows on the post. It stays in this browser, including after a site update. Nothing is sent to a server.</p>' + filters + landingNote() + '<p class="type-pick-error" data-type-error hidden>' + typeError + '</p><button class="signup" type="submit">' + submit + "</button></form></section>";
   }
 
   function lensBar() {
@@ -3590,7 +3933,10 @@
     else delete item.works;
   }
   function storeAdded() {
-    try { sessionStorage.setItem("ar-added", JSON.stringify(state.added)); } catch (e) {}
+    var raw = "";
+    try { raw = JSON.stringify(state.added); } catch (e) { return; }
+    try { localStorage.setItem("ar-added", raw); } catch (e) {}
+    try { sessionStorage.setItem("ar-added", raw); } catch (e) {}
   }
   function finishAdd(item) {
     state.added.unshift(item);
@@ -3840,6 +4186,7 @@
       try { URL.revokeObjectURL(previewBlobs[id]); } catch (e) {}
       delete previewBlobs[id];
     }
+    forgetKeptFiles(id);
     var own = "canonical:" + id;
     var before = state.context.works.length;
     state.context.works = state.context.works.filter(function (work) { return work.id !== own; });
@@ -4255,7 +4602,9 @@
       }
       return;
     }
-    if (event.target.closest && event.target.closest("#content-feed-list .post-widget, #stage .post-widget")) return;
+    var widgetHit = event.target.closest && event.target.closest("#content-feed-list .post-widget, #stage .post-widget");
+    var previewHit = widgetHit && event.target.closest("img.post-preview") && widgetHit.closest("#content-feed-list");
+    if (widgetHit && !previewHit) return;
     var feedPostEl = event.target.closest && event.target.closest("#content-feed-list [data-feed]");
     if (feedPostEl) {
       var selection = window.getSelection ? String(window.getSelection()) : "";
@@ -4365,10 +4714,36 @@
       removeContext(dropCtx.getAttribute("data-context-remove"), dropCtx.getAttribute("data-context-id"));
       return;
     }
+    var canonViewBtn = event.target.closest && event.target.closest("[data-canon-view]");
+    if (canonViewBtn && canonViewBtn.closest("#stage")) {
+      var nextView = canonViewBtn.getAttribute("data-canon-view");
+      if (nextView !== "list" && nextView !== "radial") return;
+      state.canonView = nextView;
+      try {
+        if (nextView === "radial") sessionStorage.setItem("ar-canon-view", "radial");
+        else sessionStorage.removeItem("ar-canon-view");
+      } catch (e) {}
+      renderStage();
+      return;
+    }
+    var canonBack = event.target.closest && event.target.closest("[data-canon-back]");
+    if (canonBack && canonBack.closest("#stage")) {
+      canonDrillUp();
+      return;
+    }
+    var canonJump = event.target.closest && event.target.closest("[data-canon-jump]");
+    if (canonJump && canonJump.closest("#stage")) {
+      canonDrillJump(canonJump.getAttribute("data-canon-jump"));
+      return;
+    }
     var canonBtn = event.target.closest && event.target.closest("[data-canon]");
     if (canonBtn && canonBtn.closest("#stage")) {
       var canonKind = canonBtn.getAttribute("data-canon");
       var canonId = canonBtn.getAttribute("data-canon-id");
+      if (canonBtn.closest(".canon-radial")) {
+        if (canonKind === "testament" || canonKind === "section") canonDrillTo(canonKind, canonId);
+      } else state.canonDrill = [];
+      state.canonCard = { kind: canonKind, id: canonId };
       applyCanonFilter(canonKind, canonId);
       if (canonKind === "book") openBibleBook(canonId);
       return;
@@ -4783,7 +5158,21 @@
   syncAppFull();
   document.addEventListener("fullscreenchange", onWheelFullChange);
   document.addEventListener("webkitfullscreenchange", onWheelFullChange);
+  var canonHoverKey = "";
+  document.addEventListener("mouseover", function (event) {
+    var hit = event.target.closest && event.target.closest(".canon-radial [data-canon]");
+    if (!hit) return;
+    var key = hit.getAttribute("data-canon") + ":" + hit.getAttribute("data-canon-id");
+    if (key === canonHoverKey) return;
+    canonHoverKey = key;
+    paintCanonCard(hit.getAttribute("data-canon"), hit.getAttribute("data-canon-id"));
+  });
   document.addEventListener("keydown", function (event) {
+    if ((event.key === "Enter" || event.key === " ") && event.target && event.target.closest && event.target.closest(".canon-radial [data-canon]")) {
+      event.preventDefault();
+      event.target.closest(".canon-radial [data-canon]").click();
+      return;
+    }
     if ((event.key === "Enter" || event.key === " ") && event.target && event.target.getAttribute && event.target.getAttribute("data-feed") && event.target.closest("#content-feed-list")) {
       event.preventDefault();
       if (state.feedOpen !== event.target.getAttribute("data-feed")) {
@@ -4808,6 +5197,9 @@
         openMenu.setAttribute("hidden", "");
         var person = document.querySelector(".person-btn");
         if (person) person.setAttribute("aria-expanded", "false");
+      } else if (state.module === "literature" && canonViewMode() === "radial" && canonDrillPath().length && !(event.target && event.target.closest && event.target.closest("input, textarea, select"))) {
+        canonDrillUp();
+        return;
       }
     }
     if (event.key === "Escape" && document.body.classList.contains("is-wheel-full") && !document.fullscreenElement) {
@@ -4988,4 +5380,5 @@
   })();
   ensureLect();
   renderStage();
+  restoreKeptFiles();
 })();

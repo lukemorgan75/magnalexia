@@ -974,6 +974,36 @@ body[data-need-app="1"] .bar .view-tabs button {
 .post-widget.has-preview.is-file strong { display: block; margin: 12px 14px 0; }
 .post-widget.has-preview.is-file { padding-bottom: 16px; }
 .post-widget.has-preview .post-note { margin: 0 14px; }
+.post-widget .post-preview {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 140px;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  margin: 8px auto 0;
+}
+.post.is-open .post-widget .post-preview {
+  max-height: min(520px, 62vh);
+  margin-top: 0;
+}
+.post:not(.is-open) .post-widget .post-note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.feed-view-panel img.post-preview {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(70vh, 640px);
+  object-fit: contain;
+  margin-right: auto;
+  margin-left: auto;
+}
 .post-expand, .post-actions button, .post-actions a, .feed-view-panel .post-actions button, .feed-view-panel .post-actions a {
   appearance: none;
   border: 1px solid var(--line);
@@ -1397,6 +1427,154 @@ body[data-module="literature"][data-lit="national"] #nation-home {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+.canon-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.canon-switch button {
+  appearance: none;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.canon-switch button:hover { color: var(--ink); }
+.canon-switch button[aria-pressed="true"] {
+  color: var(--ink);
+  border-color: var(--brown);
+  background: var(--wash);
+}
+.canon-radial {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 18px;
+  align-items: start;
+}
+.canon-chart { min-width: 0; }
+.canon-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.canon-crumbs button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.canon-crumbs button:hover { color: var(--ink); }
+.canon-crumbs button[aria-current="page"] {
+  color: var(--ink);
+  cursor: default;
+}
+.canon-crumb-sep { color: var(--muted); }
+.canon-sun-wrap {
+  position: relative;
+  width: min(100%, calc(100dvh - 280px));
+  margin: 0 auto;
+}
+.canon-chart:has(.canon-crumbs) .canon-sun-wrap {
+  width: min(100%, calc(100dvh - 320px));
+}
+.canon-sun {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.canon-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.canon-core-title {
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 15px;
+  line-height: 1.15;
+}
+.canon-core-sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.canon-hole { fill: var(--field); }
+.canon-hole-label {
+  fill: var(--ink);
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 22px;
+}
+.canon-hole-sub { fill: var(--muted); font-size: 13px; }
+.canon-wedge { cursor: pointer; }
+.canon-wedge.is-ot.is-depth-0 { fill: color-mix(in srgb, var(--brown) 68%, var(--sheet)); }
+.canon-wedge.is-ot.is-depth-1 { fill: color-mix(in srgb, var(--brown) 46%, var(--sheet)); }
+.canon-wedge.is-ot.is-depth-2 { fill: color-mix(in srgb, var(--brown) 26%, var(--sheet)); }
+.canon-wedge.is-nt.is-depth-0 { fill: color-mix(in srgb, var(--ink) 24%, var(--sheet)); }
+.canon-wedge.is-nt.is-depth-1 { fill: color-mix(in srgb, var(--ink) 16%, var(--sheet)); }
+.canon-wedge.is-nt.is-depth-2 { fill: color-mix(in srgb, var(--ink) 9%, var(--sheet)); }
+.canon-wedge[aria-pressed="true"] { fill: var(--wash); }
+.canon-wedge:focus-visible { outline: 2px solid var(--brown); outline-offset: 2px; }
+.canon-label {
+  fill: var(--ink);
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  pointer-events: none;
+}
+.canon-label-flat { font-size: 18px; }
+.canon-card {
+  position: sticky;
+  top: 12px;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--field);
+}
+.canon-card h3 {
+  margin: 0;
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+}
+.canon-card-kicker {
+  margin: 0 0 6px;
+  color: var(--brown);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.canon-card-place { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.canon-card-blurb { margin: 12px 0 0; color: var(--ink); font-size: 15px; line-height: 1.45; }
+.canon-card-empty { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
+@media (max-width: 800px) {
+  .canon-radial { grid-template-columns: 1fr; }
+  .canon-card { position: static; }
 }
 
 .year {
