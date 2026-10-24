@@ -60,7 +60,7 @@
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var clips = document.querySelectorAll(".hero-video");
       if (reduce || clips.length < 2) return;
-      var fade = 7;
+      var fade = 3.5;
       var front = 0;
       var fading = false;
       function other(index) { return index ? 0 : 1; }
